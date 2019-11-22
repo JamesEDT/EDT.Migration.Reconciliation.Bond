@@ -1,0 +1,36 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile;
+
+namespace Edt.Bond.Migration.Reconciliation.Framework.Services
+{
+    public class IdxProcessingService
+    {
+        private static StreamReader _streamReader;
+        private const long ProcessingChunkSize = 1000;
+        private static string[] _documentEndTag = new string[] {"#DREENDDOC"};
+        
+
+        public static IEnumerable<Document> GetNextDocumentChunkFromFile(string filepath, bool removeEncapsulation = false)
+        {
+            if (_streamReader == null) 
+                _streamReader = new StreamReader(filepath);
+
+            var stringBuilder = new StringBuilder();
+            var docsSeen = 0;
+
+            while(!_streamReader.EndOfStream && docsSeen <= ProcessingChunkSize)
+            {
+                var line = _streamReader.ReadLine();
+                if (line != null && line.Contains(_documentEndTag[0]))
+                    docsSeen++;
+
+                stringBuilder.Append(line);
+            }
+            return stringBuilder.ToString().Split(_documentEndTag, StringSplitOptions.RemoveEmptyEntries).Select(x => new Document(x, removeEncapsulation));
+        }
+    }
+}
