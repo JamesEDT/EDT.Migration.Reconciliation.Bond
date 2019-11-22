@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.902
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edt.Bond.Migration.Reconciliation.Suite", "Edt.Bond.Migration.Reconciliation.Suite\Edt.Bond.Migration.Reconciliation.Suite.csproj", "{7A6265D7-ABC3-494D-BC5A-F83908DF217D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7A6265D7-ABC3-494D-BC5A-F83908DF217D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A6265D7-ABC3-494D-BC5A-F83908DF217D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A6265D7-ABC3-494D-BC5A-F83908DF217D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A6265D7-ABC3-494D-BC5A-F83908DF217D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6C92D3DD-64D9-40FD-A328-2FFAD07AA559}
+	EndGlobalSection
+EndGlobal
