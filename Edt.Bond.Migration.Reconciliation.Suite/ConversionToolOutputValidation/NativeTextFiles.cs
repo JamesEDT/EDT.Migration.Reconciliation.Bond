@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Edt.Bond.Migration.Reconciliation.Suite.ConversionToolOutputValidation
 {
     [TestFixture]
-    class NativeTextFiles
+    public class NativeTextFiles
     {
         [Test]
         public void AllNativeFilesInLoadPackage()

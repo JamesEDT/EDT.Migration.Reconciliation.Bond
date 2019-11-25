@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Edt.Bond.Migration.Reconciliation.Suite.MicroFocusPackageValidation
 {
     [TestFixture]
-    class CaseConfig
+    public class CaseConfig
     {
         [Test]
         public void IsXmlSchemaValid()

@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Edt.Bond.Migration.Reconciliation.Suite.MicroFocusPackageValidation
 {
     [TestFixture]
-    class IdxContent
+    public class IdxContent
     {
         [Test]
         public void DoesIdxContainAllMappedCustomFields()

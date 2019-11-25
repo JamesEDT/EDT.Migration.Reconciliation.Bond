@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Edt.Bond.Migration.Reconciliation.Suite.ConversionToolOutputValidation
 {
     [TestFixture]
-    class EdtReadiness
+    public class EdtReadiness
     {
         [Test]
         public void AllAreCustomFieldsPresent()

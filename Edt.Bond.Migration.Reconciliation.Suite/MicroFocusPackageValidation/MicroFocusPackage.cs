@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Edt.Bond.Migration.Reconciliation.Suite.MicroFocusPackageValidation
 {
     [TestFixture]
-    class MicroFocusPackage
+    public class MicroFocusPackage
     {
         [Test]
         public void AllFilesExpectedArePresent()

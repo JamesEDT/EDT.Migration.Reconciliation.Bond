@@ -11,7 +11,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
     {
         private static StreamReader _streamReader;
         private const long ProcessingChunkSize = 1000;
-        private static string[] _documentEndTag = new string[] {"#DREENDDOC"};
+        private static readonly string[] DocumentEndTag = new string[] {"#DREENDDOC"};
         
 
         public static IEnumerable<Document> GetNextDocumentChunkFromFile(string filepath, bool removeEncapsulation = false)
@@ -25,12 +25,12 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             while(!_streamReader.EndOfStream && docsSeen <= ProcessingChunkSize)
             {
                 var line = _streamReader.ReadLine();
-                if (line != null && line.Contains(_documentEndTag[0]))
+                if (line != null && line.Contains(DocumentEndTag[0]))
                     docsSeen++;
 
                 stringBuilder.Append(line);
             }
-            return stringBuilder.ToString().Split(_documentEndTag, StringSplitOptions.RemoveEmptyEntries).Select(x => new Document(x, removeEncapsulation));
+            return stringBuilder.ToString().Split(DocumentEndTag, StringSplitOptions.RemoveEmptyEntries).Select(x => new Document(x, removeEncapsulation));
         }
     }
 }

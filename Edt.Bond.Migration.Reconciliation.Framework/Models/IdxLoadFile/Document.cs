@@ -1,28 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NUnit.Framework;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
 {
     public class Document
     {
         public long Id { get; set; }
-        public string Reference { get; set; }
-        public string Title { get; set; }
-        public string Date { get; set; }
-        public string Section { get; set; }
-        public string Dbname { get; set; }
-        public string Content { get; set; }
 
-        public string PARENTREFERENCE_ID { get; set; }
-        public string UUID { get; set; }
-        public string DREROOTMSGREFERENCE_ID { get; set; }
-
-        public long CHILDCOUNT { get; set; }
-
-        public List<Field> Fields { get; set; }
-
-        public List<string> Unknowns { get; set; }
+        public string DocumentId { get; set; }
 
         public List<Field> AllFields { get; set; }
 
@@ -31,22 +18,29 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
 
         }
 
+        public Document(List<Field> allFields)
+        {
+            AllFields = allFields;
+            DocumentId = GetFileName();
+        }
+
         public Document(string raw, bool removeEncapsulation = false)
         {
-            Fields = new List<Field>();
-            AllFields = new List<Field>();
-            Unknowns = new List<string>();
+            AllFields = new List<Field>(300);
 
-            raw.Split(new string[]{"#DRE"}, StringSplitOptions.RemoveEmptyEntries).AsParallel().ForAll(GenerateFieldAndAddToFields);           
+            var tokens = raw.Split(new string[]{"#DRE"}, StringSplitOptions.RemoveEmptyEntries);
 
+            tokens.AsParallel().ForAll(GenerateFieldAndAddToFields);
+
+            DocumentId = GetFileName();
         }
 
         public string GetFileName()
         {
-            var filename = AllFields.FirstOrDefault(x => x?.Key == "UUID")?.Value;
+            var filename = AllFields.FirstOrDefault(x => x.Key.ToUpper() == "UUID")?.Value;
 
             if (string.IsNullOrEmpty(filename))
-                throw new Exception("Couldnt Determine Filename for document");
+                TestContext.Out.WriteLine($"Warning: File found with no uuid with reference {AllFields.FirstOrDefault(x => x.Key.ToUpper() == "REFERENCE")?.Value}");
 
             return filename;
         }

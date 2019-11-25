@@ -60,5 +60,13 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
                 return connection.Query<T>(sql, parameters);
             }
         }
+
+        public IEnumerable<dynamic> Query(string sql, object parameters = null)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                return connection.Query(sql, parameters);
+            }
+        }
     }
 }
