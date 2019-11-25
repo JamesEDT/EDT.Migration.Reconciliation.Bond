@@ -1,6 +1,6 @@
-﻿using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
+﻿using AventStack.ExtentReports.MarkupUtils;
+using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
-using Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using Edt.Bond.Migration.Reconciliation.Framework.Services;
 using NUnit.Framework;
@@ -11,7 +11,9 @@ using System.Linq;
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
     [TestFixture]
-    public class FieldByFieldComparison
+    [Description("Compare Idx field with Edt Database field to validate implementation of mapping, for a subset of records.")]
+
+    public class IdxFieldByEdtFieldComparison : TestBase
     {
         private IEnumerable<Framework.Models.IdxLoadFile.Document> _idxSample;
         private IEnumerable<IDictionary<string, object>> _edtDocuments;
@@ -27,10 +29,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             _edtDocuments = EdtDocumentRepository.GetDocuments(ids).ToList();
 
             _edtColumnDetails = EdtDocumentRepository.GetColumnDetails().ToList();
+
+            FeatureRunner.Log(AventStack.ExtentReports.Status.Info, $"{_idxSample.Count()} sampled from Idx records.");
         }
 
         [Test]
-        [TestCaseSource(typeof(FieldByFieldComparison), nameof(StandardMappingsToTest))]
+        [TestCaseSource(typeof(IdxFieldByEdtFieldComparison), nameof(StandardMappingsToTest))]
         public void ValidateFieldPopulation(StandardMapping mappingUnderTest)
         {
             long populated = 0;
@@ -39,17 +43,20 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             long idxUnfound = 0;
             long edtUnfound = 0;
             long matched = 0;
+            long totalsampled = 0;
 
             var edtDbName = GetEdtDatabaseNameFromDisplayName(mappingUnderTest.EdtName);            
 
             //loop thru each sample document
             foreach (var idxDocument in _idxSample)
             {
+                totalsampled++;
+
                 var matchedEdtDocument = _edtDocuments.FirstOrDefault(x => x["DocNumber"].ToString().Equals(idxDocument.DocumentId));
                 if(matchedEdtDocument == null)
                 {
                     orphanDocuments++;
-                    TestContext.Out.WriteLine($"Idx Document not found in Edt's document table (DocNumber: {idxDocument.DocumentId})");
+                    TestRunner.Error($"Idx Document not found in Edt's document table (DocNumber: {idxDocument.DocumentId})");
                 }
                 else
                 {
@@ -58,7 +65,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     if (idxField == null)
                     {
                         idxUnfound++;
-                        TestContext.Out.WriteLine($"Idx field {mappingUnderTest.IdxName} not found in Idx (DocNumber: {idxDocument.DocumentId})");
+                        TestRunner.Error($"Idx field {mappingUnderTest.IdxName} not found in Idx (DocNumber: {idxDocument.DocumentId})");
                     }
                     else
                     {
@@ -73,31 +80,26 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                             if(!edtValue.ToString().Equals(expectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
                             {
                                 different++;
-                                TestContext.Out.WriteLine($"***Difference Seen for :{idxDocument.DocumentId.ToString()}***");
-                                TestContext.Out.WriteLine($"Edt value:{edtValue.ToString()}");
-                                TestContext.Out.WriteLine($"Converted Idx value:{expectedEdtValue.ToString()}");
+                                TestRunner.Info($"***Difference Seen for :{idxDocument.DocumentId.ToString()}***");
+                                TestRunner.Info($"Edt value:{edtValue.ToString()}");
+                                TestRunner.Info($"Converted Idx value:{expectedEdtValue.ToString()}");
                             }
                             else
                             {
                                 matched++;
                             }
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
                             edtUnfound++;
-                            TestContext.Out.WriteLine($"Edt version of document was not found to have expected column {mappingUnderTest.EdtName}");
+                            TestRunner.Error($"Edt version of document was not found to have expected column {mappingUnderTest.EdtName}");
+                            TestRunner.Info(ex);
                         }
                     }
                 }
             }
 
-            TestContext.Out.WriteLine("**Statistics:**");
-            TestContext.Out.WriteLine("Differences:"+ different);
-            TestContext.Out.WriteLine("Matched:" + matched);
-            TestContext.Out.WriteLine("Orphans:" + orphanDocuments);
-            TestContext.Out.WriteLine("Number of missing idx field values:" + idxUnfound);
-            TestContext.Out.WriteLine("No.of missing Edt field values:" + edtUnfound);
-            TestContext.Out.WriteLine("No.of populated Edt field values:" + populated);
+            PrintStats(different, matched, orphanDocuments, idxUnfound, edtUnfound, populated, totalsampled);
 
             Assert.Positive(populated, $"No samples had the Edt field {mappingUnderTest.EdtName} populated.");
             Assert.Zero(orphanDocuments, $"Orphan documents were found (difference count: {different})");
@@ -105,6 +107,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             Assert.Zero(idxUnfound, $"Field values were missing for this field in the Idx: {mappingUnderTest.IdxName} (missing count: {idxUnfound})");
             Assert.Zero(edtUnfound, $"Field values were missing for this field in Edt: {mappingUnderTest.EdtName} (missing count: {edtUnfound})");
         }
+
 
         private string GetEdtDatabaseNameFromDisplayName(string displayName)
         {
@@ -125,15 +128,36 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 return matchedDbName.ColumnName;
             }
         }
+
+        private void PrintStats(long different, long matched, long orphanIdx, long idxMissingField, long edtUnfound, long populated, long total)
+        {
+            TestRunner.Info(MarkupHelper.CreateLabel("Comparison Statistics:", ExtentColor.Orange));
+
+            string[][] data = new string[][]{
+                new string[]{ "Test Statistic", "Count"},
+                new string[] { "Differences", different.ToString() },
+                new string[] { "Matched", matched.ToString() },
+                new string[] { "Idx document(s) not in Edt", orphanIdx.ToString() },
+                new string[] { "Idx document(s) missing field under test", idxMissingField.ToString() },
+                new string[] { "Edt document(s) missing field under test", edtUnfound.ToString()},
+                new string[] { "Edt documents(s) populated with a value", populated.ToString()},
+                new string[] { "Total Idx records sampled", total.ToString()}
+            };
+
+            TestRunner.Info(MarkupHelper.CreateTable(data));
+        }
+
+
         private static IEnumerable<TestCaseData> StandardMappingsToTest {
             get
             {
                 return
                     new StandardMapReader()
                     .GetStandardMappings()
+                    .Where(x => !string.IsNullOrEmpty(x.EdtName) && !string.IsNullOrEmpty(x.IdxName))
                     .Select(x => new TestCaseData(x)
-                        .SetName($"Field Value Sampling: {x.IdxName} to {x.EdtName}")
-                        .SetDescription("For subset of data compare Edt database value with Idx value"));
+                        .SetName($"\"{x.IdxName}\" vs \"{x.EdtName}\"")
+                        .SetDescription($"For subset of data compare Edt database field values for \"{x.IdxName}\" with Idx values of field \"{x.EdtName}\""));
             }
         }
     }
