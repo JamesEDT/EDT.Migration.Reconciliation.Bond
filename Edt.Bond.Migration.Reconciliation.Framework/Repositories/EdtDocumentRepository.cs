@@ -2,6 +2,7 @@
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase.Dto;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
@@ -31,7 +32,20 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static IEnumerable<ColumnDetails> GetColumnDetails()
         {
-            return SqlExecutor.Query<ColumnDetails>($"SELECT * FROM {GetDatabaseName()}.[ColumnDetails]");
+            var columns = SqlExecutor.Query<ColumnDetails>($"SELECT * FROM {GetDatabaseName()}.[ColumnDetails]");
+
+            Directory.CreateDirectory(".\\logs");
+            using(var sw = new StreamWriter(".\\logs\\edt_db_cols.csv"))
+            {
+                sw.WriteLine("id,displayname,columnname");
+
+                foreach(var column in columns)
+                {
+                    sw.WriteLine($"{column.ColumnDetailsID},{column.DisplayName},{column.ColumnName}");
+                }
+            }
+
+            return columns;
         }
 
         public static long GetDocumentCount()
@@ -41,6 +55,15 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
                         + $" WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
 
             return SqlExecutor.QueryFirstOrDefault<long>(sql);
+        }
+
+        public static List<string> GetDocumentNumbers()
+        {
+            var sql = $"SELECT document.DocNumber FROM {GetDatabaseName()}.[Batch] batch"
+                        + $" INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID"
+                        + $" WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
+
+            return SqlExecutor.Query<string>(sql).ToList();
         }
 
         public static IEnumerable<DerivedFileLocation> GetNativeFileLocations()

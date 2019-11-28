@@ -45,7 +45,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             long matched = 0;
             long totalsampled = 0;
 
-            var edtDbName = GetEdtDatabaseNameFromDisplayName(mappingUnderTest.EdtName);            
+            var edtDbName = GetEdtDatabaseNameFromDisplayName(mappingUnderTest.EdtName);
+            TestLogger.Debug($"Using EDT databae column for comparison: {edtDbName}");
 
             //loop thru each sample document
             foreach (var idxDocument in _idxSample)

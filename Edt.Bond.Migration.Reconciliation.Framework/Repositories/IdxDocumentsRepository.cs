@@ -73,6 +73,17 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             }
         }
 
+        public List<string> GetDocumentIds()
+        {
+            using (var db = new LiteDatabase(DbName))
+            {
+                var documents = db.GetCollection<Document>("Documents");
+
+                // Use Linq to query documents
+                return documents.FindAll().Select(x => x.DocumentId).ToList();
+            }
+        }
+
         public IEnumerable<Document> GetDocuments(System.Linq.Expressions.Expression<System.Func<Document, bool>> expression)
         {
             using (var db = new LiteDatabase(DbName))

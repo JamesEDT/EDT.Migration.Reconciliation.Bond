@@ -3,6 +3,8 @@ using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using Edt.Bond.Migration.Reconciliation.Framework.Services;
 using NUnit.Framework;
 using System;
+using System.IO;
+using System.Linq;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
@@ -32,7 +34,34 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
-            Assert.AreEqual(_idxDocumentCount, EdtDocumentCount, "File counts should be equal for Idx and Load file");
+            if (_idxDocumentCount != EdtDocumentCount)
+                PrintOutIdDiffs();
+
+            Assert.AreEqual(_idxDocumentCount, EdtDocumentCount, "File counts should be equal for Idx and Load file");            
+        }
+
+        private void PrintOutIdDiffs()
+        {
+            var EdtIds = EdtDocumentRepository.GetDocumentNumbers();
+            var IdxIds = new IdxDocumentsRepository().GetDocumentIds();
+
+            var edtExceptIdx = EdtIds.Except(IdxIds);
+            var IdxExceptEdt = IdxIds.Except(EdtIds);
+
+            using (var sw = new StreamWriter(".\\logs\\db_document_id_diffs.csv"))
+            {
+                sw.WriteLine("Edt except Idx");
+                foreach(var id in edtExceptIdx)
+                {
+                    sw.WriteLine(id);
+                }
+
+                sw.WriteLine("Idx Except Edt");
+                foreach(var id in IdxExceptEdt)
+                {
+                    sw.WriteLine(id);
+                }
+            }
         }
 
         [Test]        
