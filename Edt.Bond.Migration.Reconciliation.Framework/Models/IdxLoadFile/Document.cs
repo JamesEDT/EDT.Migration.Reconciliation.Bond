@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
@@ -11,7 +12,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
 
         public string DocumentId { get; set; }
 
-        public List<Field> AllFields { get; set; }
+        public ConcurrentBag<Field> AllFields { get; set; }
 
         public Document()
         {
@@ -20,13 +21,13 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
 
         public Document(List<Field> allFields)
         {
-            AllFields = allFields;
+            AllFields = new ConcurrentBag<Field>(allFields);
             DocumentId = GetFileName();
         }
 
         public Document(string raw, bool removeEncapsulation = false)
         {
-            AllFields = new List<Field>(300);
+            AllFields = new ConcurrentBag<Field>();
 
             var tokens = raw.Split(new string[]{"#DRE"}, StringSplitOptions.RemoveEmptyEntries);
 

@@ -62,9 +62,16 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             }
             catch(Exception ex)
             {
-                logger.Fatal("Failed to analyse Idx");
-                logger.Log(AventStack.ExtentReports.Status.Error, ex.Message);
-                logger.Log(AventStack.ExtentReports.Status.Error, ex.StackTrace);
+                logger.Log(AventStack.ExtentReports.Status.Info, ex.Message);
+                logger.Log(AventStack.ExtentReports.Status.Info, ex.StackTrace);
+
+                if(ex.InnerException != null)
+                {
+                    logger.Log(AventStack.ExtentReports.Status.Info, ex.InnerException.Message);
+                    logger.Log(AventStack.ExtentReports.Status.Info, ex.InnerException.StackTrace);
+
+                }
+                logger.Fail("Failed to analyse Idx");
                 HtmlReport.Writer.Flush();
                 throw ex;
             }
