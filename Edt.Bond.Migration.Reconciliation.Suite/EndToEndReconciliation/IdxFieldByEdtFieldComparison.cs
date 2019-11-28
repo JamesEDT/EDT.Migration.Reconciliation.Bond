@@ -80,7 +80,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                                 var expectedEdtValue = IdxToEdtConversionService.ConvertValueToEdtForm(mappingUnderTest.EdtType, idxField.Value);
 
-                                if (edtValue.ToString().Equals(expectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
+                                if (!edtValue.ToString().Equals(expectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
                                 {
                                     different++;
                                     ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtValue.ToString(), expectedEdtValue.ToString(), idxField.Value));
@@ -140,7 +140,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         private void PrintStats(long different, long matched, long orphanIdx, long idxMissingField, long edtUnfound, long populated, long total)
         {
             string[][] data = new string[][]{
-                new string[]{ "<b>Comparison Statistics</b>"},
+                new string[]{ "<b>Comparison Statistics:</b>"},
                 new string[]{ "Statistic", "Count"},
                 new string[] { "Differences", different.ToString() },
                 new string[] { "Matched", matched.ToString() },
