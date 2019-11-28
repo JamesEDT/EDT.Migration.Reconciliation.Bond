@@ -113,7 +113,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             Assert.Zero(edtUnfound, $"Field values were missing for this field in Edt when Idx had a value: {mappingUnderTest.EdtName} (missing count: {edtUnfound})");
 
             if (idxUnfound > 0)
-                TestLogger.Warning($"Field values were missing for this field in the Idx: {mappingUnderTest.IdxName} (count: {idxUnfound})");
+                TestLogger.Info($"Field values were missing for this field in the Idx: {mappingUnderTest.IdxName} (count: {idxUnfound})");
         }
 
 

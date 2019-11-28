@@ -38,7 +38,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             var path = System.Reflection.Assembly.GetCallingAssembly().CodeBase;
             
             var projectPath = Path.GetDirectoryName(new Uri(path).LocalPath);
-            Directory.CreateDirectory(projectPath.ToString() + "report");
+            Directory.CreateDirectory(projectPath.ToString() + "\\report");
             var reportPath = projectPath + "\\report\\index.html";
 
             return reportPath;
