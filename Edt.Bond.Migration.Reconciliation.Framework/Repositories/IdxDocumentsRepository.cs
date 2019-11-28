@@ -99,9 +99,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             using (var db = new LiteDatabase(DbName))
             {
                 var documents = db.GetCollection<Document>("Documents");
-                var skip = (int) (GetNumberOfDocuments() / 1000);
 
-                return documents.Find(x => x.DocumentId != null, skip, 1000);
+                var skip = Settings.IdxSampleSize != 0 ? (int) (GetNumberOfDocuments() / Settings.IdxSampleSize) : 0;
+                var requiredRecords = Settings.IdxSampleSize != 0 ? Settings.IdxSampleSize : (int) GetNumberOfDocuments();
+
+                return documents.Find(x => x.DocumentId != null, skip, requiredRecords);
             }
         }
 

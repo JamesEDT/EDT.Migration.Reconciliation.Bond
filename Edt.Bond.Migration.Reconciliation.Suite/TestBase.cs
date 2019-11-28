@@ -1,7 +1,10 @@
 ﻿using AventStack.ExtentReports;
+using AventStack.ExtentReports.Gherkin.Model;
 using AventStack.ExtentReports.MarkupUtils;
+using Edt.Bond.Migration.Reconciliation.Framework.Models.Reporting;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -11,9 +14,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
     {
         public ExtentTest FeatureRunner;
         public bool createdLogHeader;
-        public ExtentTest TestRunner;
+        public ExtentTest TestLogger;
         public int TestFailures = 0;
         public int TestTotal = 0;
+        public List<ComparisonError> ComparisonErrors;
+        public List<ComparisonResult> ComparisonResults;
 
         [OneTimeSetUp]
         public void SetUpSuiteLog()
@@ -30,7 +35,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
             var testName = AddSpacesToName(TestContext.CurrentContext.Test.Name);
 
-            TestRunner = string.IsNullOrEmpty(description) ? FeatureRunner.CreateNode(testName) : FeatureRunner.CreateNode(testName, description);
+            TestLogger = string.IsNullOrEmpty(description) ? FeatureRunner.CreateNode(testName) : FeatureRunner.CreateNode<Scenario>(testName, description);
+
+            ComparisonErrors = new List<ComparisonError>();
+            ComparisonResults = new List<ComparisonResult>();
         }        
 
         [TearDown]
@@ -38,21 +46,45 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
         {            
             var status = TestContext.CurrentContext.Result.Outcome.Status;
             var stackTrace = "<pre>" + TestContext.CurrentContext.Result.StackTrace + "</pre>";
-            var errorMessage = TestContext.CurrentContext.Result.Message;
+            var errorMessage = MarkupHelper.CreateLabel(TestContext.CurrentContext.Result.Message, ExtentColor.Red);
 
             if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
             {
-                var failureMessage = MarkupHelper.CreateLabel(TestContext.CurrentContext.Result.Message, ExtentColor.Red);
-                TestRunner.Fail(failureMessage);
-                TestRunner.Log(Status.Error, stackTrace);
+                TestLogger.Fail(errorMessage);
+                TestLogger.Log(Status.Error, stackTrace);
                 TestFailures++;
             }
             else
             {
-                TestRunner.Pass("Pass");
+                TestLogger.Pass(TestContext.CurrentContext.Result.Outcome.Status.ToString());
             }
 
+            PrintComparisonTables();
+
             TestTotal++;
+        }
+
+        private void PrintComparisonTables()
+        {
+            //print comparision
+            if (ComparisonResults.Count > 0)
+            {
+                var data = new List<string[]>() { new string[] { "<b>Differences:</b>" }, new string[] { "DocumentId", "Idx value", "Expected Edt value", "Edt value" } };
+
+                data.AddRange(ComparisonResults.Select(x => x.ToTableRow()));
+
+                TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data.ToArray()));
+            }
+
+            //print errors
+            if (ComparisonErrors.Count > 0)
+            {
+                var data = new List<string[]>() { new string[] { "<b>Errors:</b>"}, new string[] { "DocumentId", "Error message"} };
+
+                data.AddRange(ComparisonErrors.Select(x => x.ToTableRow()));
+
+                TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data.ToArray()));
+            }
         }
 
         [OneTimeTearDown]
@@ -70,12 +102,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
         public void LogMessage(string message)
         {
-            TestRunner.Log(Status.Info, message);
+            TestLogger.Log(Status.Info, message);
         }
         
         public void LogDebugInfo(string message)
         {
-            TestRunner.Debug(message);
+            TestLogger.Debug(message);
         }
 
         private string AddSpacesToName(string name)

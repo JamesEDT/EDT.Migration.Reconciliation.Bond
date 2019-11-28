@@ -1,4 +1,5 @@
-﻿using Edt.Bond.Migration.Reconciliation.Framework;
+﻿using AventStack.ExtentReports.Gherkin.Model;
+using Edt.Bond.Migration.Reconciliation.Framework;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
@@ -28,12 +29,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             {
                 logger.Debug("Analysing Standard Mappings");
 
-                StandardMappings = new StandardMapReader().GetStandardMappings();
+                StandardMappings = new StandardMapReader().GetStandardMappings().Where(x => !string.IsNullOrEmpty(x.EdtName) && !string.IsNullOrEmpty(x.IdxName));
 
                 if (!StandardMappings.Any())
                     throw new Exception("Failed to read mappings - count is 0 post attempt");
 
-                var idxPath = Path.Combine(Settings.MicroFocusSourceDirectory, Settings.IdxName);
+                var idxPath = Settings.IdxFilePath;
 
                 Document[] documents;
 
@@ -62,7 +63,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             catch(Exception ex)
             {
                 logger.Fatal("Failed to analyse Idx");
-                logger.Fail(ex);
+                logger.Log(AventStack.ExtentReports.Status.Error, ex.Message);
+                logger.Log(AventStack.ExtentReports.Status.Error, ex.StackTrace);
                 HtmlReport.Writer.Flush();
                 throw ex;
             }

@@ -1,0 +1,10 @@
+Field Name in EDT,IDOL Name (in IDX file),Name in MicroFocus export,CFU Suggested Name,Found in IDX data,Stored in EDT as,Importer Group,Field Description,Override conversion method
+Author,FROM,From,Author,,Text,Custom,GHI,Unknown
+File Extension,FILETYPE_PARAMETRIC,File Extension,File Extension,,Dropdown List,Unknown,GHI,Unknown
+1st Disc Rev Complete,TAG_REG_INITIAL_COMPLETE_NUMERIC,1st Disc Rev Complete,1st Disc Rev Complete,,Boolean,Standard,ABC,Unknown
+SizeWithoutChildren,FILESIZE_NUMERIC,File size (bytes),SizeWithoutChildren,,Text,Custom,DEF,Unknown
+INTERNETMESSAGEID,INTERNETMESSAGEID,,INTERNETMESSAGEID,,,,DEF,Unknown
+ConversationIndex,PR_CONVERSATION_INDEX,,ConversationIndex,,,,ABC,Unknown
+InternetHeaders,PR_TRANSPORT_MESSAGE_HEADERS_W,,InternetHeaders,,,,ABC,Unknown
+Title,TITLE,,Title,,,,ABC,Unknown
+1st Disc Review Comments,TAG_REG_INITIAL_COMMENTS_MATCH,1st Disc Review Comments,1st Disc Review Comments,,Memo,Unknown,DEF,Unknown

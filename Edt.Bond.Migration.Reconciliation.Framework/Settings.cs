@@ -11,13 +11,15 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
 
         public static string MicroFocusSourceDirectory => GetSetting("MicroFocusStagingDirectory");
 
-        public static string IdxName => GetSetting("IdxName");
+        public static string IdxFilePath => GetSetting("IdxFilePath");
 
         public static string ConversionToolOutputDirectory => GetSetting("ConversionToolOutputDirectory");
 
         public static string EdtImporterDatasetName => GetSetting("EdtImporterDataSetName");
 
         public static string EdtCfsDirectory => GetSetting("EdtCfsDirectory");
+
+        public static int IdxSampleSize => int.Parse(GetSetting("IdxSampleSize"));
 
         private static string GetSetting(string key)
         {

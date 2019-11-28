@@ -16,32 +16,38 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
         [OneTimeSetUp]
         public void ReportSetup()
         {
-            var path = System.Reflection.Assembly.GetCallingAssembly().CodeBase;
-            var actualPath = path.Substring(0, path.LastIndexOf("bin"));
+            var reportFolder = GenerateReportFolder();
 
-            var projectPath = new Uri(actualPath).LocalPath;
-            Directory.CreateDirectory(projectPath.ToString() + "reports");
-            var reportPath = projectPath + "reports\\ExtentReport.html";
+            var htmlReporter = new ExtentHtmlReporter(reportFolder);
 
-            var htmlReporter = new ExtentHtmlReporter(reportPath);
 
-            htmlReporter.Config.DocumentTitle = "EDT DM Reconciliation";
+            htmlReporter.Config.DocumentTitle = "EDT Data Migration Report";
             htmlReporter.Config.ReportName = "Idx to EDT Data Migration Reconciliation";
             htmlReporter.Config.EnableTimeline = false;
             htmlReporter.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Standard;
             htmlReporter.Config.CSS = CSS;
 
-            AddRunSettingsToReport(htmlReporter);
            
             Writer = new ExtentReports();
 
-            Writer.AttachReporter(htmlReporter);       
-        }       
+            Writer.AttachReporter(htmlReporter);
+        } 
+        
+        private string GenerateReportFolder()
+        {
+            var path = System.Reflection.Assembly.GetCallingAssembly().CodeBase;
+            
+            var projectPath = Path.GetDirectoryName(new Uri(path).LocalPath);
+            Directory.CreateDirectory(projectPath.ToString() + "report");
+            var reportPath = projectPath + "\\report\\index.html";
+
+            return reportPath;
+        }
         
         private void AddRunSettingsToReport(ExtentHtmlReporter htmlReporter)
         {            
             htmlReporter.SystemAttributeContext.AddSystemAttribute(new AventStack.ExtentReports.Model.SystemAttribute("Idx Source path", Settings.MicroFocusSourceDirectory));
-            htmlReporter.SystemAttributeContext.AddSystemAttribute(new AventStack.ExtentReports.Model.SystemAttribute("Idx name", Settings.IdxName));
+            htmlReporter.SystemAttributeContext.AddSystemAttribute(new AventStack.ExtentReports.Model.SystemAttribute("Idx name", Settings.IdxFilePath));
             htmlReporter.SystemAttributeContext.AddSystemAttribute(new AventStack.ExtentReports.Model.SystemAttribute("Edt Case Id", Settings.EdtCaseId));
             htmlReporter.SystemAttributeContext.AddSystemAttribute(new AventStack.ExtentReports.Model.SystemAttribute("Edt Importer Dataset name", Settings.EdtImporterDatasetName));
             htmlReporter.SystemAttributeContext.AddSystemAttribute(new AventStack.ExtentReports.Model.SystemAttribute("Edt CFS path", Settings.EdtCfsDirectory));
@@ -55,10 +61,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
         }
 
         private static string CSS = @"
-            .description { font-style: italic;}
-            
+            .description { font-style: italic;}            
             .runtime-table { max-width: 500px; }
-            .runtime-table tbody tr:nth-child(1) { background-color: lightgray;} 
+            .runtime-table tbody tr:nth-child(2) { background-color: lightgray;} 
         ";
     }
 }

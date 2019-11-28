@@ -30,7 +30,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 new string[] { "Edt Database", EdtDocumentCount.ToString() }                
             };
 
-            TestRunner.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
+            TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
             Assert.AreEqual(_idxDocumentCount, EdtDocumentCount, "File counts should be equal for Idx and Load file");
         }
@@ -47,7 +47,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 new string[] { "Edt Central file store", cfsCount.ToString() }
             };
 
-            TestRunner.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
+            TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
             Assert.AreEqual(_idxDocumentCount, cfsCount, "File counts should be equal for Idx and Load file");
         }
@@ -56,6 +56,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         [Description("Comparing the text document counts in the Idx to the Edt Central File Store, thus validating all text fies are imported to EDT.")]
         public void TextCountsAreEqualBetweenIdxAndEdtFileStore()
         {
+            
             throw new NotImplementedException();
         }
 

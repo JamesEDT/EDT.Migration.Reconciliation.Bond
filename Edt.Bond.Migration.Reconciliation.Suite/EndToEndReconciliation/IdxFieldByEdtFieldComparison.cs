@@ -56,7 +56,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 if(matchedEdtDocument == null)
                 {
                     orphanDocuments++;
-                    TestRunner.Error($"Idx Document not found in Edt's document table (DocNumber: {idxDocument.DocumentId})");
+                    ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "Idx Document not found in Edt's document table"));
                 }
                 else
                 {
@@ -65,7 +65,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     if (idxField == null)
                     {
                         idxUnfound++;
-                        TestRunner.Error($"Idx field {mappingUnderTest.IdxName} not found in Idx (DocNumber: {idxDocument.DocumentId})");
+                        ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Idx field { mappingUnderTest.IdxName } not found in Idx"));
                     }
                     else
                     {
@@ -73,27 +73,33 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         {
                             var edtValue = matchedEdtDocument[edtDbName];
 
-                            if (!string.IsNullOrEmpty(edtValue.ToString())) populated++;
-
-                            var expectedEdtValue = IdxToEdtConversionService.ConvertValueToEdtForm(mappingUnderTest.EdtType, idxField.Value);
-
-                            if(!edtValue.ToString().Equals(expectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
+                            if (edtValue != null)
                             {
-                                different++;
-                                TestRunner.Info($"***Difference Seen for :{idxDocument.DocumentId.ToString()}***");
-                                TestRunner.Info($"Edt value:{edtValue.ToString()}");
-                                TestRunner.Info($"Converted Idx value:{expectedEdtValue.ToString()}");
+
+                                if (!string.IsNullOrEmpty(edtValue?.ToString())) populated++;
+
+                                var expectedEdtValue = IdxToEdtConversionService.ConvertValueToEdtForm(mappingUnderTest.EdtType, idxField.Value);
+
+                                if (edtValue.ToString().Equals(expectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
+                                {
+                                    different++;
+                                    ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtValue.ToString(), expectedEdtValue.ToString(), idxField.Value));
+                                }
+                                else
+                                {
+                                    matched++;
+                                }
                             }
                             else
                             {
-                                matched++;
+                                edtUnfound++;
+                                ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Field { mappingUnderTest.EdtName } not found in Edt"));
                             }
                         }
                         catch (Exception ex)
                         {
-                            edtUnfound++;
-                            TestRunner.Error($"Edt version of document was not found to have expected column {mappingUnderTest.EdtName}");
-                            TestRunner.Info(ex);
+                            var error = $"{ex.Message}<br></br>{ex.StackTrace}";
+                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, error));                            
                         }
                     }
                 }
@@ -102,10 +108,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             PrintStats(different, matched, orphanDocuments, idxUnfound, edtUnfound, populated, totalsampled);
 
             Assert.Positive(populated, $"No samples had the Edt field {mappingUnderTest.EdtName} populated.");
-            Assert.Zero(orphanDocuments, $"Orphan documents were found (difference count: {different})");
-            Assert.Zero(different, $"Differences were seen between expected value and actual value for this Edt field {mappingUnderTest.EdtName} (difference count: {different})");
-            Assert.Zero(idxUnfound, $"Field values were missing for this field in the Idx: {mappingUnderTest.IdxName} (missing count: {idxUnfound})");
-            Assert.Zero(edtUnfound, $"Field values were missing for this field in Edt: {mappingUnderTest.EdtName} (missing count: {edtUnfound})");
+            Assert.Zero(orphanDocuments, $"Idx documents were not found in EDT (count: {different})");
+            Assert.Zero(different, $"Differences were seen between expected value and actual value for this Edt field {mappingUnderTest.EdtName} (difference count: {different})");                   
+            Assert.Zero(edtUnfound, $"Field values were missing for this field in Edt when Idx had a value: {mappingUnderTest.EdtName} (missing count: {edtUnfound})");
+
+            if (idxUnfound > 0)
+                TestLogger.Warning($"Field values were missing for this field in the Idx: {mappingUnderTest.IdxName} (count: {idxUnfound})");
         }
 
 
@@ -131,10 +139,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
         private void PrintStats(long different, long matched, long orphanIdx, long idxMissingField, long edtUnfound, long populated, long total)
         {
-            TestRunner.Info(MarkupHelper.CreateLabel("Comparison Statistics:", ExtentColor.Orange));
-
             string[][] data = new string[][]{
-                new string[]{ "Test Statistic", "Count"},
+                new string[]{ "<b>Comparison Statistics</b>"},
+                new string[]{ "Statistic", "Count"},
                 new string[] { "Differences", different.ToString() },
                 new string[] { "Matched", matched.ToString() },
                 new string[] { "Idx document(s) not in Edt", orphanIdx.ToString() },
@@ -144,7 +151,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 new string[] { "Total Idx records sampled", total.ToString()}
             };
 
-            TestRunner.Info(MarkupHelper.CreateTable(data));
+            TestLogger.Info(MarkupHelper.CreateTable(data));
         }
 
 
