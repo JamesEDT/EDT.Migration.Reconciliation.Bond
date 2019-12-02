@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase
 {
@@ -20,5 +21,12 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase
         public bool? IsRequired { get; set; }
         public string ExportDisplayName { get; set; }
        
+
+        public string GetAlphaNumbericOnlyDisplayName()
+        {
+            Regex rgx = new Regex("[^a-zA-Z0-9]");
+            var str = rgx.Replace(DisplayName, "");
+            return str;
+        }
     }
 }

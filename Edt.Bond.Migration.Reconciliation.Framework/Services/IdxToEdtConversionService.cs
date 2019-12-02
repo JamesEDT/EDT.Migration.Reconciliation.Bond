@@ -18,6 +18,16 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             }
         }
 
+        public static string GetEdtType(string fieldName, string desiredType)
+        {
+            if(!desiredType.Equals("date", StringComparison.InvariantCultureIgnoreCase) && fieldName.EndsWith("_NUMERICDATE"))
+            {
+                return "date";
+            }
+
+            return desiredType;
+        }
+
         private static string GetDateString(string sourceDateValue)
         {
             DateTime convertedDate;
@@ -37,7 +47,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                     convertedDate = FromUnixTime(long.Parse(sourceDateValue));
                 }
             }
-            return convertedDate.ToString("yyyy/MM/dd HH:mm:ss");
+            return convertedDate.ToString("dd/MM/yyyy HH:mm:ss");
         }    
 
         private static string GetBooleanString(string sourceValue)

@@ -18,36 +18,47 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
         {
             using(var sr = new StreamReader(Settings.StandardMapPath))
             {
-                var headers = sr.ReadLine();
-                ValidateHeadersAreInExpectedPositions(headers);
-
-                var mappings = new List<StandardMapping>();
-
-                while(!sr.EndOfStream)
+                using (var sw = new StreamWriter(".\\logs\\standard_mappings_ignored.csv"))
                 {
-                    var newMappingTokens = sr.ReadLine()?.Split(_delimiter, StringSplitOptions.None);
+                    var headers = sr.ReadLine();
+                    ValidateHeadersAreInExpectedPositions(headers);
 
-                    if (newMappingTokens == null) continue;
+                    var mappings = new List<StandardMapping>();
 
-                    var mapping = new StandardMapping()
+                    while (!sr.EndOfStream)
                     {
-                        EdtName = newMappingTokens[EdtFieldNameColumn],
-                        IdxName = newMappingTokens[IdxNameColumn],
-                        EdtType = newMappingTokens[StoredEdtTypeColumn],
-                        ImportGroup = newMappingTokens[ImporterGroupColumn]
-                    };
+                        var newMappingTokens = sr.ReadLine()?.Split(_delimiter, StringSplitOptions.None);
 
-                    if (string.IsNullOrEmpty(mapping.EdtType))
-                        TestContext.Out.WriteLine(
-                            $"Warning: EDT Field {mapping.EdtName} has no type, thus will NOT be converted in processing.");
+                        if (newMappingTokens == null) continue;
 
-                    mappings.Add(mapping);
+                        var mapping = new StandardMapping()
+                        {
+                            EdtName = newMappingTokens[EdtFieldNameColumn],
+                            IdxName = newMappingTokens[IdxNameColumn],
+                            EdtType = IdxToEdtConversionService.GetEdtType(newMappingTokens[IdxNameColumn], newMappingTokens[StoredEdtTypeColumn]),
+                            ImportGroup = newMappingTokens[ImporterGroupColumn]
+                        };
+
+                        if (mapping.EdtName.Equals(mapping.IdxName))
+                        {
+                            sw.WriteLine(mapping.EdtName);
+                        }
+                        else
+                        {
+
+                            if (string.IsNullOrEmpty(mapping.EdtType))
+                                TestContext.Out.WriteLine(
+                                    $"Warning: EDT Field {mapping.EdtName} has no type, thus will NOT be converted in processing.");
+
+                            mappings.Add(mapping);
+                        }
+                    }
+
+                    if (mappings.Count <= 0)
+                        throw new Exception("Failed to read mappings from standard mapping doc, count is 0");
+
+                    return mappings;
                 }
-
-                if (mappings.Count <= 0)
-                    throw new Exception("Failed to read mappings from standard mapping doc, count is 0");
-
-                return mappings;
             }
         }
 

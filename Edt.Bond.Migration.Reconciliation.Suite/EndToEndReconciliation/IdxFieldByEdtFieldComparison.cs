@@ -6,7 +6,9 @@ using Edt.Bond.Migration.Reconciliation.Framework.Services;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
@@ -48,13 +50,16 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             var edtDbName = GetEdtDatabaseNameFromDisplayName(mappingUnderTest.EdtName);
             TestLogger.Debug($"Using EDT databae column for comparison: {edtDbName}");
 
+            var detailsLogFilePath = $".\\differences_{mappingUnderTest.EdtName}.csv";
+
+
             //loop thru each sample document
             foreach (var idxDocument in _idxSample)
             {
                 totalsampled++;
 
                 var matchedEdtDocument = _edtDocuments.FirstOrDefault(x => x["DocNumber"].ToString().Equals(idxDocument.DocumentId));
-                if(matchedEdtDocument == null)
+                if (matchedEdtDocument == null)
                 {
                     orphanDocuments++;
                     ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "Idx Document not found in Edt's document table"));
@@ -79,6 +84,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                                 if (!string.IsNullOrEmpty(edtValue?.ToString())) populated++;
 
+
                                 var expectedEdtValue = IdxToEdtConversionService.ConvertValueToEdtForm(mappingUnderTest.EdtType, idxField.Value);
 
                                 if (!edtValue.ToString().Equals(expectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
@@ -100,21 +106,25 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         catch (Exception ex)
                         {
                             var error = $"{ex.Message}<br></br>{ex.StackTrace}";
-                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, error));                            
+                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, error));
                         }
                     }
+
                 }
             }
 
             PrintStats(different, matched, orphanDocuments, idxUnfound, edtUnfound, populated, totalsampled);
 
+            TestLogger.Info($"Difference and error details written to: {PrintComparisonTables(mappingUnderTest.EdtName)}");
+
             Assert.Positive(populated, $"No samples had the Edt field {mappingUnderTest.EdtName} populated.");
             Assert.Zero(orphanDocuments, $"Idx documents were not found in EDT (count: {different})");
-            Assert.Zero(different, $"Differences were seen between expected value and actual value for this Edt field {mappingUnderTest.EdtName} (difference count: {different})");                   
+            Assert.Zero(different, $"Differences were seen between expected value and actual value for this Edt field {mappingUnderTest.EdtName} (difference count: {different})");
             Assert.Zero(edtUnfound, $"Field values were missing for this field in Edt when Idx had a value: {mappingUnderTest.EdtName} (missing count: {edtUnfound})");
 
             if (idxUnfound > 0)
                 TestLogger.Info($"Field values were missing for this field in the Idx: {mappingUnderTest.IdxName} (count: {idxUnfound})");
+            
         }
 
 
@@ -126,9 +136,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             if(matchedDbName == null)
             {
-                lowerDisplayName = lowerDisplayName.Replace(" ", string.Empty);
-
-                matchedDbName = _edtColumnDetails.Find(x => x.DisplayName.ToLower().Replace(" ", string.Empty).Equals(lowerDisplayName));
+                Regex rgx = new Regex("[^a-zA-Z0-9]");
+                lowerDisplayName = rgx.Replace(lowerDisplayName, "");
+                
+                matchedDbName = _edtColumnDetails.Find(x => x.GetAlphaNumbericOnlyDisplayName().ToLower()
+                                            .Replace(" ", string.Empty).Equals(lowerDisplayName));
 
                 return matchedDbName != null ? matchedDbName.ColumnName : throw new Exception($"Unable to determine Edt Db column name from mapped display name {displayName}");
             }

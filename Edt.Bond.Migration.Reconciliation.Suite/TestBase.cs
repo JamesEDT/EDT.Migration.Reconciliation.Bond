@@ -5,6 +5,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Models.Reporting;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -57,34 +58,44 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             else
             {
                 TestLogger.Pass(TestContext.CurrentContext.Result.Outcome.Status.ToString());
-            }
-
-            PrintComparisonTables();
+            }            
 
             TestTotal++;
         }
 
-        private void PrintComparisonTables()
+        public string PrintComparisonTables(string mappingName)
         {
-            //print comparision
-            if (ComparisonResults.Count > 0)
+            var filename = $"{GetCurrentDirectory()}\\report\\differences_{mappingName}.csv";
+
+            using (var sw = new StreamWriter(filename))
             {
-                var data = new List<string[]>() { new string[] { "<b>Differences:</b>" }, new string[] { "DocumentId", "Idx value", "Expected Edt value", "Edt value" } };
+                //print comparision
+                if (ComparisonResults.Count > 0)
+                {
+                    sw.WriteLine("Differences:");
+                    sw.WriteLine("DocumentId,Idx value,Expected Edt value,Edt value");
 
-                data.AddRange(ComparisonResults.Select(x => x.ToTableRow()));
+                    foreach (var result in ComparisonResults) {
+                        sw.WriteLine($"{result.DocumentId},{result.IdxValue},{result.IdxConvertedValue},{result.EdtValue}");                        
+                    }
+                }
 
-                TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data.ToArray()));
+                //print errors
+                if (ComparisonErrors.Count > 0)
+                {
+                    sw.WriteLine();
+                    sw.WriteLine("Errors/Warnings:");
+                    sw.WriteLine("DocumentId,Error/Warning");
+                    var data = new List<string[]>() { new string[] { "<b>Errors:</b>" }, new string[] { "DocumentId", "Error message" } };
+
+                    foreach(var error in ComparisonErrors)
+                    {
+                        sw.WriteLine($"{error.DocumentId},{error.ErrorMessage}");
+                    }
+                }
             }
 
-            //print errors
-            if (ComparisonErrors.Count > 0)
-            {
-                var data = new List<string[]>() { new string[] { "<b>Errors:</b>"}, new string[] { "DocumentId", "Error message"} };
-
-                data.AddRange(ComparisonErrors.Select(x => x.ToTableRow()));
-
-                TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data.ToArray()));
-            }
+            return filename;
         }
 
         [OneTimeTearDown]
@@ -98,6 +109,13 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             {
                 FeatureRunner.Fail($"{TestFailures } test(s) failed of {TestTotal}");
             }
+        }
+
+        private string GetCurrentDirectory()
+        {
+            var path = System.Reflection.Assembly.GetCallingAssembly().CodeBase;
+
+            return Path.GetDirectoryName(new Uri(path).LocalPath);
         }
 
         public void LogMessage(string message)
