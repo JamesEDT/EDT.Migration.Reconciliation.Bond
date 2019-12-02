@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
 using NUnit.Framework;
 
@@ -16,9 +17,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
         public IEnumerable<StandardMapping> GetStandardMappings()
         {
-            using(var sr = new StreamReader(Settings.StandardMapPath))
+            var fieldsToIgnore = Settings.IgnoredIdxFieldsFromComparison.ToList();
+
+            using (var sr = new StreamReader(Settings.StandardMapPath))
             {
-                using (var sw = new StreamWriter(".\\logs\\standard_mappings_ignored.csv"))
+                using (var swIgnored = new StreamWriter(".\\logs\\standard_mappings_ignored.csv"))
                 {
                     var headers = sr.ReadLine();
                     ValidateHeadersAreInExpectedPositions(headers);
@@ -39,9 +42,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                             ImportGroup = newMappingTokens[ImporterGroupColumn]
                         };
 
-                        if (mapping.EdtName.Equals(mapping.IdxName))
+                        if (mapping.EdtName.Equals(mapping.IdxName) || fieldsToIgnore.Contains(mapping.IdxName))
                         {
-                            sw.WriteLine(mapping.EdtName);
+                            swIgnored.WriteLine(mapping.EdtName, mapping.IdxName);
                         }
                         else
                         {

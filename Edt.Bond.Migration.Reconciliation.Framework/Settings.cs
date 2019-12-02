@@ -21,6 +21,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
 
         public static int IdxSampleSize => int.Parse(GetSetting("IdxSampleSize"));
 
+        public static string[] IgnoredIdxFieldsFromComparison => GetSetting("IgnoredIdxFieldsFromComparison").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+
         private static string GetSetting(string key)
         {
             return ConfigurationManager.AppSettings[key] ??
