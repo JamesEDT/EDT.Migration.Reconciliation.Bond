@@ -1,4 +1,5 @@
 ﻿using AventStack.ExtentReports.MarkupUtils;
+using Edt.Bond.Migration.Reconciliation.Framework;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using Edt.Bond.Migration.Reconciliation.Framework.Services;
 using NUnit.Framework;
@@ -48,15 +49,15 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             var edtExceptIdx = EdtIds.Except(IdxIds);
             var IdxExceptEdt = IdxIds.Except(EdtIds);
 
-            using (var sw = new StreamWriter(".\\logs\\db_document_id_diffs.csv"))
+            using (var sw = new StreamWriter(".\\Reports\\DocumentCountDifferences_IdLists.csv"))
             {
-                sw.WriteLine("Edt except Idx");
+                sw.WriteLine("In Edt but not in Idx:");
                 foreach(var id in edtExceptIdx)
                 {
                     sw.WriteLine(id);
                 }
 
-                sw.WriteLine("Idx Except Edt");
+                sw.WriteLine("In Idx but not Edt");
                 foreach(var id in IdxExceptEdt)
                 {
                     sw.WriteLine(id);
@@ -82,12 +83,51 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         }
 
         [Test]
-        [Description("Comparing the text document counts in the Idx to the Edt Central File Store, thus validating all text fies are imported to EDT.")]
+        [Description("Comparing the text document counts in the Idx to the Edt Document.Body, thus validating all text fies are imported to EDT.")]
         public void TextCountsAreEqualBetweenIdxAndEdtFileStore()
         {
-            
-            throw new NotImplementedException();
+            //For each Document in Batch, Count where Body is not null
+            var edtDocsWithBody = EdtDocumentRepository.GetDocuentNumbersWithABody();
+
+            //compare against Text count in microfocus dir
+            var edtIds = EdtDocumentRepository.GetDocumentNumbers();
+            var textDirectory = Path.Combine(Settings.MicroFocusSourceDirectory, "TEXT");
+            var textFileDocsIds = Directory.GetFiles(textDirectory, "*.txt", SearchOption.AllDirectories).Select(x => GetDocumentIdFromFilePath(x)).Where(x => edtIds.Contains(x));
+
+            var mircoFocusDocCount = textFileDocsIds.Count();
+            //output result
+            string[][] data = new string[][]{
+                new string[]{ "Item Evaluated", "Count of Documents"},
+                new string[] { "MicroFocus Export text(s)",mircoFocusDocCount.ToString() },
+                new string[] { "Edt Document.Body", edtDocsWithBody.Count().ToString() }
+            };
+
+
+            if(mircoFocusDocCount != edtDocsWithBody.Count())
+            {
+                //output diff list
+                using (var sw = new StreamWriter(".\\logs\\TextContentMissing.csv"))
+                {
+                    var missingBodies = textFileDocsIds.Where(x => !edtDocsWithBody.Contains(x));
+                    foreach(var missing in missingBodies)
+                    {
+                        sw.WriteLine(missing);
+                    }
+                }
+            }
+
+            Assert.AreEqual(mircoFocusDocCount, edtDocsWithBody.Count(), "File counts should be equal for Microfocus load and EDT");
         }
+
+        private string GetDocumentIdFromFilePath(string FilePath)
+        {
+            var fileInfo = new FileInfo(FilePath);
+
+            var fileName = fileInfo.Name.Split(new char[] { '.' }).First();
+
+            return fileName;            
+        }
+
 
     }
 }

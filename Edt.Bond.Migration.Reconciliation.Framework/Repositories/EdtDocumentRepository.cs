@@ -57,6 +57,16 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             return SqlExecutor.QueryFirstOrDefault<long>(sql);
         }
 
+        public static List<string> GetDocuentNumbersWithABody()
+        {
+            var sql = $"SELECT document.DocumentId FROM {GetDatabaseName()}.[Batch] batch"
+                        + $" INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID"
+                        + $" WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'" 
+                        + $" AND document.Body IS NOT NULL";
+
+            return SqlExecutor.Query<string>(sql).ToList();
+        }
+
         public static List<string> GetDocumentNumbers()
         {
             var sql = $"SELECT document.DocNumber FROM {GetDatabaseName()}.[Batch] batch"

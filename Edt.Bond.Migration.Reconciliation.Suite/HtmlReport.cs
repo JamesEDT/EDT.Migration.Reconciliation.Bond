@@ -43,16 +43,6 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
             return reportPath;
         }
-        
-        private void AddRunSettingsToReport(ExtentHtmlReporter htmlReporter)
-        {            
-            htmlReporter.SystemAttributeContext.AddSystemAttribute(new AventStack.ExtentReports.Model.SystemAttribute("Idx Source path", Settings.MicroFocusSourceDirectory));
-            htmlReporter.SystemAttributeContext.AddSystemAttribute(new AventStack.ExtentReports.Model.SystemAttribute("Idx name", Settings.IdxFilePath));
-            htmlReporter.SystemAttributeContext.AddSystemAttribute(new AventStack.ExtentReports.Model.SystemAttribute("Edt Case Id", Settings.EdtCaseId));
-            htmlReporter.SystemAttributeContext.AddSystemAttribute(new AventStack.ExtentReports.Model.SystemAttribute("Edt Importer Dataset name", Settings.EdtImporterDatasetName));
-            htmlReporter.SystemAttributeContext.AddSystemAttribute(new AventStack.ExtentReports.Model.SystemAttribute("Edt CFS path", Settings.EdtCfsDirectory));
-            htmlReporter.SystemAttributeContext.AddSystemAttribute(new AventStack.ExtentReports.Model.SystemAttribute("Standard Map path", Settings.StandardMapPath));
-        }
 
         [OneTimeTearDown]
         public void Teardown()

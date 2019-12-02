@@ -7,7 +7,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Extensions
     {
         public static readonly Regex CsvSplit = new Regex("(?:^|,)(\"(?:[^\"]+|\"\")*\"|[^,]*)", RegexOptions.Compiled);
 
-        public  static string[] SplitCsv(this string input)
+        public static string[] SplitCsv(this string input)
         {
 
             List<string> list = new List<string>();
