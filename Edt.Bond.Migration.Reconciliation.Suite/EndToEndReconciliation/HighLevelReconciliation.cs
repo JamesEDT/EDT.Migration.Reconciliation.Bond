@@ -95,24 +95,27 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             var textFileDocsIds = Directory.GetFiles(textDirectory, "*.txt", SearchOption.AllDirectories).Select(x => GetDocumentIdFromFilePath(x)).Where(x => edtIds.Contains(x));
 
             var mircoFocusDocCount = textFileDocsIds.Count();
-            //output result
+
+            //output counts
             string[][] data = new string[][]{
                 new string[]{ "Item Evaluated", "Count of Documents"},
                 new string[] { "MicroFocus Export text(s)",mircoFocusDocCount.ToString() },
                 new string[] { "Edt Document.Body", edtDocsWithBody.Count().ToString() }
             };
 
-
             if(mircoFocusDocCount != edtDocsWithBody.Count())
             {
                 //output diff list
-                using (var sw = new StreamWriter(".\\logs\\TextContentMissing.csv"))
+                var outputFile = ".\\logs\\TextContentMissing.csv";
+                using (var sw = new StreamWriter(outputFile))
                 {
                     var missingBodies = textFileDocsIds.Where(x => !edtDocsWithBody.Contains(x));
                     foreach(var missing in missingBodies)
                     {
                         sw.WriteLine(missing);
                     }
+
+                    TestLogger.Info($"List of Ids without body output to: {new FileInfo(outputFile).FullName}");
                 }
             }
 
@@ -127,7 +130,5 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             return fileName;            
         }
-
-
     }
 }
