@@ -49,7 +49,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             var edtExceptIdx = EdtIds.Except(IdxIds);
             var IdxExceptEdt = IdxIds.Except(EdtIds);
 
-            using (var sw = new StreamWriter(".\\Reports\\DocumentCountDifferences_IdLists.csv"))
+            using (var sw = new StreamWriter($"{Settings.ReportingDirectory}\\DocumentCountDifferences_IdLists.csv"))
             {
                 sw.WriteLine("In Edt but not in Idx:");
                 foreach(var id in edtExceptIdx)
@@ -103,10 +103,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 new string[] { "Edt Document.Body", edtDocsWithBody.Count().ToString() }
             };
 
-            if(mircoFocusDocCount != edtDocsWithBody.Count())
+            TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
+
+            if (mircoFocusDocCount != edtDocsWithBody.Count())
             {
                 //output diff list
-                var outputFile = ".\\logs\\TextContentMissing.csv";
+                var outputFile = Path.Combine(Settings.ReportingDirectory, "TextContentMissing.csv");
                 using (var sw = new StreamWriter(outputFile))
                 {
                     var missingBodies = textFileDocsIds.Where(x => !edtDocsWithBody.Contains(x));

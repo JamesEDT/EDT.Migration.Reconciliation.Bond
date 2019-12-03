@@ -21,7 +21,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
             using (var sr = new StreamReader(Settings.StandardMapPath))
             {
-                using (var swIgnored = new StreamWriter(".\\logs\\standard_mappings_ignored.csv"))
+                using (var swIgnored = new StreamWriter(Path.Combine(Settings.LogDirectory, "standard_mappings_ignored.csv")))
                 {
                     var headers = sr.ReadLine();
                     ValidateHeadersAreInExpectedPositions(headers);
@@ -44,7 +44,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
                         if (mapping.EdtName.Equals(mapping.IdxName) || fieldsToIgnore.Contains(mapping.IdxName))
                         {
-                            swIgnored.WriteLine(mapping.EdtName, mapping.IdxName);
+                            swIgnored.WriteLine($"{mapping.EdtName},{mapping.IdxName}");
                         }
                         else
                         {

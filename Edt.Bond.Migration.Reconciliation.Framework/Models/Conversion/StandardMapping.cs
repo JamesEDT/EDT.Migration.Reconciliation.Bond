@@ -6,5 +6,10 @@
         public string IdxName { get; set; }
         public string EdtType { get; set; }
         public string ImportGroup { get; set; }
+
+        public bool IsEmailField()
+        {
+            return EdtName.StartsWith(Settings.EmailFieldIdentifyingPrefix);
+        }
     }
 }

@@ -109,6 +109,7 @@
     <Compile Include="Models\CaseConfigXml\TagContainer.cs" />
     <Compile Include="Models\CaseConfigXml\ViewTitleTemplate.cs" />
     <Compile Include="Models\CaseConfigXml\WorkStream.cs" />
+    <Compile Include="Models\Conversion\DesiredType.cs" />
     <Compile Include="Models\Conversion\StandardMapping.cs" />
     <Compile Include="Models\EdtDatabase\Batch.cs" />
     <Compile Include="Models\EdtDatabase\ColumnDetails.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="Models\EdtDatabase\Custodian.cs" />
     <Compile Include="Models\EdtDatabase\Document.cs" />
     <Compile Include="Models\EdtDatabase\DocumentContent.cs" />
+    <Compile Include="Models\EdtDatabase\DocumentCorrespondant.cs" />
     <Compile Include="Models\EdtDatabase\DocumentExtra.cs" />
     <Compile Include="Models\EdtDatabase\DocumentLanguage.cs" />
     <Compile Include="Models\EdtDatabase\DocumentMvField.cs" />

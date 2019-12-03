@@ -16,32 +16,19 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
         [OneTimeSetUp]
         public void ReportSetup()
         {
-            var reportFolder = GenerateReportFolder();
+            var reportFolder = Path.Combine(Settings.ReportingDirectory, "index.html");
 
             var htmlReporter = new ExtentHtmlReporter(reportFolder);
-
 
             htmlReporter.Config.DocumentTitle = "EDT Data Migration Report";
             htmlReporter.Config.ReportName = "Idx to EDT Data Migration Reconciliation";
             htmlReporter.Config.EnableTimeline = false;
             htmlReporter.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Standard;
             htmlReporter.Config.CSS = CSS;
-
-           
+            
             Writer = new ExtentReports();
 
             Writer.AttachReporter(htmlReporter);
-        } 
-        
-        private string GenerateReportFolder()
-        {
-            var path = System.Reflection.Assembly.GetCallingAssembly().CodeBase;
-            
-            var projectPath = Path.GetDirectoryName(new Uri(path).LocalPath);
-            Directory.CreateDirectory(projectPath.ToString() + "\\report");
-            var reportPath = projectPath + "\\report\\index.html";
-
-            return reportPath;
         }
 
         [OneTimeTearDown]

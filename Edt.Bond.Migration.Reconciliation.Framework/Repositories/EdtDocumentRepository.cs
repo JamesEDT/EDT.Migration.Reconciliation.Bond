@@ -1,5 +1,7 @@
-﻿using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
+﻿using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
+using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase.Dto;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -25,6 +27,13 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             return SqlExecutor.Query(sql, new { documentIds }).Select(x => (IDictionary<string, object>) x);
         }
 
+        public static Dictionary<string, string> GetDocumentField(List<string> documentIds, string desiredField)
+        {
+            var sql = $"SELECT DocNumber, {desiredField} as Value FROM {GetDatabaseName()}.[Document] WHERE DocNumber in @documentIds";
+            return SqlExecutor.Query<KeyValuePair<string, string>>(sql, new { documentIds })                
+                    .ToDictionary(x => x.Key, x => x.Valuel);
+        }
+
         public static IEnumerable<ColumnDetails> GetColumnDetails(string caseId)
         {
             return SqlExecutor.Query<ColumnDetails>($"SELECT * FROM [eDiscoveryToolbox.Case.{caseId}].[dbo].[ColumnDetails]");
@@ -34,12 +43,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
         {
             var columns = SqlExecutor.Query<ColumnDetails>($"SELECT * FROM {GetDatabaseName()}.[ColumnDetails]");
 
-            Directory.CreateDirectory(".\\logs");
-            using(var sw = new StreamWriter(".\\logs\\edt_db_cols.csv"))
+            using (var sw = new StreamWriter(Path.Combine(Settings.LogDirectory, "edt_db_cols.csv")))
             {
                 sw.WriteLine("id,displayname,columnname");
 
-                foreach(var column in columns)
+                foreach (var column in columns)
                 {
                     sw.WriteLine($"{column.ColumnDetailsID},{column.DisplayName},{column.ColumnName}");
                 }
@@ -74,6 +82,18 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
                         + $" WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
 
             return SqlExecutor.Query<string>(sql).ToList();
+        }
+
+        public static List<DocumentCorrespondant> GetDocumentCorrespondances(List<string> documentIds)
+        {
+            var sql = "SELECT  document.DocNumber, party.PartyName, correspondenceType.CorrespondenceTypeName as CorrespondanceType"
+                + $" FROM {GetDatabaseName()}.[Document] document"
+                + $" INNER JOIN {GetDatabaseName()}.[DocumentParty] docParty ON document.DocumentID = docParty.DocumentID"
+                + $" INNER JOIN {GetDatabaseName()}.[Party] party ON docParty.PartyID = party.PartyID"
+                + $" INNER JOIN {GetDatabaseName()}.[CorrespondenceType] correspondenceType ON docParty.CorrespondenceTypeID = correspondenceType.CorrespondenceTypeID"
+                + $" WHERE document.DocNumber in @documentIds";
+
+            return SqlExecutor.Query<DocumentCorrespondant>(sql, new { documentIds }).ToList();
         }
 
         public static IEnumerable<DerivedFileLocation> GetNativeFileLocations()

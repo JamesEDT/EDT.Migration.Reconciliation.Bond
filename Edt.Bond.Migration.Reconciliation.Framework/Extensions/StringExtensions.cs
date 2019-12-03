@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Extensions
@@ -24,6 +25,15 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Extensions
             }
 
             return list.ToArray();
+        }
+
+        public static string[] SplitCsv(this string input, bool sort)
+        {
+            var tokens = SplitCsv(input).ToList();
+
+            if(sort) tokens.Sort();
+
+            return tokens.ToArray();
         }
     }
 }

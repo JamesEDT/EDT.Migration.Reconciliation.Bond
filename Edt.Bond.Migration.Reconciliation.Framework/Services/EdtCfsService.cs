@@ -39,7 +39,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
         private static void LogNativeFileLocations(List<DerivedFileLocation> derivedFiles)
         {
-            using (var sw = new StreamWriter(".\\logs\\NativeComparison_DerivedLocations.csv"))
+            using (var sw = new StreamWriter(Path.Combine(Settings.LogDirectory, "NativeComparison_DerivedLocations.csv")))
             {
                 sw.WriteLine("DocumentId,Filename,FolderId,Full Path");
 

@@ -1,6 +1,7 @@
 ﻿using AventStack.ExtentReports;
 using AventStack.ExtentReports.Gherkin.Model;
 using AventStack.ExtentReports.MarkupUtils;
+using Edt.Bond.Migration.Reconciliation.Framework;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Reporting;
 using NUnit.Framework;
 using System;
@@ -65,7 +66,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
         public string PrintComparisonTables(string mappingName)
         {
-            var filename = $"{GetCurrentDirectory()}\\report\\differences_{mappingName}.csv";
+            var filename = Path.Combine(Settings.ReportingDirectory,$"differences_{mappingName}.csv");
 
             using (var sw = new StreamWriter(filename))
             {
@@ -109,13 +110,6 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             {
                 FeatureRunner.Fail($"{TestFailures } test(s) failed of {TestTotal}");
             }
-        }
-
-        private string GetCurrentDirectory()
-        {
-            var path = System.Reflection.Assembly.GetCallingAssembly().CodeBase;
-
-            return Path.GetDirectoryName(new Uri(path).LocalPath);
         }
 
         public void LogMessage(string message)
