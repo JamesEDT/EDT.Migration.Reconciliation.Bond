@@ -18,7 +18,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
     public class IdxFieldByEdtFieldComparison : TestBase
     {
         private IEnumerable<Framework.Models.IdxLoadFile.Document> _idxSample;
-        private IEnumerable<IDictionary<string, object>> _edtDocuments;
+        //private IEnumerable<IDictionary<string, object>> _edtDocuments;
         private List<ColumnDetails> _edtColumnDetails;
         private List<string> _idxDocumentIds;
 
@@ -42,9 +42,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         {
             long populated = 0;
             long different = 0;
-            long orphanDocuments = 0;
+            long documentsInIdxButNotInEdt = 0;
+            long documentsInEdtButNotInIdx = 0;
             long idxUnfound = 0;
-            long edtUnfound = 0;
+            long unexpectedErrors = 0;
             long matched = 0;
             long totalsampled = 0;
 
@@ -57,53 +58,50 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             {
                 totalsampled++;
 
-                var matchedEdtDocument = _edtDocuments.FirstOrDefault(x => x["DocNumber"].ToString().Equals(idxDocument.DocumentId));
+                var idxField = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(mappingUnderTest.IdxName));
 
-                if (matchedEdtDocument == null)
+                if (!edtValues.TryGetValue(idxDocument.DocumentId, out var edtValueForIdxRecord) && idxField?.Value != null)
                 {
-                    orphanDocuments++;
+                    documentsInIdxButNotInEdt++;
                     ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "Document not found in Edt's document table"));
                 }
                 else
                 {
-                    var idxField = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(mappingUnderTest.IdxName));
 
                     if (idxField == null)
                     {
-                        idxUnfound++;
-                        ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Field { mappingUnderTest.IdxName } not found in Idx"));
+                        if (!string.IsNullOrEmpty(edtValueForIdxRecord))
+                        {
+                            documentsInEdtButNotInIdx++;
+                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Edt had value {edtValueForIdxRecord} for field {mappingUnderTest.EdtName} when Idx had no value."));
+                        }
+                        else
+                        {
+                            idxUnfound++;
+                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Field { mappingUnderTest.IdxName } not found in Idx for document"));
+                        }
                     }
                     else
                     {
                         try
-                        {
-                           
-                            var edtValue = mappingUnderTest.IsEmailField() ? GetEmailFieldValue(idxDocument.DocumentId, mappingUnderTest.EdtName) : matchedEdtDocument[edtDbName];
+                        {                            
+                            if (!string.IsNullOrEmpty(edtValueForIdxRecord?.ToString())) populated++;
 
-                            if (edtValue != null)
+                            var expectedEdtValue = IdxToEdtConversionService.ConvertValueToEdtForm(mappingUnderTest.EdtType, idxField.Value);
+
+                            if (!edtValueForIdxRecord.Equals(expectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
                             {
-                                if (!string.IsNullOrEmpty(edtValue?.ToString())) populated++;
-
-                                var expectedEdtValue = IdxToEdtConversionService.ConvertValueToEdtForm(mappingUnderTest.EdtType, idxField.Value);
-
-                                if (!edtValue.ToString().Equals(expectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
-                                {
-                                    different++;
-                                    ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtValue.ToString(), expectedEdtValue.ToString(), idxField.Value));
-                                }
-                                else
-                                {
-                                    matched++;
-                                }
+                                different++;
+                                ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtValueForIdxRecord, expectedEdtValue, idxField.Value));
                             }
                             else
                             {
-                                edtUnfound++;
-                                ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Field { mappingUnderTest.EdtName } not found in Edt"));
-                            }
+                                matched++;
+                            }                            
                         }
                         catch (Exception ex)
                         {
+                            unexpectedErrors++;
                             var error = $"{ex.Message}<br></br>{ex.StackTrace}";
                             ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, error));
                         }
@@ -112,30 +110,30 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 }
             }
 
-            PrintStats(different, matched, orphanDocuments, idxUnfound, edtUnfound, populated, totalsampled);
+            PrintStats(different, matched, documentsInIdxButNotInEdt, documentsInEdtButNotInIdx, idxUnfound, unexpectedErrors, populated, totalsampled);
             
             if(ComparisonErrors.Count() > 0 || ComparisonResults.Count() > 0)
                 TestLogger.Info($"Difference and error details written to: {PrintComparisonTables(mappingUnderTest.EdtName)}");
 
             Assert.Zero(different, $"Differences were seen between expected value and actual value for this Edt field {mappingUnderTest.EdtName}");
-            Assert.Zero(edtUnfound, $"Field missing for in Edt when Idx had a value: {mappingUnderTest.EdtName}");
-            Assert.Zero(orphanDocuments, $"Idx documents were not found in EDT.");           
+            Assert.Zero(unexpectedErrors, $"Unexpected errors experienced during processing {mappingUnderTest.EdtName}");
+            Assert.Zero(documentsInIdxButNotInEdt, $"Idx documents were not found in EDT.");
+            Assert.Zero(documentsInEdtButNotInIdx, "Edt was found to have field populated for instances where Idx was null");
            
             if (idxUnfound > 0)
-                TestLogger.Info($"Field values were missing for this field in the Idx: {mappingUnderTest.IdxName} (count: {idxUnfound})");
+                TestLogger.Info($"The Idx was found to not have a value for field {mappingUnderTest.IdxName} in {idxUnfound} documents/instances.");
 
             if(populated == 0)
-                TestLogger.Info($"No samples had the Edt field {mappingUnderTest.EdtName} populated.");          
+                TestLogger.Info($"No sampled documents had the Edt field {mappingUnderTest.EdtName} populated.");          
         }
 
         private Dictionary<string,string> GetEdtFieldValues(StandardMapping mappingUnderTest)
         {
             if(mappingUnderTest.IsEmailField())
             {
-                var correspondances = EdtDocumentRepository.GetDocumentCorrespondances(_idxSample.Select(x => x.DocumentId).ToList());
-                var objects = correspondances.GroupBy(x => x.DocumentNumber);
+                var correspondances = GetEmailFieldValues(_idxSample.Select(x => x.DocumentId).ToList(), mappingUnderTest.EdtName);
 
-                return null;
+                return correspondances;
             }
             else
             {
@@ -147,20 +145,20 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             }
         }
 
-        private string GetEmailFieldValues(List<string> documentIds, string fieldType)
+        private Dictionary<string, string> GetEmailFieldValues(List<string> documentIds, string fieldType)
         {
             var type = fieldType.Replace(Settings.EmailFieldIdentifyingPrefix, string.Empty);
 
-            var allFields = EdtDocumentRepository.GetDocumentCorrespondances(documentIds);
+            var allFields = EdtDocumentRepository.GetDocumentCorrespondances(documentIds)
+                            .Where(x => x.CorrespondanceType.Equals(type, StringComparison.InvariantCultureIgnoreCase));
 
-            var desiredParties = allFields
-                                .Where(x => x.CorrespondanceType.Equals(type, StringComparison.InvariantCultureIgnoreCase))
-                                .Select(x => x.PartyName)
-                                .OrderBy(x => x);
+            var desiredParties = from field in allFields
+                                 group field.PartyName by field.DocumentNumber into correspondants
+                                 select new { DocumentId = correspondants.Key, Value = string.Join(",", correspondants.ToList())};
 
-            return string.Join(",", desiredParties);                
+
+            return desiredParties.ToDictionary(x => x.DocumentId, x => x.Value);
         }
-
 
         private string GetEdtDatabaseNameFromDisplayName(string displayName)
         {
@@ -184,16 +182,17 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             }
         }
 
-        private void PrintStats(long different, long matched, long orphanIdx, long idxMissingField, long edtUnfound, long populated, long total)
+        private void PrintStats(long different, long matched, long documentsInIdxButNotInEdt, long documentsInEdtButNotIdx, long idxMissingField, long unexpectedErrors, long populated, long total)
         {
             string[][] data = new string[][]{
                 new string[]{ "<b>Comparison Statistics:</b>"},
                 new string[]{ "Statistic", "Count"},
                 new string[] { "Differences", different.ToString() },
                 new string[] { "Matched", matched.ToString() },
-                new string[] { "Idx document(s) not in Edt", orphanIdx.ToString() },
-                new string[] { "Idx document(s) missing field under test", idxMissingField.ToString() },
-                new string[] { "Edt document(s) missing field under test", edtUnfound.ToString()},
+                new string[] { "Idx document(s) incorrectly without a value in Edt", documentsInIdxButNotInEdt.ToString() },
+                new string[] { "Edt document(s) incorrectly have a value when Idx is null", documentsInEdtButNotIdx.ToString() },
+                new string[] { "Idx document(s) not populated for field under test (and EDt is also null)", idxMissingField.ToString() },
+                new string[] { "Unexpected Errors during processing", unexpectedErrors.ToString()},
                 new string[] { "Edt documents(s) populated with a value", populated.ToString()},
                 new string[] { "Total Idx records sampled", total.ToString()}
             };

@@ -30,8 +30,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
         public static Dictionary<string, string> GetDocumentField(List<string> documentIds, string desiredField)
         {
             var sql = $"SELECT DocNumber, {desiredField} as Value FROM {GetDatabaseName()}.[Document] WHERE DocNumber in @documentIds";
-            return SqlExecutor.Query<KeyValuePair<string, string>>(sql, new { documentIds })                
-                    .ToDictionary(x => x.Key, x => x.Valuel);
+            return SqlExecutor.Query(sql, new { documentIds })                
+                    .ToDictionary(x => (string) x.DocNumber, x => (string) x.Value?.ToString() ?? string.Empty);
         }
 
         public static IEnumerable<ColumnDetails> GetColumnDetails(string caseId)
@@ -86,7 +86,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static List<DocumentCorrespondant> GetDocumentCorrespondances(List<string> documentIds)
         {
-            var sql = "SELECT  document.DocNumber, party.PartyName, correspondenceType.CorrespondenceTypeName as CorrespondanceType"
+            var sql = "SELECT  document.DocNumber as DocumentNumber, party.PartyName, correspondenceType.CorrespondenceTypeName as CorrespondanceType"
                 + $" FROM {GetDatabaseName()}.[Document] document"
                 + $" INNER JOIN {GetDatabaseName()}.[DocumentParty] docParty ON document.DocumentID = docParty.DocumentID"
                 + $" INNER JOIN {GetDatabaseName()}.[Party] party ON docParty.PartyID = party.PartyID"

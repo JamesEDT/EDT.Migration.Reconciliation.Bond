@@ -16,6 +16,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
         [OneTimeSetUp]
         public void ReportSetup()
         {
+            RenameOldFolders();
+
             var reportFolder = Path.Combine(Settings.ReportingDirectory, "index.html");
 
             var htmlReporter = new ExtentHtmlReporter(reportFolder);
@@ -29,6 +31,17 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             Writer = new ExtentReports();
 
             Writer.AttachReporter(htmlReporter);
+        }
+
+        private void RenameOldFolders()
+        {
+            var renameSuffix = "old" + DateTime.Now.Ticks;
+
+            if (Directory.Exists(Settings.ReportingDirectory))
+                Directory.Move(Settings.ReportingDirectory, Settings.ReportingDirectory + renameSuffix);
+
+            if (Directory.Exists(Settings.LogDirectory))
+                Directory.Move(Settings.LogDirectory, Settings.LogDirectory + renameSuffix);
         }
 
         [OneTimeTearDown]

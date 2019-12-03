@@ -42,7 +42,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                             ImportGroup = newMappingTokens[ImporterGroupColumn]
                         };
 
-                        if (mapping.EdtName.Equals(mapping.IdxName) || fieldsToIgnore.Contains(mapping.IdxName))
+                        if (mapping.EdtName.Equals(mapping.IdxName) || fieldsToIgnore.Contains(mapping.IdxName) || mapping.EdtName.EndsWith("_unmapped"))
                         {
                             swIgnored.WriteLine($"{mapping.EdtName},{mapping.IdxName}");
                         }
