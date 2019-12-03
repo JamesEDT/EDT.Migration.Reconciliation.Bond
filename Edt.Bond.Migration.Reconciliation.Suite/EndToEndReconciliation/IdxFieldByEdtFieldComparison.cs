@@ -18,7 +18,6 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
     public class IdxFieldByEdtFieldComparison : TestBase
     {
         private IEnumerable<Framework.Models.IdxLoadFile.Document> _idxSample;
-        //private IEnumerable<IDictionary<string, object>> _edtDocuments;
         private List<ColumnDetails> _edtColumnDetails;
         private List<string> _idxDocumentIds;
 
@@ -28,9 +27,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             _idxSample = new IdxDocumentsRepository().GetSample();
 
             _idxDocumentIds = _idxSample.Select(x => x.DocumentId).ToList();
-
-           // _edtDocuments = EdtDocumentRepository.GetDocuments(IdxDocumentIds).ToList();
-
+            
             _edtColumnDetails = EdtDocumentRepository.GetColumnDetails().ToList();
 
             FeatureRunner.Log(AventStack.ExtentReports.Status.Info, $"{_idxSample.Count()} sampled from Idx records.");
@@ -111,9 +108,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             }
 
             PrintStats(different, matched, documentsInIdxButNotInEdt, documentsInEdtButNotInIdx, idxUnfound, unexpectedErrors, populated, totalsampled);
-            
-            if(ComparisonErrors.Count() > 0 || ComparisonResults.Count() > 0)
-                TestLogger.Info($"Difference and error details written to: {PrintComparisonTables(mappingUnderTest.EdtName)}");
+
+            if (ComparisonErrors.Count() > 0 || ComparisonResults.Count() > 0)
+            {
+                var diffFile = PrintComparisonTables(mappingUnderTest.EdtName);
+                TestLogger.Info($"Difference and error details written to: <a href=\"{diffFile}\">Report\\{diffFile}</a>");
+            }
 
             Assert.Zero(different, $"Differences were seen between expected value and actual value for this Edt field {mappingUnderTest.EdtName}");
             Assert.Zero(unexpectedErrors, $"Unexpected errors experienced during processing {mappingUnderTest.EdtName}");
@@ -157,7 +157,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                  select new { DocumentId = correspondants.Key, Value = string.Join(",", correspondants.ToList())};
 
 
-            return desiredParties.ToDictionary(x => x.DocumentId, x => x.Value);
+            return desiredParties.ToDictionary(x => (string) x.DocumentId, x => x.Value);
         }
 
         private string GetEdtDatabaseNameFromDisplayName(string displayName)
@@ -199,8 +199,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             TestLogger.Info(MarkupHelper.CreateTable(data));
         }
-
-
+        
         private static IEnumerable<TestCaseData> StandardMappingsToTest {
             get
             {

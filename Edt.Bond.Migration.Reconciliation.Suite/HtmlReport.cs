@@ -35,13 +35,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
         private void RenameOldFolders()
         {
-            var renameSuffix = "old" + DateTime.Now.Ticks;
+            var renameSuffix = "_old" + DateTime.Now.Ticks;
 
             if (Directory.Exists(Settings.ReportingDirectory))
-                Directory.Move(Settings.ReportingDirectory, Settings.ReportingDirectory + renameSuffix);
-
-            if (Directory.Exists(Settings.LogDirectory))
-                Directory.Move(Settings.LogDirectory, Settings.LogDirectory + renameSuffix);
+                Directory.Move(Settings.ReportingDirectory, Settings.ReportingDirectory + renameSuffix);           
         }
 
         [OneTimeTearDown]

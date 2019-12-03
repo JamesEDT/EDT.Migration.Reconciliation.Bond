@@ -24,14 +24,14 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
         public static IEnumerable<IDictionary<string, object>> GetDocuments(List<string> documentIds)
         {
             var sql = $"SELECT * FROM {GetDatabaseName()}.[Document] WHERE DocNumber in @documentIds";
-            return SqlExecutor.Query(sql, new { documentIds }).Select(x => (IDictionary<string, object>) x);
+            return SqlExecutor.Query(sql, new { documentIds }).Select(x => (IDictionary<string, object>)x);
         }
 
         public static Dictionary<string, string> GetDocumentField(List<string> documentIds, string desiredField)
         {
             var sql = $"SELECT DocNumber, {desiredField} as Value FROM {GetDatabaseName()}.[Document] WHERE DocNumber in @documentIds";
-            return SqlExecutor.Query(sql, new { documentIds })                
-                    .ToDictionary(x => (string) x.DocNumber, x => (string) x.Value?.ToString() ?? string.Empty);
+            return SqlExecutor.Query(sql, new { documentIds })
+                    .ToDictionary(x => (string)x.DocNumber, x => (string)x.Value?.ToString() ?? string.Empty);
         }
 
         public static IEnumerable<ColumnDetails> GetColumnDetails(string caseId)
@@ -69,7 +69,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
         {
             var sql = $"SELECT document.DocumentId FROM {GetDatabaseName()}.[Batch] batch"
                         + $" INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID"
-                        + $" WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'" 
+                        + $" WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'"
                         + $" AND document.Body IS NOT NULL";
 
             return SqlExecutor.Query<string>(sql).ToList();
@@ -105,6 +105,23 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
             return SqlExecutor.Query<DerivedFileLocation>(sql);
         }
+
+        public static Dictionary<string, List<string>> GetDocumentTags(List<string> documentIds)
+        {
+            var sql = $"SELECT document.DocNumber as DocumentNumber, tag.TagName as Tag FROM {GetDatabaseName()}.[Document] document"
+                     + $" INNER JOIN {GetDatabaseName()}.[DocumentTag] documentTag ON document.DocumentID = documentTag.DocumentID"
+                     + $" INNER JOIN {GetDatabaseName()}.[Tag] tag ON documentTag.TagID = tag.TagID"
+                     + $" WHERE document.DocNumber in @documentIds";
+
+            var rawTags = SqlExecutor.Query(sql, new { documentIds });
+
+            var tags = from tag in rawTags
+                       group (string) tag.Tag by tag.DocumentNumber into docTags
+                       select new { DocumentId = (string) docTags.Key, Value = docTags };
+
+             return tags.ToDictionary(x => x.DocumentId, x => x.Value.ToList());
+        }
+
 
         private static string GetConnectionStringByName()
         {

@@ -66,7 +66,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
         public string PrintComparisonTables(string mappingName)
         {
-            var filename = Path.Combine(Settings.ReportingDirectory,$"differences_{mappingName}.csv");
+            var filename = Path.Combine(Settings.ReportingDirectory,$"differences_{mappingName.Replace(" ", string.Empty)}.csv");
 
             using (var sw = new StreamWriter(filename))
             {
