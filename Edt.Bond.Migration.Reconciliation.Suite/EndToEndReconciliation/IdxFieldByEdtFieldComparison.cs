@@ -28,6 +28,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             _idxDocumentIds = _idxSample.Select(x => x.DocumentId).ToList();
             
+				//don't validate MvFields atm
             _edtColumnDetails = EdtDocumentRepository.GetColumnDetails().ToList();
 
             FeatureRunner.Log(AventStack.ExtentReports.Status.Info, $"{_idxSample.Count()} sampled from Idx records.");
@@ -46,6 +47,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             long matched = 0;
             long totalsampled = 0;
 
+
+            if (mappingUnderTest.EdtType == "MultiValueList")
+            {
+	            return;
+            }
             //Get 
             var edtValues = GetEdtFieldValues(mappingUnderTest);
             
@@ -82,7 +88,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     {
                         try
                         {                            
-                            if (!string.IsNullOrEmpty(edtValueForIdxRecord?.ToString())) populated++;
+                            if (!string.IsNullOrEmpty(edtValueForIdxRecord)) populated++;
 
                             var expectedEdtValue = IdxToEdtConversionService.ConvertValueToEdtForm(mappingUnderTest.EdtType, idxField.Value);
 
@@ -135,12 +141,14 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                 return correspondances;
             }
+
+
             else
             {
                 var edtDbName = GetEdtDatabaseNameFromDisplayName(mappingUnderTest.EdtName);
                 TestLogger.Debug($"Using EDT database column for comparison: {edtDbName}");
 
-                return EdtDocumentRepository.GetDocumentField(_idxDocumentIds, edtDbName);
+                return (mappingUnderTest.EdtType == "Date") ? EdtDocumentRepository.GetDocumentDateField(_idxDocumentIds, edtDbName): EdtDocumentRepository.GetDocumentField(_idxDocumentIds, edtDbName);
                
             }
         }
@@ -159,6 +167,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             return desiredParties.ToDictionary(x => (string) x.DocumentId, x => x.Value);
         }
+
 
         private string GetEdtDatabaseNameFromDisplayName(string displayName)
         {

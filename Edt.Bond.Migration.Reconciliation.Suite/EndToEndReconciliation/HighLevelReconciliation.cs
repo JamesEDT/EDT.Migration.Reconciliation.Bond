@@ -90,17 +90,16 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             var edtDocsWithBody = EdtDocumentRepository.GetDocuentNumbersWithABody();
 
             //compare against Text count in microfocus dir
-            var edtIds = EdtDocumentRepository.GetDocumentNumbers();
-            var textDirectory = Path.Combine(Settings.MicroFocusSourceDirectory, "TEXT");
-            var textFileDocsIds = Directory.GetFiles(textDirectory, "*.txt", SearchOption.AllDirectories).Select(x => GetDocumentIdFromFilePath(x)).Where(x => edtIds.Contains(x));
+            var edtIds = EdtDocumentRepository.GetDocumentNumbers(); 
+            var textFileDocsIds = Directory.GetFiles(Settings.MicroFocusStagingDirectoryTextPath, "*.txt", SearchOption.AllDirectories).Select(x => GetDocumentIdFromFilePath(x)).Where(x => edtIds.Contains(x));
 
             var mircoFocusDocCount = textFileDocsIds.Count();
 
             //output counts
-            string[][] data = new string[][]{
-                new string[]{ "Item Evaluated", "Count of Documents"},
-                new string[] { "MicroFocus Export text(s)",mircoFocusDocCount.ToString() },
-                new string[] { "Edt Document.Body", edtDocsWithBody.Count().ToString() }
+            string[][] data = {
+                new[]{ "Item Evaluated", "Count of Documents"},
+                new[] { "MicroFocus Export text(s)",mircoFocusDocCount.ToString() },
+                new[] { "Edt Document.Body", edtDocsWithBody.Count().ToString() }
             };
 
             TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
