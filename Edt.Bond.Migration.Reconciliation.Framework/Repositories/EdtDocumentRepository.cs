@@ -4,6 +4,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase.Dto;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -34,7 +35,14 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
                     .ToDictionary(x => (string)x.DocNumber, x => (string)x.Value?.ToString() ?? string.Empty);
         }
 
-        public static IEnumerable<ColumnDetails> GetColumnDetails(string caseId)
+        public static Dictionary<string, string> GetDocumentDateField(List<string> documentIds, string desiredField)
+        {
+	        var sql = $"SELECT DocNumber, {desiredField} as Value FROM {GetDatabaseName()}.[Document] WHERE DocNumber in @documentIds";
+	        return SqlExecutor.Query(sql, new { documentIds })
+		        .ToDictionary(x => (string)x.DocNumber, x => (string)x.Value?.ToString() == "" ? "" : ((DateTime)((IDictionary<string, object>)x).Values.Last()).ToString("dd/MM/yyyy HH:mm:ss"));
+        } 
+
+		public static IEnumerable<ColumnDetails> GetColumnDetails(string caseId)
         {
             return SqlExecutor.Query<ColumnDetails>($"SELECT * FROM [eDiscoveryToolbox.Case.{caseId}].[dbo].[ColumnDetails]");
         }
@@ -122,8 +130,19 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
              return tags.ToDictionary(x => x.DocumentId, x => x.Value.ToList());
         }
 
+        public static Dictionary<string, string> GetDocumentLocations(List<string> documentIds)
+        {
+	        var sql = $"SELECT document.DocNumber as DocumentNumber, l.Path as Location FROM {GetDatabaseName()}.[Document] document"
+	                  + $" INNER JOIN {GetDatabaseName()}.[Location] l ON l.LocationID = document.LocationID"
+	                  + " WHERE document.DocNumber in @documentIds";
 
-        private static string GetConnectionStringByName()
+	        var rawLocations = SqlExecutor.Query(sql, new { documentIds });
+
+			  return rawLocations.ToDictionary(x => (string)x.DocumentNumber, x => (string)x.Location); 
+        }
+
+
+		private static string GetConnectionStringByName()
         {
             return ConfigurationManager.AppSettings[EdtConnectionStringConfigKey];
         }

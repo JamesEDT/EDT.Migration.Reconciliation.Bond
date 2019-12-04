@@ -12,7 +12,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
 
         public static string MicroFocusSourceDirectory => GetSetting("MicroFocusStagingDirectory");
 
-        public static string IdxFilePath => GetSetting("IdxFilePath");
+        public static string MicroFocusStagingDirectoryTextPath => GetSetting("MicroFocusStagingDirectoryTextPath");
+
+			public static string IdxFilePath => GetSetting("IdxFilePath");
 
         public static string ConversionToolOutputDirectory => GetSetting("ConversionToolOutputDirectory");
 
@@ -24,7 +26,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
 
         public static string[] IgnoredIdxFieldsFromComparison => GetSetting("IgnoredIdxFieldsFromComparison").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
-        public static string ReportingDirectory => GetDirectory("Report");
+        public static string[] LocationIdxFields => GetSetting("LocationIdxFields").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries); 
+
+		  public static string ReportingDirectory => GetDirectory("Report");
 
         public static string LogDirectory => GetDirectory("Logs");        
 
