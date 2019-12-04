@@ -85,7 +85,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             }
 
             var diffFile = PrintComparisonTables("Tags");
-            TestLogger.Info($"Difference and error details written to: <a href=\"{diffFile}\">Report\\{diffFile}</a>");
+            TestLogger.Info($"Difference and error details written to: <a href=\"{diffFile}\">{diffFile}</a>");
 
             //print table of stats
             string[][] data = new string[][]{

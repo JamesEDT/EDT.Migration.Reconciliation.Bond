@@ -63,6 +63,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     sw.WriteLine(id);
                 }
             }
+
+            TestLogger.Info($"Document Id differences output to <a href=\"DocumentCountDifferences_IdLists.csv\"> DocumentCountDifferences_IdLists.csv</a>");
         }
 
         [Test]        
