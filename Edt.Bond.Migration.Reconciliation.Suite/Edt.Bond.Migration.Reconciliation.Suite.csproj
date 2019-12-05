@@ -101,6 +101,7 @@
     <Compile Include="ConversionToolOutputValidation\EdtReadiness.cs" />
     <Compile Include="ConversionToolOutputValidation\LoadFileReconciliation.cs" />
     <Compile Include="ConversionToolOutputValidation\NativeTextFiles.cs" />
+    <Compile Include="EndToEndReconciliation\CaseLevelStatistics.cs" />
     <Compile Include="EndToEndReconciliation\TransformedFieldValidation.cs" />
     <Compile Include="EndToEndReconciliation\IdxFieldByEdtFieldComparison.cs" />
     <Compile Include="EndToEndReconciliation\HighLevelReconciliation.cs" />

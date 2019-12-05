@@ -66,28 +66,37 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static long GetDocumentCount()
         {
-            var sql = $"SELECT Count(document.DocumentId) FROM {GetDatabaseName()}.[Batch] batch"
-                        + $" INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID"
-                        + $" WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
+            var sql = $@"SELECT Count(document.DocumentId) FROM {GetDatabaseName()}.[Batch] batch
+                         INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
+                         WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
 
             return SqlExecutor.QueryFirstOrDefault<long>(sql);
         }
 
+        public static IEnumerable<dynamic> GetDocumentCountPerBatch()
+        {
+            var sql = $@"SELECT batch.BatchName as BatchName, Count(document.DocumentId) as DocumentCount FROM {GetDatabaseName()}.[Batch] batch
+                         INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
+                         GROUP BY batch.BatchName";                        
+
+            return SqlExecutor.Query<dynamic>(sql);
+        }
+
         public static List<string> GetDocuentNumbersWithABody()
         {
-            var sql = $"SELECT document.DocumentId FROM {GetDatabaseName()}.[Batch] batch"
-                        + $" INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID"
-                        + $" WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'"
-                        + $" AND document.Body IS NOT NULL";
+            var sql = $@"SELECT document.DocumentId FROM {GetDatabaseName()}.[Batch] batch
+                         INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
+                         WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'
+                         AND document.Body IS NOT NULL";
 
             return SqlExecutor.Query<string>(sql).ToList();
         }
 
         public static List<string> GetDocumentNumbers()
         {
-            var sql = $"SELECT document.DocNumber FROM {GetDatabaseName()}.[Batch] batch"
-                        + $" INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID"
-                        + $" WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
+            var sql = $@"SELECT document.DocNumber FROM {GetDatabaseName()}.[Batch] batch
+                         INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
+                         WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
 
             return SqlExecutor.Query<string>(sql).ToList();
         }
@@ -106,20 +115,20 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static IEnumerable<DerivedFileLocation> GetNativeFileLocations()
         {
-            var sql = "SELECT CONCAT(CONVERT(varchar(10), document.DocumentID), '_NATIVE',FileExtOrMsgClass) as FileName, DocumentID as DocumentId" +
-                     $" FROM {GetDatabaseName()}.[Batch] batch " +
-                     $" INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID " +
-                     $" WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
+            var sql = $@"SELECT CONCAT(CONVERT(varchar(10), document.DocumentID), '_NATIVE',FileExtOrMsgClass) as FileName, DocumentID as DocumentId
+                         FROM {GetDatabaseName()}.[Batch] batch
+                         INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
+                         WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
 
             return SqlExecutor.Query<DerivedFileLocation>(sql);
         }
 
         public static Dictionary<string, List<string>> GetDocumentTags(List<string> documentIds)
         {
-            var sql = $"SELECT document.DocNumber as DocumentNumber, tag.TagName as Tag FROM {GetDatabaseName()}.[Document] document"
-                     + $" INNER JOIN {GetDatabaseName()}.[DocumentTag] documentTag ON document.DocumentID = documentTag.DocumentID"
-                     + $" INNER JOIN {GetDatabaseName()}.[Tag] tag ON documentTag.TagID = tag.TagID"
-                     + $" WHERE document.DocNumber in @documentIds";
+            var sql = $@"SELECT document.DocNumber as DocumentNumber, tag.TagName as Tag FROM {GetDatabaseName()}.[Document] document
+                          INNER JOIN {GetDatabaseName()}.[DocumentTag] documentTag ON document.DocumentID = documentTag.DocumentID
+                          INNER JOIN {GetDatabaseName()}.[Tag] tag ON documentTag.TagID = tag.TagID
+                          WHERE document.DocNumber in @documentIds";
 
             var rawTags = SqlExecutor.Query(sql, new { documentIds });
 
@@ -132,9 +141,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static Dictionary<string, string> GetDocumentLocations(List<string> documentIds)
         {
-	        var sql = $"SELECT document.DocNumber as DocumentNumber, l.Path as Location FROM {GetDatabaseName()}.[Document] document"
-	                  + $" INNER JOIN {GetDatabaseName()}.[Location] l ON l.LocationID = document.LocationID"
-	                  + " WHERE document.DocNumber in @documentIds";
+	        var sql = $@"SELECT document.DocNumber as DocumentNumber, l.Path as Location FROM {GetDatabaseName()}.[Document] document
+	                    INNER JOIN {GetDatabaseName()}.[Location] l ON l.LocationID = document.LocationID
+	                    WHERE document.DocNumber in @documentIds";
 
 	        var rawLocations = SqlExecutor.Query(sql, new { documentIds });
 
