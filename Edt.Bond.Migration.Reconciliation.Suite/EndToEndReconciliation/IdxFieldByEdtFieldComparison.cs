@@ -47,23 +47,17 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             long matched = 0;
             long totalsampled = 0;
 
-
-            if (mappingUnderTest.EdtType == "MultiValueList")
-            {
-	            return;
-            }
             //Get 
-            var edtValues = GetEdtFieldValues(mappingUnderTest);
-            
+            var edtValues = GetEdtFieldValues(mappingUnderTest);            
 
             //loop thru each sample document
             foreach (var idxDocument in _idxSample)
             {
                 totalsampled++;
 
-                var idxField = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(mappingUnderTest.IdxName));
+                var idxField = GetIdxFieldValue(idxDocument, mappingUnderTest);
 
-                if (!edtValues.TryGetValue(idxDocument.DocumentId, out var edtValueForIdxRecord) && idxField?.Value != null)
+                if (!edtValues.TryGetValue(idxDocument.DocumentId, out var edtValueForIdxRecord) && !string.IsNullOrEmpty(idxField))
                 {
                     documentsInIdxButNotInEdt++;
                     ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "Document not found in Edt's document table"));
@@ -71,7 +65,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 else
                 {
 
-                    if (idxField == null)
+                    if (string.IsNullOrEmpty(idxField))
                     {
                         if (!string.IsNullOrEmpty(edtValueForIdxRecord))
                         {
@@ -90,12 +84,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         {                            
                             if (!string.IsNullOrEmpty(edtValueForIdxRecord)) populated++;
 
-                            var expectedEdtValue = IdxToEdtConversionService.ConvertValueToEdtForm(mappingUnderTest.EdtType, idxField.Value);
+                            var expectedEdtValue = IdxToEdtConversionService.ConvertValueToEdtForm(mappingUnderTest.EdtType, idxField);
 
                             if (!edtValueForIdxRecord.Equals(expectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
                             {
                                 different++;
-                                ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtValueForIdxRecord, expectedEdtValue, idxField.Value));
+                                ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtValueForIdxRecord, expectedEdtValue, idxField));
                             }
                             else
                             {
@@ -133,16 +127,40 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 TestLogger.Info($"No sampled documents had the Edt field {mappingUnderTest.EdtName} populated.");          
         }
 
+        private string GetIdxFieldValue(Framework.Models.IdxLoadFile.Document idxDocument, StandardMapping mappingUnderTest)
+        {
+            if (mappingUnderTest.EdtType != "MultiValueList")
+                return idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(mappingUnderTest.IdxName))?.Value;
+
+            var allFieldValues = idxDocument.AllFields.Where(x => x.Key.Equals(mappingUnderTest.IdxName))
+                                    .Select(x => x.Value)
+                                    .OrderBy(x => x);
+
+            return string.Join(";", allFieldValues);                                
+        }
+
         private Dictionary<string,string> GetEdtFieldValues(StandardMapping mappingUnderTest)
         {
             if(mappingUnderTest.IsEmailField())
             {
-                var correspondances = GetEmailFieldValues(_idxSample.Select(x => x.DocumentId).ToList(), mappingUnderTest.EdtName);
+                var correspondances = GetEmailFieldValues(_idxDocumentIds, mappingUnderTest.EdtName);
 
                 return correspondances;
             }
+            else if(mappingUnderTest.EdtType == "MultiValueList")
+            {
+                var allFieldValues = EdtDocumentRepository.GetMultiValueFieldValues(_idxDocumentIds, mappingUnderTest.EdtName);
 
-
+                var combinedValues = allFieldValues.GroupBy(x => x.DocNumber)
+                                        .Select(group => new
+                                        {
+                                            DocNumber = group.Key,
+                                            Values = group.Select(x => x.FieldValue).OrderBy(x => x)
+                                        });
+         
+                var dictionaryValues =  combinedValues.ToDictionary(x => (string) x.DocNumber, x => string.Join(";", x.Values));
+                return dictionaryValues;
+            }
             else
             {
                 var edtDbName = GetEdtDatabaseNameFromDisplayName(mappingUnderTest.EdtName);
