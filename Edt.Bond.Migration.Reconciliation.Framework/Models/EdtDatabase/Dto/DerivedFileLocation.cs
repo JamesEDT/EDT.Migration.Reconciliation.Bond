@@ -5,7 +5,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase.Dto
     public class DerivedFileLocation
     {
         public string Filename { get; set; }
-        public int FolderId { get; set; }
+
+        public long FolderId => DocumentId % 1000;
         public long DocumentId { get; set; }
 
         public string FullDocumentPath => BuildFullPath();
