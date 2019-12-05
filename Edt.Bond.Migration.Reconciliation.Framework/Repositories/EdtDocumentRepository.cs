@@ -30,14 +30,22 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static Dictionary<string, string> GetDocumentField(List<string> documentIds, string desiredField)
         {
-            var sql = $"SELECT DocNumber, {desiredField} as Value FROM {GetDatabaseName()}.[Document] WHERE DocNumber in @documentIds";
+            var sql = $@"SELECT DocNumber, {desiredField} as Value 
+                            FROM {GetDatabaseName()}.[Document] doc
+                            LEFT OUTER JOIN {GetDatabaseName()}.[DocumentExtra] docExtra ON doc.DocumentID = docExtra.DocumentID
+                        WHERE DocNumber in @documentIds";
+
             return SqlExecutor.Query(sql, new { documentIds })
                     .ToDictionary(x => (string)x.DocNumber, x => (string)x.Value?.ToString() ?? string.Empty);
         }
 
         public static Dictionary<string, string> GetDocumentDateField(List<string> documentIds, string desiredField)
         {
-	        var sql = $"SELECT DocNumber, {desiredField} as Value FROM {GetDatabaseName()}.[Document] WHERE DocNumber in @documentIds";
+	        var sql = $@"SELECT DocNumber, {desiredField} as Value 
+                        FROM {GetDatabaseName()}.[Document] doc
+                        LEFT OUTER JOIN {GetDatabaseName()}.[DocumentExtra] docExtra ON doc.DocumentID = docExtra.DocumentID
+                        WHERE DocNumber in @documentIds";
+
 	        return SqlExecutor.Query(sql, new { documentIds })
 		        .ToDictionary(x => (string)x.DocNumber, x => (string)x.Value?.ToString() == "" ? "" : ((DateTime)((IDictionary<string, object>)x).Values.Last()).ToString("dd/MM/yyyy HH:mm:ss"));
         } 
