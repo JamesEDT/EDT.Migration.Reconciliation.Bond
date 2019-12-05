@@ -14,6 +14,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
 
         public static string MicroFocusStagingDirectoryTextPath => GetSetting("MicroFocusStagingDirectoryTextPath");
 
+
+
         public static string MicroFocusStagingDirectoryNativePath => GetSetting("MicroFocusStagingDirectoryNativePath");
 
         public static string IdxFilePath => GetSetting("IdxFilePath");

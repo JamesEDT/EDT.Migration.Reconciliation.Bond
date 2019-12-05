@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CsvHelper, Version=12.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
+      <HintPath>..\Packages\CsvHelper.12.2.1\lib\net47\CsvHelper.dll</HintPath>
+    </Reference>
     <Reference Include="Dapper, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\Packages\Dapper.2.0.30\lib\net461\Dapper.dll</HintPath>
     </Reference>
@@ -142,6 +145,7 @@
     <Compile Include="Services\EdtCfsService.cs" />
     <Compile Include="Services\IdxProcessingService.cs" />
     <Compile Include="Services\IdxToEdtConversionService.cs" />
+    <Compile Include="Services\RedactionLoadFileReader.cs" />
     <Compile Include="Services\StandardMapReader.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>
