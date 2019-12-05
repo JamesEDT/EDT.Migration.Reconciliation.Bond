@@ -99,7 +99,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
 	        TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
-	        Assert.AreEqual(lppDocCount, idxLppDocCount, "File counts should be equal for Idx and Load file");
+	        Assert.AreEqual(lppDocCount, idxLppDocCount, "File counts should be equal between IDX and EDT Quarantine folder");
         }
 
 		[Test]
