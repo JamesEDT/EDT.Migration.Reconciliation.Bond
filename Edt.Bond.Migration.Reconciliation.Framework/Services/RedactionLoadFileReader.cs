@@ -10,10 +10,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 {
 	public class RedactionLoadFileReader
 	{
+        private dynamic[] _records;
 
-		public RedactionLoadFileReader()
+		public RedactionLoadFileReader(string path)
 		{
-			using (var reader = new StreamReader(_path))
+			using (var reader = new StreamReader(path))
 			using (var csv = new CsvReader(reader))
 			{
 				csv.Configuration.Delimiter = ",";
@@ -28,10 +29,14 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 				csv.Configuration.MissingFieldFound = null;
 
 				var records = csv.GetRecords<dynamic>();
-				string directory = Path.GetDirectoryName(_path);
 
-				var docs = records as dynamic[] ?? records.ToArray();
+				_records = records as dynamic[] ?? records.ToArray();
 			}
 		}
+
+        public int GetRecordCount()
+        {
+            return _records.Length;
+        }
 	}
 }

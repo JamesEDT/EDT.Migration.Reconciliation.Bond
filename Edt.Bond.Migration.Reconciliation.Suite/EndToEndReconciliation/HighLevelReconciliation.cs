@@ -108,7 +108,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         public void RedactedCountsAreEqualBetweenRedactionLoadFile()
         {
 	        int edtRedactionCount = EdtDocumentRepository.GetDocumentRedactedDocumentCount();
-	        int redactionDocCount = new RedactionLoadFileReader().GetNumberRedactedDocs();
+            int redactionDocCount = new RedactionLoadFileReader(Settings.RedactionsFilePath).GetRecordCount();
 
 	        string[][] data = {
 		        new[]{ "Item Evaluated", "Count of LPP Documents"},
