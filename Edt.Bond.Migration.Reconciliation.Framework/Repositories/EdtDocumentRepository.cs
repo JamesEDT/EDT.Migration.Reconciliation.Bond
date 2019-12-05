@@ -141,6 +141,18 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 			  return rawLocations.ToDictionary(x => (string)x.DocumentNumber, x => (string)x.Location); 
         }
 
+        public static int GetDocumentQuarantineDocumentCount()
+        {
+	        var sql =
+		        $@"SELECT Count(document.DocumentId) FROM {GetDatabaseName()}.[Batch] batch 
+						INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
+						INNER JOIN {GetDatabaseName()}.[Folder] folder ON folder.FolderId = document.FolderID
+						WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}' AND
+								folder.folderType = 1 --Quarantine Folder";
+
+	        return SqlExecutor.QueryFirstOrDefault<int>(sql);
+        }
+
 
 		private static string GetConnectionStringByName()
         {
@@ -154,6 +166,5 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             return $"[eDiscoveryToolbox.Case.{caseId}].[dbo]";
 
         }
-
     }
 }
