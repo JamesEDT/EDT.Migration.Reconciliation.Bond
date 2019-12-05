@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase.Dto
 {
@@ -6,7 +7,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase.Dto
     {
         public string Filename { get; set; }
 
-        public long FolderId => DocumentId % 1000;
+        public long FolderId => (long) (Math.Floor(DocumentId / 1000.0) * 1000.0);
         public long DocumentId { get; set; }
 
         public string FullDocumentPath => BuildFullPath();

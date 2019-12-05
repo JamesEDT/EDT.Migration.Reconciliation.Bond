@@ -73,6 +73,15 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             return SqlExecutor.QueryFirstOrDefault<long>(sql);
         }
 
+        public static IEnumerable<dynamic> GetDocumentCountPerBatch()
+        {
+            var sql = $"SELECT batch.BatchName as BatchName, Count(document.DocumentId) as DocumentCount FROM {GetDatabaseName()}.[Batch] batch"
+                        + $" INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID"
+                        + " GROUP BY batch.BatchName";                        
+
+            return SqlExecutor.Query<dynamic>(sql);
+        }
+
         public static List<string> GetDocuentNumbersWithABody()
         {
             var sql = $"SELECT document.DocumentId FROM {GetDatabaseName()}.[Batch] batch"
