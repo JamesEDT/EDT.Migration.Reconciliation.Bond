@@ -106,7 +106,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static IEnumerable<DerivedFileLocation> GetNativeFileLocations()
         {
-            var sql = "SELECT CONCAT(CONVERT(varchar(10), document.DocumentID), '_NATIVE',FileExtOrMsgClass) as FileName, FolderID, DocumentID " +
+            var sql = "SELECT CONCAT(CONVERT(varchar(10), document.DocumentID), '_NATIVE',FileExtOrMsgClass) as FileName, FolderID as FolderId, DocumentID as DocumentId" +
                      $"FROM {GetDatabaseName()}.[Batch] batch " +
                      $"INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID " +
                      $"WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";

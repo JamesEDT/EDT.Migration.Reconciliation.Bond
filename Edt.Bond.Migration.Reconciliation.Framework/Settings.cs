@@ -14,7 +14,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
 
         public static string MicroFocusStagingDirectoryTextPath => GetSetting("MicroFocusStagingDirectoryTextPath");
 
-			public static string IdxFilePath => GetSetting("IdxFilePath");
+        public static string MicroFocusStagingDirectoryNativePath => GetSetting("MicroFocusStagingDirectoryNativePath");
+
+        public static string IdxFilePath => GetSetting("IdxFilePath");
 
         public static string ConversionToolOutputDirectory => GetSetting("ConversionToolOutputDirectory");
 
@@ -26,11 +28,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
 
         public static string[] IgnoredIdxFieldsFromComparison => GetSetting("IgnoredIdxFieldsFromComparison").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
-        public static string[] LocationIdxFields => GetSetting("LocationIdxFields").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries); 
+        public static string[] LocationIdxFields => GetSetting("LocationIdxFields").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
-		  public static string ReportingDirectory => GetDirectory("Report");
+        public static string ReportingDirectory => GetDirectory("Report");
 
-        public static string LogDirectory => GetDirectory("Logs");        
+        public static string LogDirectory => GetDirectory("Logs");
 
         public static string EmailFieldIdentifyingPrefix => GetSetting("EmailFieldIdentifyingPrefix");
 
@@ -44,7 +46,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
             if (!Directory.Exists(workingDirectory))
                 Directory.CreateDirectory(workingDirectory);
 
-            return workingDirectory;        
+            return workingDirectory;
         }
 
         private static string GetSetting(string key)
