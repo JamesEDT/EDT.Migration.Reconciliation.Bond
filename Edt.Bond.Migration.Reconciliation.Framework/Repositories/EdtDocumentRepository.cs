@@ -147,7 +147,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
 	        var rawLocations = SqlExecutor.Query(sql, new { documentIds });
 
-			  return rawLocations.ToDictionary(x => (string)x.DocumentNumber, x => (string)x.Location); 
+		    return rawLocations.ToDictionary(x => (string)x.DocumentNumber, x => (string)x.Location); 
         }
 
         public static int GetDocumentQuarantineDocumentCount()
@@ -173,6 +173,31 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 	        return SqlExecutor.QueryFirstOrDefault<int>(sql);
         } 
 
+
+        public static IEnumerable<dynamic> GetMultiValueFieldValues(List<string> documentIds, string fieldName)
+        {
+            var sql = $@"SELECT
+	                        document.DocNumber,
+	                        mvField.Name as FieldValue,
+	                        mvField.DisplayOrder As MvFieldDisplayOrder,
+	                        Field.Name
+                          FROM [eDiscoveryToolbox.Case.011].[dbo].[DocumentMvField] documentField
+                          INNER JOIN [eDiscoveryToolbox.Case.011].[dbo].[Document] document on documentField.DocumentID = document.DocumentID
+                          INNER JOIN [eDiscoveryToolbox.Case.011].[dbo].[MvField] mvField on documentField.DocumentMvFieldID = mvField.MvFieldID
+                          INNER JOIN (
+	                        SELECT 
+			                        MvField.MvFieldID as Id,
+			                        mvField.Name as Name
+	                        FROM [eDiscoveryToolbox.Case.011].[dbo].[MvField] mvField
+	                        WHERE mvField.ParentID = 0
+                          ) as Field on mvField.ParentID = Field.Id
+                        WHERE DocNumber in @documentIds
+                        AND Field.Name = @fieldName";
+
+            var multiValueListResults = SqlExecutor.Query(sql, new { documentIds, fieldName });
+
+            return multiValueListResults;
+        }
 
 		private static string GetConnectionStringByName()
         {
