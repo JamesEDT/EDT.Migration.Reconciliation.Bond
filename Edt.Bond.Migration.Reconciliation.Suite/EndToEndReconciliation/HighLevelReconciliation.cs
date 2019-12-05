@@ -85,6 +85,24 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         }
 
         [Test]
+        [Description("Comparing the count of documents detailed in the Idx as LPP documents that have been moved to the quarantine Folder.")]
+        public void NativeCountsAreEqualBetweenIdxAndQuarantineFolder()
+        { 
+	       int lppDocCount = EdtDocumentRepository.GetDocumentQuarantineDocumentCount();
+	       int idxLppDocCount = new IdxDocumentsRepository().GetNumberOfLppDocs();
+
+			string[][] data = {
+		        new[]{ "Item Evaluated", "Count of LPP Documents"},
+		        new[] { "Idx file", idxLppDocCount.ToString() },
+		        new[] { "Quarantine Folder", lppDocCount.ToString() }
+	        };
+
+	        TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
+
+	        Assert.AreEqual(lppDocCount, idxLppDocCount, "File counts should be equal between IDX and EDT Quarantine folder");
+        }
+
+		[Test]
         [Description("Comparing the text document counts in the Idx to the Edt Document.Body, thus validating all text fies are imported to EDT.")]
         public void TextCountsAreEqualBetweenIdxAndEdtFileStore()
         {

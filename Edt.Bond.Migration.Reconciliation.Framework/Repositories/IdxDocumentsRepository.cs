@@ -105,6 +105,17 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             }
         }
 
+        public int GetNumberOfLppDocs()
+        {
+	        using (var db = new LiteDatabase(DbName))
+	        {
+		        var documents = db.GetCollection<Document>("Documents");
+
+		        return documents.FindAll().Count(x => Enumerable.Any(x.AllFields, c => c.Key == "INTROSPECT_DELETED" && !string.IsNullOrWhiteSpace(c.Value))); 
+	        }
+
+        }
+
         public IEnumerable<Document> GetSample()
         {
             using (var db = new LiteDatabase(DbName))
