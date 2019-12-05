@@ -92,7 +92,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 	       int idxLppDocCount = new IdxDocumentsRepository().GetNumberOfLppDocs();
 
 			string[][] data = {
-		        new[]{ "Item Evaluated", "Count of Documents"},
+		        new[]{ "Item Evaluated", "Count of LPP Documents"},
 		        new[] { "Idx file", idxLppDocCount.ToString() },
 		        new[] { "Quarantine Folder", lppDocCount.ToString() }
 	        };
