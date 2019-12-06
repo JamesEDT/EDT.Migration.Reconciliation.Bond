@@ -225,5 +225,14 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             return $"[eDiscoveryToolbox.Case.{caseId}].[dbo]";
 
         }
+
+        public static IEnumerable<string> GetAllDocumentIds()
+        {
+            var sql = $@"SELECT document.DocumentId FROM {GetDatabaseName()}.[Batch] batch
+                        INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
+                        WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
+
+            return SqlExecutor.Query<string>(sql);            
+        }
     }
 }

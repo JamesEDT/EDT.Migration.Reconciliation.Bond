@@ -10,13 +10,17 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
     {
         public static long GetDocumentCountForBatch()
         {
-            var allFileLocations = EdtDocumentRepository.GetNativeFileLocations().ToList();
+            var allDocumentIds = EdtDocumentRepository.GetAllDocumentIds();
 
-            LogNativeFileLocations(allFileLocations);
+            var allNativeFilesInEdt = Directory
+                .GetFiles(Path.Combine(Settings.EdtCfsDirectory, $"Site01_Case{Settings.EdtCaseId.ToString().PadLeft(4, '0')}"), "*.*", SearchOption.AllDirectories)
+                .Select(x => new FileInfo(x).Name)
+                .Select(x => x.Substring(0, x.IndexOf('_')))
+                .Distinct();
 
-            var presentFileLocations = allFileLocations.Where(x => File.Exists(x.FullDocumentPath));
-
-            return presentFileLocations.LongCount();
+            var presentDocuments = allDocumentIds.Intersect(allNativeFilesInEdt);
+            
+            return presentDocuments.LongCount();
         }
 
         private static void LogNativeFileLocations(List<DerivedFileLocation> derivedFiles)
