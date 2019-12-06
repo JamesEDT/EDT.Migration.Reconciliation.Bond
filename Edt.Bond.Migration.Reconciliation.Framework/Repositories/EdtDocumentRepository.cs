@@ -182,7 +182,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 		        $@"SELECT Count(document.DocumentId) FROM {GetDatabaseName()}.[Batch] batch 
 						INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID 
 						WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}' AND
-								Document.DocNumber LIKE  '_R%'";
+								Document.DocNumber LIKE  '%_R'";
 
 	        return SqlExecutor.QueryFirstOrDefault<int>(sql);
         } 
