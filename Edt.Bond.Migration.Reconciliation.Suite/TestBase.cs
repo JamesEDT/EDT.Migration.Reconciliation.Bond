@@ -52,9 +52,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
             if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
             {
+                TestLogger.AssignCategory("Failed Test");
                 TestLogger.Fail(errorMessage);
                 TestLogger.Log(Status.Error, stackTrace);
-                TestFailures++;
+                TestFailures++;               
             }
             else
             {
@@ -108,6 +109,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             }
             else
             {
+                FeatureRunner.AssignCategory("Failed Test Suite");
                 FeatureRunner.Fail($"{TestFailures } test(s) failed of {TestTotal}");
             }
         }
