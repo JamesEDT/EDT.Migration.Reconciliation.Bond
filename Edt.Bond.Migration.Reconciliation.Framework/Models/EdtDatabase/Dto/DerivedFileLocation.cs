@@ -7,7 +7,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase.Dto
     {
         public string Filename { get; set; }
 
-        public long FolderId => (long) (Math.Floor(DocumentId / 1000.0) * 1000.0);
+        public long FolderId => (long) (Math.Floor(DocumentId / 5000.0) * 5000.0);
         public long DocumentId { get; set; }
 
         public string FullDocumentPath => BuildFullPath();
