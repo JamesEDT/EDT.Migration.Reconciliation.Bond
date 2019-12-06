@@ -3,13 +3,12 @@ using Edt.Bond.Migration.Reconciliation.Framework;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using Edt.Bond.Migration.Reconciliation.Framework.Services;
 using NUnit.Framework;
-using System;
 using System.IO;
 using System.Linq;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
-	[TestFixture]
+    [TestFixture]
 	[Description(
 		"Comparing high level counts of documents from the source Idx to targets (Edt database and File store)")]
 	public class HighLevelReconciliation : TestBase

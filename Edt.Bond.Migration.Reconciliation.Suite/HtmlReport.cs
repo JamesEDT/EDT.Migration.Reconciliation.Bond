@@ -10,20 +10,17 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
     [SetUpFixture]
     public class HtmlReport
     {
-        public static ExtentReports Writer;
-       
+        public static ExtentReports Writer;       
 
         [OneTimeSetUp]
         public void ReportSetup()
         {
-            RenameOldFolders();
-
             var reportFolder = Path.Combine(Settings.ReportingDirectory, "index.html");
 
             var htmlReporter = new ExtentHtmlReporter(reportFolder);
 
             htmlReporter.Config.DocumentTitle = "EDT Data Migration Report";
-            htmlReporter.Config.ReportName = $"Data Migration Validation Report - v{Settings.Version}";
+            htmlReporter.Config.ReportName = $"Data Migration Validation Report (v{Settings.Version}) - Edt Case {Settings.EdtCaseId} Batch Name {Settings.EdtImporterDatasetName}";
             htmlReporter.Config.EnableTimeline = false;
             htmlReporter.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Standard;
             htmlReporter.Config.CSS = CSS;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.IO;
+using Edt.Bond.Migration.Reconciliation.Framework.Extensions;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework
 {
@@ -32,7 +33,19 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
 
         public static string[] LocationIdxFields => GetSetting("LocationIdxFields").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
-        public static string ReportingDirectory => GetDirectory("Report");
+        public static string ReportingDirectory
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(_reportingDirectory))
+                                    _reportingDirectory = GetDirectory($"ReportV{Version}_Case{EdtCaseId}_{EdtImporterDatasetName.TrimNonAlphaNumerics()}_{DateTime.Now.ToString("ddMMyyyy_HHmm")}");
+
+                return _reportingDirectory;
+            }
+        }
+        
+
+        private static string _reportingDirectory;
 
         public static string LogDirectory => GetDirectory("Logs");
         public static string Version => GetSetting("Version");

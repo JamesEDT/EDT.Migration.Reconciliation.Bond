@@ -35,5 +35,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Extensions
 
             return tokens.ToArray();
         }
+
+        public static string TrimNonAlphaNumerics(this string input)
+        {
+            Regex rgx = new Regex("[^a-zA-Z0-9 -]");
+            return rgx.Replace(input, "");
+        }
     }
 }
