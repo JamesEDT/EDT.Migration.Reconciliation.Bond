@@ -47,10 +47,16 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
                         WHERE DocNumber in @documentIds";
 
 	        return SqlExecutor.Query(sql, new { documentIds })
-		        .ToDictionary(x => (string)x.DocNumber, x => (string)x.Value?.ToString() == "" ? "" : ((DateTime)((IDictionary<string, object>)x).Values.Last()).ToString("dd/MM/yyyy HH:mm:ss"));
-        } 
+		        .ToDictionary(x => (string)x.DocNumber, x => (string) GetDate(x));
+        }
 
-		public static IEnumerable<ColumnDetails> GetColumnDetails(string caseId)
+        private static string GetDate(dynamic x)
+        {
+	        var value = ((IDictionary<string, object>)x).Values.Last(); 
+	        return value != null ? ((DateTime)value).ToString("dd/MM/yyyy HH:mm:ss") : "";
+        }
+
+        public static IEnumerable<ColumnDetails> GetColumnDetails(string caseId)
         {
             return SqlExecutor.Query<ColumnDetails>($"SELECT * FROM [eDiscoveryToolbox.Case.{caseId}].[dbo].[ColumnDetails]");
         }

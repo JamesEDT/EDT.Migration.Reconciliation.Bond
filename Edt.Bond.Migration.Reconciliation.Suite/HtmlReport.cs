@@ -23,7 +23,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             var htmlReporter = new ExtentHtmlReporter(reportFolder);
 
             htmlReporter.Config.DocumentTitle = "EDT Data Migration Report";
-            htmlReporter.Config.ReportName = "Idx to EDT Data Migration Reconciliation";
+            htmlReporter.Config.ReportName = $"Data Migration Validation Report - v{Settings.Version}";
             htmlReporter.Config.EnableTimeline = false;
             htmlReporter.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Standard;
             htmlReporter.Config.CSS = CSS;

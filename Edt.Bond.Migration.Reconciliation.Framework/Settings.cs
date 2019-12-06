@@ -35,8 +35,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
         public static string ReportingDirectory => GetDirectory("Report");
 
         public static string LogDirectory => GetDirectory("Logs");
+        public static string Version => GetSetting("Version");
 
-        public static string EmailFieldIdentifyingPrefix => GetSetting("EmailFieldIdentifyingPrefix");
+		public static string EmailFieldIdentifyingPrefix => GetSetting("EmailFieldIdentifyingPrefix");
 
         private static string GetDirectory(string subfolder = "")
         {
