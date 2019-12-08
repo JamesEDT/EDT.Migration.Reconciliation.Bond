@@ -195,9 +195,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 	                        mvField.Name as FieldValue,
 	                        mvField.DisplayOrder As MvFieldDisplayOrder,
 	                        Field.Name
-                          FROM [eDiscoveryToolbox.Case.011].[dbo].[DocumentMvField] documentField
-                          INNER JOIN [eDiscoveryToolbox.Case.011].[dbo].[Document] document on documentField.DocumentID = document.DocumentID
-                          INNER JOIN [eDiscoveryToolbox.Case.011].[dbo].[MvField] mvField on documentField.DocumentMvFieldID = mvField.MvFieldID
+                          FROM {GetDatabaseName()}.[DocumentMvField] documentField
+                          INNER JOIN {GetDatabaseName()}.[Document] document on documentField.DocumentID = document.DocumentID
+                          INNER JOIN {GetDatabaseName()}.[MvField] mvField on documentField.DocumentMvFieldID = mvField.MvFieldID
                           INNER JOIN (
 	                        SELECT 
 			                        MvField.MvFieldID as Id,
