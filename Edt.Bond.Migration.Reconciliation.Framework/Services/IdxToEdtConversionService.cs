@@ -1,31 +1,61 @@
-﻿using System;
+﻿using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
+using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
+using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
+using System;
 using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 {
     public class IdxToEdtConversionService
     {
-        public static string ConvertValueToEdtForm(string desiredType, string value)
+        private StandardMapping _standardMapping;
+        private ColumnDetails _edtColumnDetails;
+
+        public string MappedEdtDatabaseColumn => _edtColumnDetails?.ColumnName;
+
+        public ColumnType? MappedEdtDatabaseColumnType => _edtColumnDetails?.DataType;
+       
+        public IdxToEdtConversionService(StandardMapping standardMapping)
         {
-            switch (desiredType.ToLower())
+            _standardMapping = standardMapping;
+
+            if (!_standardMapping.IsEmailField())
+                _edtColumnDetails = GetEdtColumnDetailsFromDisplayName(standardMapping.EdtName);
+        }
+
+        public string ConvertValueToEdtForm(string value)
+        {
+            switch (_edtColumnDetails?.DataType)
             {
-                case "date":
+                case ColumnType.Date:
                     return GetDateString(value);
-                case "boolean":
+                case ColumnType.Boolean:
                     return GetBooleanString(value);
                 default:
                     return value;
             }
         }
 
-        public static string GetEdtType(string fieldName, string desiredType)
+        private ColumnDetails GetEdtColumnDetailsFromDisplayName(string displayName)
         {
-            if(!desiredType.Equals("date", StringComparison.InvariantCultureIgnoreCase) && fieldName.EndsWith("_NUMERICDATE"))
-            {
-                return "date";
-            }
+            var lowerDisplayName = displayName.ToLower();
 
-            return desiredType;
+            var edtColumnDetails = EdtDocumentRepository.GetColumnDetails().ToList();
+
+            var matchedDbName = edtColumnDetails.FirstOrDefault(x => x.DisplayName.ToLower().Equals(lowerDisplayName));
+
+            if (matchedDbName != null)
+                return matchedDbName;
+
+            Regex rgx = new Regex("[^a-zA-Z0-9]");
+            lowerDisplayName = rgx.Replace(lowerDisplayName, "");
+
+            matchedDbName = edtColumnDetails.Find(x => x.GetAlphaNumbericOnlyDisplayName().ToLower()
+                                        .Replace(" ", string.Empty).Equals(lowerDisplayName));
+
+            return matchedDbName ?? throw new Exception($"Unable to determine Edt Db column name from mapped display name {displayName}");
         }
 
         private static string GetDateString(string sourceDateValue)
@@ -63,10 +93,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             }
         }
 
-        public static DateTime FromUnixTime(long unixTime)
+        private static DateTime FromUnixTime(long unixTime)
         {
             return epoch.AddSeconds(unixTime);
         }
+
         private static readonly DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     }
 }

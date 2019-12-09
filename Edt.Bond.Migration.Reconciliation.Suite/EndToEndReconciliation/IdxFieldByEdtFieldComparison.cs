@@ -8,7 +8,6 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
@@ -18,8 +17,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
     public class IdxFieldByEdtFieldComparison : TestBase
     {
         private IEnumerable<Framework.Models.IdxLoadFile.Document> _idxSample;
-        private List<ColumnDetails> _edtColumnDetails;
         private List<string> _idxDocumentIds;
+        private IdxToEdtConversionService _idxToEdtConversionService;
 
         [OneTimeSetUp]
         public void SetIdxSample()
@@ -27,9 +26,6 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             _idxSample = new IdxDocumentsRepository().GetSample();
 
             _idxDocumentIds = _idxSample.Select(x => x.DocumentId).ToList();
-            
-				//don't validate MvFields atm
-            _edtColumnDetails = EdtDocumentRepository.GetColumnDetails().ToList();
 
             FeatureRunner.Log(AventStack.ExtentReports.Status.Info, $"{_idxSample.Count()} sampled from Idx records.");
         }
@@ -46,6 +42,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             long unexpectedErrors = 0;
             long matched = 0;
             long totalsampled = 0;
+
+            //initiliase conversion service for field under test
+            _idxToEdtConversionService = new IdxToEdtConversionService(mappingUnderTest);
+
+            TestLogger.Debug($"Using EDT database column for comparison: {_idxToEdtConversionService.MappedEdtDatabaseColumn}");
 
             //Get 
             var edtValues = GetEdtFieldValues(mappingUnderTest);            
@@ -64,7 +65,6 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 }
                 else
                 {
-
                     if (string.IsNullOrEmpty(idxField))
                     {
                         if (!string.IsNullOrEmpty(edtValueForIdxRecord))
@@ -84,7 +84,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         {                            
                             if (!string.IsNullOrEmpty(edtValueForIdxRecord)) populated++;
 
-                            var expectedEdtValue = IdxToEdtConversionService.ConvertValueToEdtForm(mappingUnderTest.EdtType, idxField);
+                            var expectedEdtValue = _idxToEdtConversionService.ConvertValueToEdtForm(idxField);
 
                             if (!edtValueForIdxRecord.Equals(expectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
                             {
@@ -129,7 +129,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
         private string GetIdxFieldValue(Framework.Models.IdxLoadFile.Document idxDocument, StandardMapping mappingUnderTest)
         {
-            if (mappingUnderTest.EdtType != "MultiValueList")
+            if (mappingUnderTest.EdtType != "MultiValueList" && !mappingUnderTest.IsEmailField())
                 return idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(mappingUnderTest.IdxName))?.Value;
 
             var allFieldValues = idxDocument.AllFields.Where(x => x.Key.Equals(mappingUnderTest.IdxName))
@@ -143,13 +143,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         {
             if(mappingUnderTest.IsEmailField())
             {
-                var correspondances = GetEmailFieldValues(_idxDocumentIds, mappingUnderTest.EdtName);
+                return GetEmailFieldValues(_idxDocumentIds, mappingUnderTest.EdtName);                
+            }            
 
-                return correspondances;
-            }
-            else if(mappingUnderTest.EdtType == "MultiValueList")
+            if (mappingUnderTest.EdtType == "MultiValueList")
             {
-                var allFieldValues = EdtDocumentRepository.GetMultiValueFieldValues(_idxDocumentIds, mappingUnderTest.EdtName);
+                var allFieldValues = EdtDocumentRepository.GetMultiValueFieldValues(_idxDocumentIds, _idxToEdtConversionService.MappedEdtDatabaseColumn);
 
                 var combinedValues = allFieldValues.GroupBy(x => x.DocNumber)
                                         .Select(group => new
@@ -163,11 +162,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             }
             else
             {
-                var edtDbName = GetEdtDatabaseNameFromDisplayName(mappingUnderTest.EdtName);
-                TestLogger.Debug($"Using EDT database column for comparison: {edtDbName}");
-
-                return (mappingUnderTest.EdtType == "Date") ? EdtDocumentRepository.GetDocumentDateField(_idxDocumentIds, edtDbName): EdtDocumentRepository.GetDocumentField(_idxDocumentIds, edtDbName);
-               
+                return (_idxToEdtConversionService.MappedEdtDatabaseColumnType == ColumnType.Date) ? EdtDocumentRepository.GetDocumentDateField(_idxDocumentIds, _idxToEdtConversionService.MappedEdtDatabaseColumn)
+                                                                    :   EdtDocumentRepository.GetDocumentField(_idxDocumentIds, _idxToEdtConversionService.MappedEdtDatabaseColumn);               
             }
         }
 
@@ -180,33 +176,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             var desiredParties = from field in allFields
                                  group field.PartyName by field.DocumentNumber into correspondants
-                                 select new { DocumentId = correspondants.Key, Value = string.Join(",", correspondants.ToList())};
-
+                                 select new { DocumentId = correspondants.Key, Value = string.Join(";", correspondants.ToList().OrderBy(x => x))};
 
             return desiredParties.ToDictionary(x => (string) x.DocumentId, x => x.Value);
-        }
-
-
-        private string GetEdtDatabaseNameFromDisplayName(string displayName)
-        {
-            var lowerDisplayName = displayName.ToLower();
-
-            var matchedDbName = _edtColumnDetails.FirstOrDefault(x => x.DisplayName.ToLower().Equals(lowerDisplayName));
-
-            if(matchedDbName == null)
-            {
-                Regex rgx = new Regex("[^a-zA-Z0-9]");
-                lowerDisplayName = rgx.Replace(lowerDisplayName, "");
-                
-                matchedDbName = _edtColumnDetails.Find(x => x.GetAlphaNumbericOnlyDisplayName().ToLower()
-                                            .Replace(" ", string.Empty).Equals(lowerDisplayName));
-
-                return matchedDbName != null ? matchedDbName.ColumnName : throw new Exception($"Unable to determine Edt Db column name from mapped display name {displayName}");
-            }
-            else
-            {
-                return matchedDbName.ColumnName;
-            }
         }
 
         private void PrintStats(long different, long matched, long documentsInIdxButNotInEdt, long documentsInEdtButNotIdx, long idxMissingField, long unexpectedErrors, long populated, long total)

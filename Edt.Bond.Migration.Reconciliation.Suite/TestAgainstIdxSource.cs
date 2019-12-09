@@ -23,7 +23,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
         [OneTimeSetUp]
         public void AnalyseIdx()
         {
-            var logger = HtmlReport.Writer.CreateTest("Test Setup: Analyse Idx", "Processing Idx into local store for reconciliation tests against IdX");
+            var logger = HtmlReport.Writer.CreateTest("Validation Setup", "Processing Idx into local store for reconciliation tests against IdX");
 
             try
             {

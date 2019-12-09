@@ -15,6 +15,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
         private const int ImporterGroupColumn = 6;
         private readonly string[] _delimiter = new string[] {","};
 
+
         public IEnumerable<StandardMapping> GetStandardMappings()
         {
             var fieldsToIgnore = Settings.IgnoredIdxFieldsFromComparison.ToList();
@@ -38,7 +39,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                         {
                             EdtName = newMappingTokens[EdtFieldNameColumn],
                             IdxName = newMappingTokens[IdxNameColumn],
-                            EdtType = IdxToEdtConversionService.GetEdtType(newMappingTokens[IdxNameColumn], newMappingTokens[StoredEdtTypeColumn]),
+                            EdtType = newMappingTokens[StoredEdtTypeColumn],
                             ImportGroup = newMappingTokens[ImporterGroupColumn]
                         };
 

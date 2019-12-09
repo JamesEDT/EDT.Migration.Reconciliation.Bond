@@ -10,7 +10,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase
         public int ColumnDetailsID { get; set; }
         public string ColumnName { get; set; }
         public string DisplayName { get; set; }
-        public string DataType { get; set; }
+        public ColumnType DataType { get; set; }
         public bool? IsCustomColumn { get; set; }
         public bool? IsConfigurable { get; set; }
         public bool? IsFullText { get; set; }
@@ -28,5 +28,16 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase
             var str = rgx.Replace(DisplayName, "");
             return str;
         }
+    }
+
+    public enum ColumnType
+    {
+        Boolean,
+        Date,
+        Float,
+        List,
+        Memo,
+        Number,
+        Text
     }
 }

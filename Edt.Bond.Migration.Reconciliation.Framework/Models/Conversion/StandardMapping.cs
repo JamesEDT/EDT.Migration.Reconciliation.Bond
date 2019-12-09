@@ -1,4 +1,6 @@
-﻿namespace Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion
+﻿using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
+
+namespace Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion
 {
     public class StandardMapping
     {

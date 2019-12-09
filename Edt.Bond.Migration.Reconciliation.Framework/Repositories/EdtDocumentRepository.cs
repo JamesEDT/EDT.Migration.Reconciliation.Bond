@@ -1,10 +1,8 @@
-﻿using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
-using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
+﻿using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase.Dto;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -16,11 +14,6 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
         private static SqlExecutor _sqlExecutor;
 
         public static SqlExecutor SqlExecutor => _sqlExecutor ?? (_sqlExecutor = new SqlExecutor(GetConnectionStringByName()));
-
-        public static IEnumerable<ColumnDetails> GetAllCustomFieldDetails(string caseId)
-        {
-            return GetColumnDetails(caseId).Where(x => x.IsCustomColumn != null && (x.ColumnName.StartsWith("cc_") || x.IsCustomColumn.Value));
-        }
 
         public static IEnumerable<IDictionary<string, object>> GetDocuments(List<string> documentIds)
         {
@@ -54,11 +47,6 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
         {
 	        var value = ((IDictionary<string, object>)x).Values.Last(); 
 	        return value != null ? ((DateTime)value).ToString("dd/MM/yyyy HH:mm:ss") : "";
-        }
-
-        public static IEnumerable<ColumnDetails> GetColumnDetails(string caseId)
-        {
-            return SqlExecutor.Query<ColumnDetails>($"SELECT * FROM [eDiscoveryToolbox.Case.{caseId}].[dbo].[ColumnDetails]");
         }
 
         public static IEnumerable<ColumnDetails> GetColumnDetails()
@@ -202,7 +190,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 	                        SELECT 
 			                        MvField.MvFieldID as Id,
 			                        mvField.Name as Name
-	                        FROM [eDiscoveryToolbox.Case.011].[dbo].[MvField] mvField
+	                        FROM {GetDatabaseName()}.[MvField] mvField
 	                        WHERE mvField.ParentID = 0
                           ) as Field on mvField.ParentID = Field.Id
                         WHERE DocNumber in @documentIds
