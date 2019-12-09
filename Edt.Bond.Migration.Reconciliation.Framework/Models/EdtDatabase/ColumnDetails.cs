@@ -38,6 +38,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase
         List,
         Memo,
         Number,
-        Text
-    }
+        Text,
+        MultiValueList
+	}
 }

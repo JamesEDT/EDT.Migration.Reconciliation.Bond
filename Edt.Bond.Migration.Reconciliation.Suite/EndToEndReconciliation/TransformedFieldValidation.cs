@@ -142,9 +142,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 				idxDocument.AllFields.Where(c => c.Key.StartsWith(Settings.LocationIdxFields[3])).OrderBy(c=> c.Key).ToList().ForEach(
 					c =>
 					{
-						if (!string.IsNullOrWhiteSpace(c.Value))
+						if (!string.IsNullOrWhiteSpace(c.Value) && !c.Value.Contains(".msg:"))
 						{
-							location += @"\" + c.Value;
+							location += @"\" + c.Value.Replace(":", "-");
 						} 
 					});
 				 

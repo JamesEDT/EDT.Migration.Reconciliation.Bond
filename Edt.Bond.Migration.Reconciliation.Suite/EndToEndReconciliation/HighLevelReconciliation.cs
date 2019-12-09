@@ -116,8 +116,14 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			"Comparing the count of documents detailed in the Redaction Load File and those redacted documents in EDT.")]
 		public void RedactedCountsAreEqualBetweenRedactionLoadFile()
 		{
-			int edtRedactionCount = EdtDocumentRepository.GetDocumentRedactedDocumentCount();
-			int redactionDocCount = new RedactionLoadFileReader(Settings.RedactionsFilePath).GetRecordCount();
+			int edtRedactionCount = 0;
+			int redactionDocCount = 0;
+
+			if (!string.IsNullOrWhiteSpace(Settings.RedactionsFilePath))
+			{
+				edtRedactionCount = EdtDocumentRepository.GetDocumentRedactedDocumentCount();
+				redactionDocCount = new RedactionLoadFileReader(Settings.RedactionsFilePath).GetRecordCount();
+			} 
 
 			string[][] data =
 			{
