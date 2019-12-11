@@ -17,8 +17,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static IEnumerable<IDictionary<string, object>> GetDocuments(List<string> documentIds)
         {
-            var sql = $"SELECT * FROM {GetDatabaseName()}.[Document] WHERE DocNumber in @documentIds";
-            return SqlExecutor.Query(sql, new { documentIds }).Select(x => (IDictionary<string, object>)x);
+            var sql = $"SELECT * FROM {GetDatabaseName()}.[Document] WHERE DocNumber in {GetDocumentIDQuery(documentIds)}";
+            return SqlExecutor.Query(sql).Select(x => (IDictionary<string, object>)x);
         }
 
         public static Dictionary<string, string> GetDocumentField(List<string> documentIds, string desiredField)
@@ -26,10 +26,15 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             var sql = $@"SELECT DocNumber, {desiredField} as Value 
                             FROM {GetDatabaseName()}.[Document] doc
                             LEFT OUTER JOIN {GetDatabaseName()}.[DocumentExtra] docExtra ON doc.DocumentID = docExtra.DocumentID
-                        WHERE DocNumber in @documentIds";
+                        WHERE DocNumber in {GetDocumentIDQuery(documentIds)}";
 
-            return SqlExecutor.Query(sql, new { documentIds })
+            return SqlExecutor.Query(sql)
                     .ToDictionary(x => (string)x.DocNumber, x => (string)x.Value?.ToString() ?? string.Empty);
+        }
+
+        public static string GetDocumentIDQuery(List<string> documentIds)
+        {
+				return "(" + string.Join(",", documentIds) +")";
         }
 
         public static Dictionary<string, string> GetDocumentDateField(List<string> documentIds, string desiredField)
@@ -37,9 +42,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 	        var sql = $@"SELECT DocNumber, {desiredField} as Value 
                         FROM {GetDatabaseName()}.[Document] doc
                         LEFT OUTER JOIN {GetDatabaseName()}.[DocumentExtra] docExtra ON doc.DocumentID = docExtra.DocumentID
-                        WHERE DocNumber in @documentIds";
+                        WHERE DocNumber in {GetDocumentIDQuery(documentIds)}";
 
-	        return SqlExecutor.Query(sql, new { documentIds })
+	        return SqlExecutor.Query(sql)
 		        .ToDictionary(x => (string)x.DocNumber, x => (string) GetDate(x));
         }
 
@@ -110,9 +115,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
                 + $" INNER JOIN {GetDatabaseName()}.[DocumentParty] docParty ON document.DocumentID = docParty.DocumentID"
                 + $" INNER JOIN {GetDatabaseName()}.[Party] party ON docParty.PartyID = party.PartyID"
                 + $" INNER JOIN {GetDatabaseName()}.[CorrespondenceType] correspondenceType ON docParty.CorrespondenceTypeID = correspondenceType.CorrespondenceTypeID"
-                + $" WHERE document.DocNumber in @documentIds";
+                + $" WHERE document.DocNumber in {GetDocumentIDQuery(documentIds)}";
 
-            return SqlExecutor.Query<DocumentCorrespondant>(sql, new { documentIds }).ToList();
+            return SqlExecutor.Query<DocumentCorrespondant>(sql).ToList();
         }
 
         public static IEnumerable<DerivedFileLocation> GetNativeFileLocations()
@@ -130,9 +135,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             var sql = $@"SELECT document.DocNumber as DocumentNumber, tag.TagName as Tag FROM {GetDatabaseName()}.[Document] document
                           INNER JOIN {GetDatabaseName()}.[DocumentTag] documentTag ON document.DocumentID = documentTag.DocumentID
                           INNER JOIN {GetDatabaseName()}.[Tag] tag ON documentTag.TagID = tag.TagID
-                          WHERE document.DocNumber in @documentIds";
+                          WHERE document.DocNumber in {GetDocumentIDQuery(documentIds)}";
 
-            var rawTags = SqlExecutor.Query(sql, new { documentIds });
+            var rawTags = SqlExecutor.Query(sql);
 
             var tags = from tag in rawTags
                        group (string) tag.Tag by tag.DocumentNumber into docTags
@@ -145,9 +150,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
         {
 	        var sql = $@"SELECT document.DocNumber as DocumentNumber, l.Path as Location FROM {GetDatabaseName()}.[Document] document
 	                    INNER JOIN {GetDatabaseName()}.[Location] l ON l.LocationID = document.LocationID
-	                    WHERE document.DocNumber in @documentIds";
+	                    WHERE document.DocNumber in {GetDocumentIDQuery(documentIds)}";
 
-	        var rawLocations = SqlExecutor.Query(sql, new { documentIds });
+	        var rawLocations = SqlExecutor.Query(sql);
 
 		    return rawLocations.ToDictionary(x => (string)x.DocumentNumber, x => (string)x.Location); 
         }
@@ -193,10 +198,10 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 	                        FROM {GetDatabaseName()}.[MvField] mvField
 	                        WHERE mvField.ParentID = 0
                           ) as Field on mvField.ParentID = Field.Id
-                        WHERE DocNumber in @documentIds
+                        WHERE DocNumber in {GetDocumentIDQuery(documentIds)}
                         AND Field.Name = @fieldName";
 
-            var multiValueListResults = SqlExecutor.Query(sql, new { documentIds, fieldName });
+            var multiValueListResults = SqlExecutor.Query(sql, new { fieldName });
 
             return multiValueListResults;
         }
@@ -208,11 +213,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         private static string GetDatabaseName()
         {
-            var caseId = Settings.EdtCaseId.PadLeft(3, '0');
+	        return ConfigurationManager.AppSettings["DbName"];
 
-            return $"[eDiscoveryToolbox.Case.{caseId}].[dbo]";
-
-        }
+		}
 
         public static IEnumerable<string> GetAllDocumentIds()
         {
