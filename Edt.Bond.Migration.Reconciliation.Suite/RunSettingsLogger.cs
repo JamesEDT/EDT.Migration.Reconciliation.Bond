@@ -19,7 +19,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
                 sw.WriteLine("dataset:" + Settings.EdtImporterDatasetName);
                 sw.WriteLine("idx path:" + Settings.IdxFilePath);
                 sw.WriteLine("sample size:" + Settings.IdxSampleSize);
-                sw.WriteLine("mirco src dir:" + Settings.MicroFocusSourceDirectory);
+                sw.WriteLine("aun workbook path:" + Settings.MicroFocusAunWorkbookPath);
                 sw.WriteLine("standard map path:" + Settings.StandardMapPath);
             }
         }

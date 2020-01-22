@@ -65,6 +65,24 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             TestTotal++;
         }
 
+        public void PrintExpectedOutputFile(string mappingName)
+        {
+            if (ComparisonResults.Count > 0)
+            {
+                var filename = Path.Combine(Settings.ReportingDirectory, $"expectedvalues_{mappingName.Replace(" ", string.Empty)}.csv");
+
+                using (var sw = new StreamWriter(filename))
+                {
+                    sw.WriteLine("DocumentId,Expected Edt value");
+
+                    foreach (var result in ComparisonResults)
+                    {
+                        sw.WriteLine($"{result.DocumentId},\"{result.IdxConvertedValue}\"");
+                    }                
+                }
+            }
+        }
+
         public string PrintComparisonTables(string mappingName)
         {
             var filename = Path.Combine(Settings.ReportingDirectory,$"differences_{mappingName.Replace(" ", string.Empty)}.csv");
@@ -78,7 +96,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
                     sw.WriteLine("DocumentId,Idx value,Expected Edt value,Edt value");
 
                     foreach (var result in ComparisonResults) {
-                        sw.WriteLine($"{result.DocumentId},{result.IdxValue},{result.IdxConvertedValue},{result.EdtValue}");                        
+                        sw.WriteLine($"{result.DocumentId},\"{result.IdxValue}\",\"{result.IdxConvertedValue}\",\"{result.EdtValue}\"");                        
                     }
                 }
 

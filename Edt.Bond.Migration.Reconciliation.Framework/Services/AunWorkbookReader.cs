@@ -8,9 +8,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
     {
         public static Dictionary<string,string> Read()
         {
-            var aunPath = Path.Combine(Settings.MicroFocusSourceDirectory, "AUN_WORKBOOK.CSV");
-
-            using (var streamReader = new StreamReader(aunPath))
+            using (var streamReader = new StreamReader(Settings.MicroFocusAunWorkbookPath))
             {
                 var headers = streamReader.ReadLine();
 

@@ -113,6 +113,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             {
                 var diffFile = PrintComparisonTables(mappingUnderTest.EdtName);
                 TestLogger.Info($"Difference and error details written to: <a href=\"{diffFile}\">{diffFile}</a>");
+                PrintExpectedOutputFile(mappingUnderTest.EdtName);
             }
 
             Assert.Zero(different, $"Differences were seen between expected value and actual value for this Edt field {mappingUnderTest.EdtName}");

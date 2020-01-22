@@ -27,15 +27,15 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
         public string ConvertValueToEdtForm(string value)
         {
-            switch (_edtColumnDetails?.DataType)
+            if(_edtColumnDetails?.DataType == ColumnType.Date || _standardMapping.EdtType.Equals("Date", StringComparison.InvariantCultureIgnoreCase))
             {
-                case ColumnType.Date:
-                    return GetDateString(value);
-                case ColumnType.Boolean:
-                    return GetBooleanString(value);
-                default:
-                    return value;
+                return GetDateString(value);
             }
+
+            if (_edtColumnDetails?.DataType == ColumnType.Boolean)
+                return GetBooleanString(value);
+
+            return value;
         }
 
         private ColumnDetails GetEdtColumnDetailsFromDisplayName(string displayName)

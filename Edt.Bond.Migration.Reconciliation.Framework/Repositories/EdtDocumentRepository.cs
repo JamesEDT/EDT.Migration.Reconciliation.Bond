@@ -34,7 +34,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static string GetDocumentIDQuery(List<string> documentIds)
         {
-				return "(" + string.Join(",", documentIds) +")";
+				return "(" + string.Join(",", documentIds.Select(x => $"'{x}'")) +")";
         }
 
         public static Dictionary<string, string> GetDocumentDateField(List<string> documentIds, string desiredField)
@@ -190,7 +190,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 	                        Field.Name
                           FROM {GetDatabaseName()}.[DocumentMvField] documentField
                           INNER JOIN {GetDatabaseName()}.[Document] document on documentField.DocumentID = document.DocumentID
-                          INNER JOIN {GetDatabaseName()}.[MvField] mvField on documentField.DocumentMvFieldID = mvField.MvFieldID
+                          INNER JOIN {GetDatabaseName()}.[MvField] mvField on documentField.MvFieldID = mvField.MvFieldID
                           INNER JOIN (
 	                        SELECT 
 			                        MvField.MvFieldID as Id,

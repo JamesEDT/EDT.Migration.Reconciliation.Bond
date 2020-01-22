@@ -1,4 +1,4 @@
-Field Name in EDT,IDOL Name (in IDX file),Name in MicroFocus export,CFU Suggested Name,Found in IDX data,Stored in EDT as,Importer Group,Field Description,Override conversion method
+Field Name in EDT,IDOL Name (in IDX file),Name in MicroFocus export,Suggested Name,Found in IDX data,Stored in EDT as,Importer Group,Field Description,Override conversion method
 #DREDBNAME,#DREDBNAME,,Database Name,,,Custom,,Unknown
 #DREENDDOC,#DREENDDOC,,#DREENDDOC,,,Custom,,Unknown
 #DRESECTION,#DRESECTION,,#DRESECTION,,,Custom,,Unknown
@@ -16,7 +16,7 @@ _TEMPLATEID,_TEMPLATEID,,_TEMPLATEID,,,Custom,,Unknown
 2nd Disc Reviewer,TAG_REG_SECOND_REVIEWER_MATCH_PARAMETRIC,2nd Disc Reviewer,2nd Disc Reviewer,,Dropdown List,MS Office & PDF,,Unknown
 ACTUALORIGINALNAME,ACTUALORIGINALNAME,,ACTUALORIGINALNAME,,,Custom,,Unknown
 APERTURE_VALUE,APERTURE_VALUE,,APERTURE_VALUE,,,Custom,,Unknown
-APPLE-MOBILE-WEB-APP-CAPABLE,APPLE-MOBILE-WEB-APP-CAPABLE,,APPLE-MOBILE-WEB-APP-CAPABLE,,,Unknown,,Unknown
+APPLE_MOBILE_WEB_APP_CAPABLE,APPLE-MOBILE-WEB-APP-CAPABLE,,APPLE-MOBILE-WEB-APP-CAPABLE,,,Unknown,,Unknown
 APPLE-MOBILE-WEB-APP-STATUS-BAR-STYLE,APPLE-MOBILE-WEB-APP-STATUS-BAR-STYLE,,APPLE-MOBILE-WEB-APP-STATUS-BAR-STYLE,,,Standard,,Unknown
 APPLE-TOUCH-FULLSCREEN,APPLE-TOUCH-FULLSCREEN,,APPLE-TOUCH-FULLSCREEN,,,Other,,Unknown
 AppModified,FILEMODIFIED_NUMERICDATE,OS Date Last Modified,AppModified,,undefined,Custom,,Unknown
@@ -178,12 +178,12 @@ CFU Quarantine Reason,TAG_CFU_QUARANTINE_DELETE_REASON_MATCH,CFU Quarantine Reas
 CFU Release Date,TAG_CFU_QUARANTINE_RELEASE_DATE_NUMERICDATE,CFU Release Date,CFU Release Date,,Date,Custom,,Unknown
 CFU Release Reason,TAG_CFU_QUARANTINE_RELEASE_REASON_MATCH,CFU Release Reason,CFU Release Reason,,Memo,Custom,,Unknown
 CHANNELS,CHANNELS,,CHANNELS,,,,,Unknown
-Character Count,CHARCOUNT,,Character Count,,,,,Unknown
+CHARCOUNT,CHARCOUNT,,Character Count,,,,,Unknown
 CHARACTERSWITHSPACES,CHARACTERSWITHSPACES,,CHARACTERSWITHSPACES,,,,,Unknown
 Child Count,#DRECHILDCOUNT,Child Count,Child Count,,Text,Custom,,Unknown
 CHILDHASHES,CHILDHASHES,,CHILDHASHES,,,,,Unknown
 CLIENTNO,CLIENTNO,,CLIENTNO,,,,,Unknown
-Code Page,CODEPAGE,,Code Page,,,,,Unknown
+CODEPAGE,CODEPAGE,,Code Page,,,,,Unknown
 COLOR_REPRESENTATION,COLOR_REPRESENTATION,,COLOR_REPRESENTATION,,,,,Unknown
 COMMENT0,COMMENT0,,COMMENT0,,,,,Unknown
 COMMENTS,COMMENTS,,COMMENTS,,,,,Unknown
@@ -191,13 +191,13 @@ Company,COMPANY,,Company,,,,,Unknown
 COMPONENTS_CONFIGURATION,COMPONENTS_CONFIGURATION,,COMPONENTS_CONFIGURATION,,,,,Unknown
 COMPRESSED_BITS_PIXEL,COMPRESSED_BITS_PIXEL,,COMPRESSED_BITS_PIXEL,,,,,Unknown
 COMPRESSION,COMPRESSION,,COMPRESSION,,,,,Unknown
-Containing Folder,#DRECONTAININGFOLDER,,Containing Folder,,,Custom,,Unknown
-Containing Folder,DRECONTAININGFOLDER,,Containing Folder,,,Custom,,Unknown
-Content,#DRECONTENT,,Content,,Text,Custom,,Unknown
-Content,DRECONTENT,,Content,,Text,Custom,,Unknown
+#DRECONTAININGFOLDER,#DRECONTAININGFOLDER,,Containing Folder,,,Custom,,Unknown
+DRECONTAININGFOLDER,DRECONTAININGFOLDER,,Containing Folder,,,Custom,,Unknown
+#DRECONTENT,#DRECONTENT,,Content,,Text,Custom,,Unknown
+DRECONTENT,DRECONTENT,,Content,,Text,Custom,,Unknown
 CONTENTSTATUS,CONTENTSTATUS,,CONTENTSTATUS,,,,,Unknown
 CONTENTTYPEID,CONTENTTYPEID,,CONTENTTYPEID,,,,,Unknown
-Conversation Topic,PR_CONVERSATION_TOPIC,,Conversation Topic,,,,,Unknown
+PR_CONVERSATION_TOPIC,PR_CONVERSATION_TOPIC,,Conversation Topic,,,,,Unknown
 ConversationIndex,PR_CONVERSATION_INDEX,,ConversationIndex,,,,,Unknown
 Corrected Date,TAG_CORRECTEDDATE_NUMERICDATE,Corrected Date,Corrected Date,,Date,Custom,,Unknown
 Corrected Date Request,TAG_CDATEREQUEST_MATCH,Corrected Date Request,Corrected Date Request,,List (presented as radio button),Email,,Unknown
@@ -213,7 +213,7 @@ Crim Disc Determination,TAG_CRIM_DIS_DETERMINATION_MATCH_PARAMETRIC,Crim Disc De
 Crim Disc Reason,TAG_CRIM_DIS_REASON_MATCH,Crim Disc Reason,,,Memo,TextArea,,Unknown
 Crim Disclose To,TAG_CRIM_DIS_TO_MATCH,Crim Disclose To,,,MultiValueList,MultiSelect,,Unknown
 Crim Disclosure Status,TAG_CRIM_DIS_STATUS_MATCH,Crim Disclosure Status,,,Dropdown List,Combobox,,Unknown
-Crim Disclosure To All?,TAG_CRIM_DIS_TOALL_MATCH,Crim Disclosure To All?,,,Dropdown List,Combobox,,Unknown
+Crim Disclosure To All,TAG_CRIM_DIS_TOALL_MATCH,Crim Disclosure To All?,,,Dropdown List,Combobox,,Unknown
 Crim Duplicate Of,TAG_CRIM_DUPLICATEOF_MATCH,Crim Duplicate Of,,,Text,Text,,Unknown
 CRIM Evidence Comments,TAG_BUN_EVIDENCECOMMENTS_MATCH,CRIM Evidence Comments,,,Memo,TextArea,,Unknown
 CRIM Evidence Status,TAG_BUN_EVIDENCESTATUS_MATCH,CRIM Evidence Status,,,List (presented as radio button),Radio,,Unknown
@@ -234,7 +234,7 @@ CX_RELOCATIONTIMESTAMP,CX_RELOCATIONTIMESTAMP,,CX_RELOCATIONTIMESTAMP,,,,,Unknow
 CX_RELOCATIONUSER,CX_RELOCATIONUSER,,CX_RELOCATIONUSER,,,,,Unknown
 DATA_RATE,DATA_RATE,,DATA_RATE,,,,,Unknown
 Date,#DREDATE,Date,EMS DREDATE,,undefined,Unknown,,Unknown
-Date File Modified,FILEMODIFIEDTIME,,Date File Modified,,,,,Unknown
+FILEMODIFIEDTIME,FILEMODIFIEDTIME,,Date File Modified,,,,,Unknown
 Date Received,RECEIVED_NUMERICDATE,Email Received Date,Date Received,,undefined,Custom,,Unknown
 Date Sent,SENT,,Date Sent,,,,,Unknown
 DATE_TIME_DIGITISED,DATE_TIME_DIGITISED,,DATE_TIME_DIGITISED,,,,,Unknown
@@ -254,23 +254,23 @@ Disc Redaction Applied,TAG_REG_REDACTION_APPLIED_NUMERIC,Disc Redaction Applied,
 Disc Redaction Approved,TAG_REG_REDACTION_APROVED_NUMERIC,Disc Redaction Approved?,Disc Redaction Approved,,Boolean,Standard,,Unknown
 Disclosure Determination,TAG_REG_DIS_DETERMINATION_MATCH_PARAMETRIC,Disclosure Determination,Disclosure Determination,,List (presented as radio button),Custom,,Unknown
 Disclosure Reason,TAG_REG_DIS_REASON_MATCH_PARAMETRIC,Disclosure Reason,Disclosure Reason,,Dropdown List,Custom,,Unknown
-Display BCC,PR_DISPLAY_BCC,,Display BCC,,,,,Unknown
-Display CC,PR_DISPLAY_CC,,Display CC,,,,,Unknown
-Display To,PR_DISPLAY_TO,,Display To,,,,,Unknown
+PR_DISPLAY_BCC,PR_DISPLAY_BCC,,Display BCC,,,,,Unknown
+PR_DISPLAY_CC,PR_DISPLAY_CC,,Display CC,,,,,Unknown
+PR_DISPLAY_TO,PR_DISPLAY_TO,,Display To,,,,,Unknown
 DMSDOCNUM,DMSDOCNUM,,DMSDOCNUM,,,,,Unknown
-Doc Description Reviewed,TAG_CRIM_DOCDESCRIPTIONREVIEWED_NUMERIC,Doc Description Reviewed,,,Boolean,Checkbox,,Unknown
+Document Description Reviewed,TAG_CRIM_DOCDESCRIPTIONREVIEWED_NUMERIC,Doc Description Reviewed,,,Boolean,Checkbox,,Unknown
 DOCID,DOCID,,DOCID,,,,,Unknown
 DOCIDCONTENT,DOCIDCONTENT,,DOCIDCONTENT,,,,,Unknown
-DocLibSource,AUN_SOURCE_NAME,Source Name (Initial),DocLibSource,,Dropdown List,Custom,,Unknown
+AUN_SOURCE_NAME,AUN_SOURCE_NAME,Source Name (Initial),DocLibSource,,Dropdown List,Custom,,Unknown
 DOCLOC,DOCLOC,,DOCLOC,,,,,Unknown
 DOCLOC2,DOCLOC2,,DOCLOC2,,,,,Unknown
 DOCREFERENCE,DOCREFERENCE,,DOCREFERENCE,,,,,Unknown
 DOCSECURITY,DOCSECURITY,,DOCSECURITY,,,,,Unknown
-Document Class,DOCUMENTCLASS,,Document Class,,,,,Unknown
+DOCUMENTCLASS,DOCUMENTCLASS,,Document Class,,,,,Unknown
 Document Description,TAG_INV_REVISEDDOCDESCRIPTION_MATCH,Doc Description,Document Description,,Memo,Custom,,Unknown
 Document Exhibit Reference,TAG_DOC_EXHIBITREFERENCE_MATCH,Document Exhibit Reference,,,Text,Text,,Unknown
 Document ID,UUID,UUID,Document ID / EMS UUID,,undefined,Custom,,Unknown
-Document Size,DOCUMENTSIZE,,Document Size,,,,,Unknown
+DOCUMENTSIZE,DOCUMENTSIZE,,Document Size,,,,,Unknown
 Document Source,TAG_DOCUMENT_SOURCE_MATCH,Document Source,Document Source,,Text,Custom,,Unknown
 APPNAME,APPNAME,,Document Type,,,Other,,Unknown
 EMS Document Type Code,DOCUMENTTYPE,Document Type Code,Document Type Code,,undefined,Custom,,Unknown
@@ -281,14 +281,12 @@ DOCUMENTPCTEMBEDDEDFONT,DOCUMENTPCTEMBEDDEDFONT,,DOCUMENTPCTEMBEDDEDFONT,,,,,Unk
 DOCUMENTPCTPROBABILITYMISMATCH,DOCUMENTPCTPROBABILITYMISMATCH,,DOCUMENTPCTPROBABILITYMISMATCH,,,,,Unknown
 DRE_Reference,#DREREFERENCE,Native Reference,DRE_Reference,,Text,Custom,,Unknown
 DRECHILDCOUNT,DRECHILDCOUNT,,,,,,,Unknown
-DREDATE,DREDATE,,,,,,,Unknown
 DREENDDOC,DREENDDOC,,DREENDDOC,,,Custom,,Unknown
 DREFAMILYCOUNT_NUMERIC,DREFAMILYCOUNT_NUMERIC,,,,,,,Unknown
 DREORIGINALNAME,DREORIGINALNAME,,,,,,,Unknown
-DREPARENTREFERENCE_ID,DREPARENTREFERENCE_ID,,,,,,,Unknown
 DREREFERENCE,DREREFERENCE,,,,,,,Unknown
 DREROOTFAMILYREFERENCE_ID,DREROOTFAMILYREFERENCE_ID,,,,,,,Unknown
-DREROOTPARENTTYPE,#DREROOTPARENTTYPE,,DREROOTPARENTTYPE,,,Custom,,Unknown
+#DREROOTPARENTTYPE,#DREROOTPARENTTYPE,,DREROOTPARENTTYPE,,,Custom,,Unknown
 DREROOTPARENTTYPE,DREROOTPARENTTYPE,,DREROOTPARENTTYPE,,,Custom,,Unknown
 DRETITLE,DRETITLE,,,,,,,Unknown
 EDD Protected _ Deleted From Review,TAG_PROTECTED_ITEM_EDD_DELETE_NUMERIC,EDD - Protected - Deleted From Review,EDD Protected _ Deleted From Review,,Boolean,Custom,,Unknown
@@ -298,23 +296,23 @@ EDRMSFSCCLASSIFICATION,EDRMSFSCCLASSIFICATION,,EDRMSFSCCLASSIFICATION,,,,,Unknow
 All Email Addresses,AUN_ADDRESS_MATCH_PARAMETRIC,Email Addresses (All),Email Addresses (All),,Dropdown List,Custom,,Unknown
 Recipient Email Domain,RECIPIENT_DOMAIN,Domain (Recipient),Domain (Recipient),,Dropdown List,Email,,Unknown
 Sender Email Domain,FROMDOMAIN,Domain (Sender),Domain (Sender),,Dropdown List,Email,,Unknown
-Email Timezone,EMAIL_TIMEZONE,,Email Timezone,,,,,Unknown
+EMAIL_TIMEZONE,EMAIL_TIMEZONE,,Email Timezone,,,,,Unknown
 EMAIL_DIRECTION_PARAMETRIC,EMAIL_DIRECTION_PARAMETRIC,Email Direction,,,Dropdown List,Custom,,Unknown
 EMAIL_OWNER_ADDRESS,EMAIL_OWNER_ADDRESS,,EMAIL_OWNER_ADDRESS,,,,,Unknown
-EmailThreadId,EMAILTHREADID_MATCH,,EmailThreadId,,,,,Unknown
-Embedded,EMBEDDED,,Embedded,,,,,Unknown
-Embedded Mail Reference,#DREEMBMAILREFERENCE,,Embedded Mail Reference,,,Custom,,Unknown
-Embedded Mail Reference,DREEMBMAILREFERENCE,,Embedded Mail Reference,,,Custom,,Unknown
+EMAILTHREADID_MATCH,EMAILTHREADID_MATCH,,EmailThreadId,,,,,Unknown
+EMBEDDED,EMBEDDED,,Embedded,,,,,Unknown
+#DREEMBMAILREFERENCE,#DREEMBMAILREFERENCE,,Embedded Mail Reference,,,Custom,,Unknown
+DREEMBMAILREFERENCE,DREEMBMAILREFERENCE,,Embedded Mail Reference,,,Custom,,Unknown
 EMS File Type,CONTENT-TYPE,File Type,Content Type,,Dropdown List,Custom,,Unknown
 EMS Production Bates Number,INTROSPECT_BATES,EMS Bates,BatesSearch,,undefined,Custom,,Unknown
 EMS Production Begin,PRODUCTION_BEGIN_MATCH,Production Begin,Production Begin,,undefined,Custom,,Unknown
 EMS Production Date,PRODUCTION_DATE,Production Date,Production Date,,Dropdown List,Custom,,Unknown
 EMS Production End,PRODUCTION_END_MATCH,Production End,Production End,,undefined,Custom,,Unknown
 EMS Production Name,PRODUCTION_NAME_MATCH,Production Name,Production Name,,Dropdown List,Custom,,Unknown
-EMS Record Type,TYPE,Record Type,File Type,,Dropdown List,Custom,,Unknown
+EMS Record Type Code,TYPE,Record Type,File Type,,Dropdown List,Custom,,Unknown
 EMS Attachment,ATTACHMENT,,EMS Attachment,,,System,,Unknown
 EMS Batch Number,TAG_BATCH_NUMBER_MATCH,Batch Number,EMS Batch Number,,Text,Standard ,,Unknown
-EMS Custodian,AUN_CUSTODIAN,Custodian (Initial),EMS Custodian,,Dropdown List,Standard,,Unknown
+AUN_CUSTODIAN,AUN_CUSTODIAN,Custodian (Initial),EMS Custodian,,Dropdown List,Standard,,Unknown
 EMS Document Author,AUTHOR,Author,EMS Document Author,,Text,Custom,,Unknown
 EMS Duplicate Document,TAG_DUPLICATE_NUMERIC,Duplicate,EMS Duplicate Document,,Boolean,Custom,,Unknown
 EMS Duplicate Of,TAG_DUPLICATEOF_MATCH,Duplicate Of,EMS Duplicate Of,,Text,Custom,,Unknown
@@ -323,16 +321,16 @@ EMS Family Root,FAMILYROOT,Family Root,EMS Family Root,,undefined,Custom,,Unknow
 EMS Family Sender,FAMILYSENDER,Family Sender,EMS Family Sender,,Text,Standard,,Unknown
 EMS Family Sort,FAMILYSORT,Family Group,EMS Family Sort,,Text,Unknown,,Unknown
 EMS Family Subject,FAMILYSUBJECT,Family Subject,EMS Family Subject,,Text,Unknown,,Unknown
-EMS Group,AUN_GROUP,Group Name (Initial),EMS Group,,Dropdown List,Other,,Unknown
-EMS Has Track Changes,HAS_REVISIONS,Has Track Changes,EMS Has Track Changes,,undefined,Custom,,Unknown
+AUN_GROUP,AUN_GROUP,Group Name (Initial),EMS Group,,Dropdown List,Other,,Unknown
+EMS Has Tracked Changes,HAS_REVISIONS,Has Track Changes,EMS Has Track Changes,,undefined,Custom,,Unknown
 EMS Import Error Description,IMPORTERRORDESCRIPTION,Import Error Description,EMS Import Error Description,,Dropdown List,Unknown,,Unknown
 EMS MD5,MD5,MD5 Hash,EMS MD5,,Text,Appointment,,Unknown
 EMS OCR Processed,AUN_OCRED,OCR Processed,EMS OCR Processed,,undefined,Standard,,Unknown
 EMS Produced Exhibit Reference number,SL_PRODUCED_REFERENCE_MATCH,Produced Exhibit Reference number,,,Text,Unknown,,Unknown
-EMS Source Number,AUN_SOURCE_NUMERIC,Source ID,EMS Source Number,,Dropdown List,Other,,Unknown
+AUN_SOURCE_NUMERIC,AUN_SOURCE_NUMERIC,Source ID,EMS Source Number,,Dropdown List,Other,,Unknown
 EMS Structured Load Doc Type,SL_DOCUMENT_TYPE_MATCH,Document Type,Document Source Type,,Text,Custom,,Unknown
 EMS Term List,AUN_TERMLIST_NUMERIC,Term List,EMS Term List,,undefined,MS Office & PDF,,Unknown
-EMS Title,TITLE,,Title,,,,,Unknown
+TITLE,TITLE,,Title,,,,,Unknown
 EMS Workflow ID Source,INTROSPECT_WORKFLOW_SOURCE,Workflow ID - Source,EMS Workflow ID Source,,Text,Custom,,Unknown
 EMS Workflow ID Target,INTROSPECT_WORKFLOW_TARGET,Workflow ID - Target,EMS Workflow ID Target,,Text,Custom,,Unknown
 EMS Workflow Project Target,INTROSPECT_MIGRATED_TO_MATTER,Workflow Project - Target,EMS Workflow Project Target,,Text,Custom,,Unknown
@@ -357,7 +355,6 @@ Family Date,FAMILY_DATE_NUMERICDATE,Family Date,FamilyDate,,undefined,Standard,,
 FAMILYDATE,FAMILYDATE,,FAMILYDATE,,,,,Unknown
 FAMILYTHREADID_MATCH,FAMILYTHREADID_MATCH,,FAMILYTHREADID_MATCH,,,,,Unknown
 File Extension,FILETYPE_PARAMETRIC,File Extension,File Extension,,Dropdown List,Unknown,,Unknown
-File Name,#DREFILENAME,,File Name,,,Custom,,Unknown
 File Name,DREFILENAME,,File Name,,,Custom,,Unknown
 File Tab Number,TAG_FILE_TAB_MATCH,File Tab Number,File Tab Number,,Text,Email,,Unknown
 FILE_SOURCE,FILE_SOURCE,,FILE_SOURCE,,,,,Unknown
@@ -373,7 +370,7 @@ FORMAT_TYPE,FORMAT_TYPE,,FORMAT_TYPE,,,,,Unknown
 FORMAT-DETECTION,FORMAT-DETECTION,,FORMAT-DETECTION,,,,,Unknown
 FRAME_COUNT,FRAME_COUNT,,FRAME_COUNT,,,,,Unknown
 Further Review Required,TAG_FURTHER_REVIEW_REQUIRED_NUMERIC,Further Review Required,Further Review Required,,Boolean,Custom,,Unknown
-Generator,GENERATOR,,Generator,,,,,Unknown
+GENERATOR,GENERATOR,,Generator,,,,,Unknown
 GPS_ALTITUDE,GPS_ALTITUDE,,GPS_ALTITUDE,,,,,Unknown
 GPS_ALTITUDE_REF,GPS_ALTITUDE_REF,,GPS_ALTITUDE_REF,,,,,Unknown
 GPS_DATE_STAMP,GPS_DATE_STAMP,,GPS_DATE_STAMP,,,,,Unknown
@@ -390,41 +387,41 @@ GPS_SPEED,GPS_SPEED,,GPS_SPEED,,,,,Unknown
 GPS_SPEED_REF,GPS_SPEED_REF,,GPS_SPEED_REF,,,,,Unknown
 GPS_TIMESTAMP,GPS_TIMESTAMP,,GPS_TIMESTAMP,,,,,Unknown
 GPS_VERSION_ID,GPS_VERSION_ID,,GPS_VERSION_ID,,,,,Unknown
-Has Attachment,HASATTACHMENT,,Has Attachment,,,,,Unknown
+HASATTACHMENT,HASATTACHMENT,,Has Attachment,,,,,Unknown
 Has Attachments,HASATTACHMENTS,Attachments,Has Attachments,,undefined,Unknown,,Unknown
 Has Searchable Text,HAS_TEXT,Has Searchable Text,Has Searchable Text,,Dropdown List,Custom,,Unknown
-Has TIFF Path,AUN_TIFFASSOCIATION,Has TIFF Path,Has TIFF Path,,Text,Custom,,Unknown
+AUN_TIFFASSOCIATION,AUN_TIFFASSOCIATION,Has TIFF Path,Has TIFF Path,,Text,Custom,,Unknown
 HEADINGPAIRS,HEADINGPAIRS,,HEADINGPAIRS,,,,,Unknown
 HEIGHT,HEIGHT,,HEIGHT,,,,,Unknown
 HEIGHT__PIXELS_,HEIGHT__PIXELS_,,HEIGHT__PIXELS_,,,,,Unknown
 HIDDENCOUNT,HIDDENCOUNT,,HIDDENCOUNT,,,,,Unknown
 HLINKS,HLINKS,,HLINKS,,,,,Unknown
 HORIZONTAL_RESOLUTION,HORIZONTAL_RESOLUTION,,HORIZONTAL_RESOLUTION,,,,,Unknown
-Host Document ID,#DREPARENTREFERENCE_ID,Parent UUID,Host Document ID,,Text,MS Office & PDF,,Unknown
+Host Document ID,DREPARENTREFERENCE_ID,Parent UUID,Host Document ID,,Text,MS Office & PDF,,Unknown
 HYPERLINKBASE,HYPERLINKBASE,,HYPERLINKBASE,,,,,Unknown
 HYPERLINKS,HYPERLINKS,,HYPERLINKS,,,,,Unknown
 HYPERLINKSCHANGED,HYPERLINKSCHANGED,,HYPERLINKSCHANGED,,,,,Unknown
-Ignored,AUN_IGNORED,,Ignored,,,Custom,,Unknown
+AUN_IGNORED,AUN_IGNORED,,Ignored,,,Custom,,Unknown
 IMAGE_SIZE,IMAGE_SIZE,,IMAGE_SIZE,,,,,Unknown
 IMCLASS,IMCLASS,,IMCLASS,,,,,Unknown
 IMDOCUMENTNUMBER,IMDOCUMENTNUMBER,,IMDOCUMENTNUMBER,,,,,Unknown
-Import Empty,IMPORTEMPTY,,Import Empty,,,,,Unknown
-Import Error Code,IMPORTERRORCODE,,Import Error Code,,,,,Unknown
-Importance,PR_IMPORTANCE,,Importance,,,,,Unknown
+IMPORTEMPTY,IMPORTEMPTY,,Import Empty,,,,,Unknown
+IMPORTERRORCODE,IMPORTERRORCODE,,Import Error Code,,,,,Unknown
+PR_IMPORTANCE,PR_IMPORTANCE,,Importance,,,,,Unknown
 IMPORTINVALIDUTF8BYTES,IMPORTINVALIDUTF8BYTES,,IMPORTINVALIDUTF8BYTES,,,,,Unknown
-ImportMagicExtension,IMPORTMAGICEXTENSION,File Extension List,ImportMagicExtension,,undefined,Custom,,Unknown
+IMPORTMAGICEXTENSION,IMPORTMAGICEXTENSION,File Extension List,ImportMagicExtension,,undefined,Custom,,Unknown
 IMPORTORIGINALENCODING,IMPORTORIGINALENCODING,,IMPORTORIGINALENCODING,,,,,Unknown
 IMPORTVERSION,IMPORTVERSION,,IMPORTVERSION,,,,,Unknown
 IMTYPE,IMTYPE,,IMTYPE,,,,,Unknown
 IMVERSIONNUMBER,IMVERSIONNUMBER,,IMVERSIONNUMBER,,,,,Unknown
-Information Flag,INFOFLAG,,Information Flag,,,,,Unknown
+INFOFLAG,INFOFLAG,,Information Flag,,,,,Unknown
 Int Date Created,CREATE_DTM_NUMERICDATE,Int Date Created,Int Date Created,,undefined,Custom,,Unknown
 Int Last Printed,LAST_PRINTED_NUMERICDATE,Int Last Printed,Int Last Printed,,undefined,Unknown,,Unknown
 Int Last Saved,LASTSAVE_DTM_NUMERICDATE,Int Last Saved,Int Last Saved,,undefined,Custom,,Unknown
-Internet Message ID,PR_INTERNET_MESSAGE_ID,,Internet Message ID,,,,,Unknown
+InternetMessageID,PR_INTERNET_MESSAGE_ID,,Internet Message ID,,,,,Unknown
 InternetHeaders,PR_TRANSPORT_MESSAGE_HEADERS_W,,InternetHeaders,,,,,Unknown
 INTERNETMESSAGEID,INTERNETMESSAGEID,,INTERNETMESSAGEID,,,,,Unknown
-InternetMessageID,MAPIENTRYID,,InternetMessageID,,,,,Unknown
+MAPIENTRYID,MAPIENTRYID,,InternetMessageID,,,,,Unknown
 INTEROPERABILITY_INDEX,INTEROPERABILITY_INDEX,,INTEROPERABILITY_INDEX,,,,,Unknown
 INTEROPERABILITY_VERSION,INTEROPERABILITY_VERSION,,INTEROPERABILITY_VERSION,,,,,Unknown
 Introspect Deleted Folder ID,INTROSPECT_DELETED,Deleted Items Folder ID,Introspect Deleted Folder ID,,Text,Custom,,Unknown
@@ -436,7 +433,7 @@ Inv 1st Reviewer,TAG_INV_REVIEWEDBY_MATCH_PARAMETRIC,Inv 1st Reviewer,Inv 1st Re
 Inv 2nd Rev Comments,TAG_INV_SECOND_COMMENTS_MATCH,Inv 2nd Rev Comments,Inv 2nd Rev Comments,,Memo,Custom,,Unknown
 Inv 2nd Rev Complete,TAG_INV_SECOND_COMPLETE_NUMERIC,Inv 2nd Review Complete,Inv 2nd Rev Complete,,Boolean,Custom,,Unknown
 Inv 2nd Reviewer,TAG_INV_SECOND_REVIEWER_MATCH_PARAMETRIC,Inv 2nd Reviewer,Inv 2nd Reviewer,,Dropdown List,Custom,,Unknown
-Investigation 1st Reviewer,TAG_INV_INITIAL_REVIEWER_MATCH_PARAMETRIC,Investigation 1st Reviewer,,,Dropdown List,Combobox,,Unknown
+Inv 1st Reviewer,TAG_INV_INITIAL_REVIEWER_MATCH_PARAMETRIC,Investigation 1st Reviewer,,,Dropdown List,Combobox,,Unknown
 Investigation Comments,TAG_INV_COMMENTS_MATCH,Comments,Investigation Comments,,Memo,Custom,,Unknown
 Investigation Determination,TAG_INV_DETERMINATION_MATCH_PARAMETRIC,Investigation Determination,Investigation Determination,,List (presented as radio button),Standard,,Unknown
 Is Redacted,TAG_REDACTED_NUMERIC,Is Redacted,,,Boolean,Checkbox,,Unknown
@@ -452,8 +449,8 @@ Key Document,TAG_KEY_DOCUMENT_NUMERIC,Key Document,Key Document,,Boolean,Custom,
 KEYVIEWVERSION,KEYVIEWVERSION,,KEYVIEWVERSION,,,,,Unknown
 Keywords,KEYWORDS,,Keywords,,,,,Unknown
 LANGUAGE,LANGUAGE,,LANGUAGE,,,,,Unknown
-Last Author,LASTAUTHOR,,Last Author,,,,,Unknown
-Last Printed,LASTPRINTED,,Last Printed,,,,,Unknown
+LASTAUTHOR,LASTAUTHOR,,Last Author,,,,,Unknown
+LASTPRINTED,LASTPRINTED,,Last Printed,,,,,Unknown
 LASTSAVED,LASTSAVED,,LASTSAVED,,,,,Unknown
 Legal Rev Comments,TAG_REG_LEGAL_COMMENTS_MATCH,Legal Rev Comments,Legal Rev Comments,,Memo,Custom,,Unknown
 Legal Rev Complete,TAG_REG_LEGAL_COMPLETE_NUMERIC,Legal Rev Complete,Legal Rev Complete,,Boolean,Custom,,Unknown
@@ -461,8 +458,8 @@ Legal Rev Date,TAG_REG_LEGALREV_NUMERICDATE,Legal Rev Date,Legal Rev Date,,Date,
 Legal Rev Decision,TAG_REG_LEGAL_DECISION_MATCH,Legal Rev Decision,Legal Rev Decision,,Dropdown List,Custom,,Unknown
 Legal Reviewer,TAG_REG_LEGALREVIEWER_MATCH_PARAMETRIC,Legal Reviewer,Legal Reviewer,,Dropdown List,Custom,,Unknown
 LEXMACHINAISRUNNING,LEXMACHINAISRUNNING,,LEXMACHINAISRUNNING,,,,,Unknown
-Line Count,LINECOUNT,,Line Count,,,,,Unknown
-Links Dirty,LINKSDIRTY,,Links Dirty,,,,,Unknown
+LINECOUNT,LINECOUNT,,Line Count,,,,,Unknown
+LINKSDIRTY,LINKSDIRTY,,Links Dirty,,,,,Unknown
 LINKSUPTODATE,LINKSUPTODATE,,LINKSUPTODATE,,,,,Unknown
 LIVELINK_ID_MATCH,LIVELINK_ID_MATCH,Livelink ID,LIVELINK_ID_MATCH,,Text,Custom,,Unknown
 LIVELINK_LOCATION_MATCH,LIVELINK_LOCATION_MATCH,Livelink Location,LIVELINK_LOCATION_MATCH,,Text,Email,,Unknown
@@ -471,19 +468,19 @@ LOOSE_MAIL_TYPE,LOOSE_MAIL_TYPE,,LOOSE_MAIL_TYPE,,,,,Unknown
 LPP or Protected Item Comments,TAG_PROTECTED_ITEM_COMMENTS_MATCH,LPP or Protected Item Comments,LPP or Protected Item Comments,,Memo,Custom,,Unknown
 LPP or Protected Item Determination,TAG_PROTECTED_ITEM_DETERMINATION_MATCH,LPP or Protected Item Determination,LPP or Protected Item Determination,,List (presented as radio button),Custom,,Unknown
 LPP or Protected Item reviewed,TAG_PROTECTED_ITEM_REVIEWED_NUMERIC,LPP or Protected Item - reviewed,LPP or Protected Item reviewed,,Boolean,Email,,Unknown
-Mail,MAIL,,Mail,,,,,Unknown
+MAIL,MAIL,,Mail,,,,,Unknown
 MAIL_MSG_ID1,MAIL_MSG_ID1,,MAIL_MSG_ID1,,,,,Unknown
 MAIL_MSG_ID2,MAIL_MSG_ID2,,MAIL_MSG_ID2,,,,,Unknown
 MAKE,MAKE,,MAKE,,,,,Unknown
 Manager,MANAGER,,Manager,,,,,Unknown
-MAPI Path,MAPIPATH,,MAPI Path,,,,,Unknown
+MAPIPATH,MAPIPATH,,MAPI Path,,,,,Unknown
 MATTERNO,MATTERNO,,MATTERNO,,,,,Unknown
 MAX_APERTURE_VALUE,MAX_APERTURE_VALUE,,MAX_APERTURE_VALUE,,,,,Unknown
 MESSAGEID,MESSAGEID,,MESSAGEID,,,,,Unknown
 METERING_MODE,METERING_MODE,,METERING_MODE,,,,,Unknown
 MICROSOFT_THEME,MICROSOFT_THEME,,MICROSOFT_THEME,,,,,Unknown
 MICROSYSTEMSCOMPARISON,MICROSYSTEMSCOMPARISON,,MICROSYSTEMSCOMPARISON,,,,,Unknown
-Millnet Document Description,TAG_DOCUMENT_DESCRIPTION_MATCH,Millnet Document Description,Millnet Document Description,,Text,Custom,,Unknown
+EMS Millnet Document Description,TAG_DOCUMENT_DESCRIPTION_MATCH,Millnet Document Description,Millnet Document Description,,Text,Custom,,Unknown
 MMCLIPS,MMCLIPS,,MMCLIPS,,,,,Unknown
 MODEL,MODEL,,MODEL,,,,,Unknown
 NativeRelativePath,NativeRelativePath,,NativeRelativePath,,,,,Unknown
@@ -497,7 +494,7 @@ NUIX_DUPLICATE_DATES_MATCH,NUIX_DUPLICATE_DATES_MATCH,Nuix Duplicate Dates,,,Tex
 NUIX_DUPLICATE_GUID_MATCH,NUIX_DUPLICATE_GUID_MATCH,Nuix Duplicate GUID,,,Text,Standard,,Unknown
 NUIX_DUPLICATE_PATHS_MATCH,NUIX_DUPLICATE_PATHS_MATCH,Nuix Duplicate File Path,,,Text,MS Office & PDF,,Unknown
 Obtained as a result of,TAG_OBTAINED_MATCH,Obtained By,Obtained as a result of,,Text,Custom,,Unknown
-OCR Eligible,AUN_OCR_ELIGIBLE,OCR Eligible,OCR Eligible,,undefined,Standard,,Unknown
+AUN_OCR_ELIGIBLE,AUN_OCR_ELIGIBLE,OCR Eligible,OCR Eligible,,undefined,Standard,,Unknown
 ORDER,ORDER,,ORDER,,,,,Unknown
 ORIENTATION,ORIENTATION,,ORIENTATION,,,,,Unknown
 Original File Name,#DREORIGINALNAME,File Name,Original File Name,,Text,MS Office & PDF,,Unknown
@@ -507,10 +504,10 @@ OS Date File Last Accessed,FILEACCESSED_NUMERICDATE,OS Date Last Accessed,OS Dat
 Outlook Item Class,PR_MESSAGE_CLASS,Outlook Item Class,Outlook Item Class,,Dropdown List,Custom,,Unknown
 PageCount,PAGECOUNT,Page Count,PageCount,,Text,Custom,,Unknown
 PAGINATION_OFFSETS,PAGINATION_OFFSETS,,PAGINATION_OFFSETS,,,,,Unknown
-Paragraph Count,PARCOUNT,,Paragraph Count,,,,,Unknown
-Parent Index,PARENTINDEX,,Parent Index,,,,,Unknown
-Parent Reference,#DREPARENTREFERENCE,,Parent Reference,,,Custom,,Unknown
-Parent Reference,DREPARENTREFERENCE,,Parent Reference,,,Custom,,Unknown
+PARCOUNT,PARCOUNT,,Paragraph Count,,,,,Unknown
+PARENTINDEX,PARENTINDEX,,Parent Index,,,,,Unknown
+#DREPARENTREFERENCE,#DREPARENTREFERENCE,,Parent Reference,,,Custom,,Unknown
+DREPARENTREFERENCE,DREPARENTREFERENCE,,Parent Reference,,,Custom,,Unknown
 PARENT_FILEMODIFIEDTIME,PARENT_FILEMODIFIEDTIME,,PARENT_FILEMODIFIEDTIME,,,,,Unknown
 PARENT_FROM,PARENT_FROM,,PARENT_FROM,,,,,Unknown
 PARENT_SENT,PARENT_SENT,,PARENT_SENT,,,,,Unknown
@@ -529,13 +526,13 @@ PR_SUBJECT,PR_SUBJECT,,PR_SUBJECT,,,,,Unknown
 PRAGMA,PRAGMA,,PRAGMA,,,,,Unknown
 PRESENTATIONTARGET,PRESENTATIONTARGET,,PRESENTATIONTARGET,,,,,Unknown
 Primary Language,AUTN_LANGUAGE,Language,Primary Language,,Dropdown List,Custom,,Unknown
-Priority,PRIORITY,,Priority,,,,,Unknown
+PRIORITY,PRIORITY,,Priority,,,,,Unknown
 PROCESSINGERRORCODE,PROCESSINGERRORCODE,,PROCESSINGERRORCODE,,,,,Unknown
-ProcessingErrorDescription,PROCESSINGERRORDESCRIPTION,,ProcessingErrorDescription,,,,,Unknown
+PROCESSINGERRORDESCRIPTION,PROCESSINGERRORDESCRIPTION,,ProcessingErrorDescription,,,,,Unknown
 Producing Statement,TAG_PRODUCING_STATEMENT_MATCH,Producing Statement,,,Text,Custom,,Unknown
-Production Image File Name,AUN_PRODUCTION_IMAGEFILENAME,Production - Image File Name,Production Image File Name,,Text,Appointment,,Unknown
+AUN_PRODUCTION_IMAGEFILENAME,AUN_PRODUCTION_IMAGEFILENAME,Production - Image File Name,Production Image File Name,,Text,Appointment,,Unknown
 PROGID,PROGID,,PROGID,,,,,Unknown
-Project Number,AUN_PROJECT_NUMERIC,Case Project ID,Project Number,,Text,Custom,,Unknown
+AUN_PROJECT_NUMERIC,AUN_PROJECT_NUMERIC,Case Project ID,Project Number,,Text,Custom,,Unknown
 PROJECTCODE,PROJECTCODE,,PROJECTCODE,,,,,Unknown
 Property reference number,TAG_EXHIBIT_REFERENCE_MATCH,Property reference number,Property reference number,,Text,Custom,,Unknown
 Protected Item Reviewed By,TAG_PROTECTED_ITEM_REVIEWEDBY_MATCH,Protected Item - Reviewed By,Protected Item Reviewed By,,MultiValueList,Custom,,Unknown
@@ -546,46 +543,45 @@ Recipients-Bcc,BCC,BCC,Recipients-Bcc,,Text,Custom,,Unknown
 Recipients-Cc,CC,CC,Recipients-Cc,,Text,Custom,,Unknown
 Recipients-To,TO,To,Recipients-To,,Text,MS Office & PDF,,Unknown
 Redacted Description,TAG_CRIM_DIS_DOCDESCRITPIONREDACTION_MATCH,Redacted Description,,,Memo,TextArea,,Unknown
-Redaction Req-Description,TAG_CRIM_DIS_REDREQ_DESCRIPTION_NUMERIC,Redaction Req-Description,,,Boolean,Checkbox,,Unknown
-Redaction Req-Document,TAG_CRIM_DIS_REDREQ_DOC_NUMERIC,Redaction Req-Document,,,Boolean,Checkbox,,Unknown
+Redaction Req Description,TAG_CRIM_DIS_REDREQ_DESCRIPTION_NUMERIC,Redaction Req-Description,,,Boolean,Checkbox,,Unknown
+Redaction Req Document,TAG_CRIM_DIS_REDREQ_DOC_NUMERIC,Redaction Req-Document,,,Boolean,Checkbox,,Unknown
 Refer to Legal Reviewer,TAG_CRIM_REF_LEGAL_NUMERIC,Refer to Legal Reviewer,,,Boolean,Checkbox,,Unknown
-Re-imported,AUN_REIMPORT_NUMERIC,Re-imported,Re-imported,,Text,Other,,Unknown
+AUN_REIMPORT_NUMERIC,AUN_REIMPORT_NUMERIC,Re-imported,Re-imported,,Text,Other,,Unknown
 RESOLUTION_UNIT,RESOLUTION_UNIT,,RESOLUTION_UNIT,,,,,Unknown
 RESPONSE_SENDER_NAME,RESPONSE_SENDER_NAME,,RESPONSE_SENDER_NAME,,,,,Unknown
-Revision Number,REVNUMBER,,Revision Number,,,,,Unknown
+REVNUMBER,REVNUMBER,,Revision Number,,,,,Unknown
 ROBOTS,ROBOTS,,ROBOTS,,,,,Unknown
-Root Embedded Reference,#DREROOTEMBEDDEDREFERENCE,,Root Embedded Reference,,,Custom,,Unknown
-Root Embedded Reference,DREROOTEMBEDDEDREFERENCE,,Root Embedded Reference,,,Custom,,Unknown
-Root Embedded Reference ID,#DREROOTEMBEDDEDREFERENCE_ID,,Root Embedded Reference ID,,,Unknown,,Unknown
-Root Embedded Reference ID,DREROOTEMBEDDEDREFERENCE_ID,,Root Embedded Reference ID,,,Unknown,,Unknown
-Root Family Reference,#DREROOTFAMILYREFERENCE,,Root Family Reference,,,Custom,,Unknown
-Root Family Reference,DREROOTFAMILYREFERENCE,,Root Family Reference,,,Custom,,Unknown
+#DREROOTEMBEDDEDREFERENCE,#DREROOTEMBEDDEDREFERENCE,,Root Embedded Reference,,,Custom,,Unknown
+DREROOTEMBEDDEDREFERENCE,DREROOTEMBEDDEDREFERENCE,,Root Embedded Reference,,,Custom,,Unknown
+#DREROOTEMBEDDEDREFERENCE_ID,#DREROOTEMBEDDEDREFERENCE_ID,,Root Embedded Reference ID,,,Unknown,,Unknown
+DREROOTEMBEDDEDREFERENCE_ID,DREROOTEMBEDDEDREFERENCE_ID,,Root Embedded Reference ID,,,Unknown,,Unknown
+#DREROOTFAMILYREFERENCE,#DREROOTFAMILYREFERENCE,,Root Family Reference,,,Custom,,Unknown
+DREROOTFAMILYREFERENCE,DREROOTFAMILYREFERENCE,,Root Family Reference,,,Custom,,Unknown
 Root Family Reference ID,#DREROOTFAMILYREFERENCE_ID,Root Family UUID,Root Family Reference ID,,Text,Custom,,Unknown
-Root Message Reference,#DREROOTMSGREFERENCE,,Root Message Reference,,,Custom,,Unknown
-Root Message Reference,DREROOTMSGREFERENCE,,Root Message Reference,,,Custom,,Unknown
-Root Message Reference ID,#DREROOTMSGREFERENCE_ID,,Root Message Reference ID,,,Custom,,Unknown
-Root Message Reference ID,DREROOTMSGREFERENCE_ID,,Root Message Reference ID,,,Custom,,Unknown
-Root Parent Reference,#DREROOTPARENTREFERENCE,,Root Parent Reference,,,Custom,,Unknown
-Root Parent Reference,DREROOTPARENTREFERENCE,,Root Parent Reference,,,Custom,,Unknown
-Root Parent Reference ID,#DREROOTPARENTREFERENCE_ID,,Root Parent Reference ID,,,Custom,,Unknown
-Root Parent Reference ID,DREROOTPARENTREFERENCE_ID,,Root Parent Reference ID,,,Custom,,Unknown
+#DREROOTMSGREFERENCE,#DREROOTMSGREFERENCE,,Root Message Reference,,,Custom,,Unknown
+DREROOTMSGREFERENCE,DREROOTMSGREFERENCE,,Root Message Reference,,,Custom,,Unknown
+#DREROOTMSGREFERENCE_ID,#DREROOTMSGREFERENCE_ID,,Root Message Reference ID,,,Custom,,Unknown
+DREROOTMSGREFERENCE_ID,DREROOTMSGREFERENCE_ID,,Root Message Reference ID,,,Custom,,Unknown
+#DREROOTPARENTREFERENCE,#DREROOTPARENTREFERENCE,,Root Parent Reference,,,Custom,,Unknown
+DREROOTPARENTREFERENCE,DREROOTPARENTREFERENCE,,Root Parent Reference,,,Custom,,Unknown
+#DREROOTPARENTREFERENCE_ID,#DREROOTPARENTREFERENCE_ID,,Root Parent Reference ID,,,Custom,,Unknown
+DREROOTPARENTREFERENCE_ID,DREROOTPARENTREFERENCE_ID,,Root Parent Reference ID,,,Custom,,Unknown
 SAMPLE_RATE,SAMPLE_RATE,,SAMPLE_RATE,,,,,Unknown
 SAMPLE_SIZE,SAMPLE_SIZE,,SAMPLE_SIZE,,,,,Unknown
-Scale Crop,SCALECROP,,Scale Crop,,,,,Unknown
+SCALECROP,SCALECROP,,Scale Crop,,,,,Unknown
 Scanner Document ID,SL_SCANNER_ID_MATCH,Scanner Document ID,Scanner Document ID,,Text,Other,,Unknown
 SCENE_TYPE,SCENE_TYPE,,SCENE_TYPE,,,,,Unknown
-Security,SECURITY,,Security,,,,,Unknown
+SECURITY,SECURITY,,Security,,,,,Unknown
 SENSING_METHOD,SENSING_METHOD,,SENSING_METHOD,,,,,Unknown
 Sensitive or LPP Comments,TAG_REG_SENSITIVELPPCOMMENTS_MATCH,Sensitive or LPP Comments,Sensitive or LPP Comments,,Memo,Standard,,Unknown
 Sensitive or LPP Item,TAG_REG_SENSITIVELPP_MATCH,Sensitive or LPP Item,Sensitive or LPP Item,,Dropdown List,Custom,,Unknown
 Sensitive or LPP Reason,TAG_REG_SENSITIVELPPREASON_MATCH,Sensitive or LPP Reason,Sensitive or LPP Reason,,Dropdown List,Custom,,Unknown
-Sent Representing Name,PR_SENT_REPRESENTING_NAME,,Sent Representing Name,,,,,Unknown
+PR_SENT_REPRESENTING_NAME,PR_SENT_REPRESENTING_NAME,,Sent Representing Name,,,,,Unknown
 SENT_NUMERICDATE,SENT_NUMERICDATE,Email Sent Date,Date Sent,,undefined,Custom,,Unknown
 SHAREDDOC,SHAREDDOC,,SHAREDDOC,,,,,Unknown
 SHAREDOC,SHAREDOC,,SHAREDOC,,,,,Unknown
 Shown To,TAG_SHOWN_TO_MATCH,Shown To,Shown To,,MultiValueList,Custom,,Unknown
 SHUTTER_SPEED_VALUE,SHUTTER_SPEED_VALUE,,SHUTTER_SPEED_VALUE,,,,,Unknown
-Size,BYTECOUNT,,Size,,,,,Unknown
 SizeWithoutChildren,FILESIZE_NUMERIC,File size (bytes),SizeWithoutChildren,,Text,Custom,,Unknown
 SL_DOCUMENT_DESCRIPTION_MATCH,SL_DOCUMENT_DESCRIPTION_MATCH,,SL_DOCUMENT_DESCRIPTION_MATCH,,,,,Unknown
 SL_ENTERED_BY_MATCH,SL_ENTERED_BY_MATCH,,SL_ENTERED_BY_MATCH,,,,,Unknown
@@ -596,8 +592,8 @@ SOFTWARE,SOFTWARE,,SOFTWARE,,,,,Unknown
 Start Time,CALENDAR_STARTDATETIME_NUMERICDATE,Calendar/Meeting Start Time,Start Time,,undefined,Custom,,Unknown
 Statuses,Statuses,,Statuses,,,,,Unknown
 Sub Source,TAG_SUB_SOURCE_MATCH,Sub Source,Sub Source,,Text,Custom,,Unknown
-Subfile Index,SUBFILEINDEX,,Subfile Index,,,,,Unknown
-Subfile Type,SUBFILETYPE,,Subfile Type,,,,,Unknown
+SUBFILEINDEX,SUBFILEINDEX,,Subfile Index,,,,,Unknown
+SUBFILETYPE,SUBFILETYPE,,Subfile Type,,,,,Unknown
 SUBFILEINDEXCSV,SUBFILEINDEXCSV,,SUBFILEINDEXCSV,,,,,Unknown
 Subject,SUBJECT,Email Subject,Subject,,Text,Custom,,Unknown
 Subjects,TAG_SUBJECTS_MATCH_PARAMETRIC,Subjects,Subjects,,MultiValueList,Unknown,,Unknown
@@ -608,25 +604,25 @@ TAXCATCHALL,TAXCATCHALL,,TAXCATCHALL,,,,,Unknown
 TEMPAUTHORNAME,TEMPAUTHORNAME,,TEMPAUTHORNAME,,,,,Unknown
 TEMPDMSDOCNAME,TEMPDMSDOCNAME,,TEMPDMSDOCNAME,,,,,Unknown
 TEMPEXTRACTIONFILENAME,TEMPEXTRACTIONFILENAME,,TEMPEXTRACTIONFILENAME,,,,,Unknown
-Template,TEMPLATE,,Template,,,,,Unknown
+TEMPLATE,TEMPLATE,,Template,,,,,Unknown
 TEMPPCDOCSDOCNAME,TEMPPCDOCSDOCNAME,,TEMPPCDOCSDOCNAME,,,,,Unknown
 TERMID,TERMID,,TERMID,,,,,Unknown
 TERMNAME,TERMNAME,,TERMNAME,,,,,Unknown
 TEXTEXPECTED,TEXTEXPECTED,,TEXTEXPECTED,,,,,Unknown
 TextRelativePath,TextRelativePath,,TextRelativePath,,,,,Unknown
-Tiff Status,AUN_TIFF_STATUS_MATCH_PARAMETRIC,Tiff Status,Tiff Status,,Dropdown List,Other,,Unknown
+AUN_TIFF_STATUS_MATCH_PARAMETRIC,AUN_TIFF_STATUS_MATCH_PARAMETRIC,Tiff Status,Tiff Status,,Dropdown List,Other,,Unknown
 Tiffing Request Status,TAG_TIFFING_REQUEST_MATCH,Tiffing Request Status,Tiffing Request Status,,List (presented as radio button),Custom,,Unknown
-Tiffing Result,TIFFING_RESULT,Tiffing Result,Tiffing Result,,Text,Custom,,Unknown
-Tiffing Slipsheeted,TIFFING_SLIPSHEETED,Tiffing Slipsheeted,Tiffing Slipsheeted,,Dropdown List,Custom,,Unknown
+TIFFING_RESULT,TIFFING_RESULT,Tiffing Result,Tiffing Result,,Text,Custom,,Unknown
+TIFFING_SLIPSHEETED,TIFFING_SLIPSHEETED,Tiffing Slipsheeted,Tiffing Slipsheeted,,Dropdown List,Custom,,Unknown
 TIFFING_SIZE,TIFFING_SIZE,,TIFFING_SIZE,,,,,Unknown
 TIFFING_SLIPSHEET_REASON_PARAMETRIC,TIFFING_SLIPSHEET_REASON_PARAMETRIC,,TIFFING_SLIPSHEET_REASON_PARAMETRIC,,,,,Unknown
 TIFFING_WARNING,TIFFING_WARNING,Tiffing Warning,,,Dropdown List,Custom,,Unknown
-Time Edited,EDITTIME,,Time Edited,,,,,Unknown
-Time File Accessed,FILEACCESSEDTIME,,Time File Accessed,,,,,Unknown
-Time File Created,FILECREATEDTIME,,Time File Created,,,,,Unknown
-Time File Imported,FILEIMPORTEDTIME,,Time File Imported,,,,,Unknown
-Time Message Delivered,PR_MESSAGE_DELIVERY_TIME,,Time Message Delivered,,,,,Unknown
-Time Sent,SENTTIME,,Time Sent,,,,,Unknown
+EDITTIME,EDITTIME,,Time Edited,,,,,Unknown
+FILEACCESSEDTIME,FILEACCESSEDTIME,,Time File Accessed,,,,,Unknown
+FILECREATEDTIME,FILECREATEDTIME,,Time File Created,,,,,Unknown
+FILEIMPORTEDTIME,FILEIMPORTEDTIME,,Time File Imported,,,,,Unknown
+PR_MESSAGE_DELIVERY_TIME,PR_MESSAGE_DELIVERY_TIME,,Time Message Delivered,,,,,Unknown
+SENTTIME,SENTTIME,,Time Sent,,,,,Unknown
 Title,#DRETITLE,Title,EMS Title,,Text,Other,,Unknown
 TITLESOFPARTS,TITLESOFPARTS,,TITLESOFPARTS,,,,,Unknown
 TOPHASALREADYBEENMANUALLYCHANGED,TOPHASALREADYBEENMANUALLYCHANGED,,TOPHASALREADYBEENMANUALLYCHANGED,,,,,Unknown
@@ -635,10 +631,10 @@ Unique Reference Number,TAG_URN_MATCH,Unique Reference Number,Unique Reference N
 URL,URL,,URL,,,,,Unknown
 VENUE,VENUE,,VENUE,,,,,Unknown
 VERSION,VERSION,,VERSION,,,,,Unknown
-Version Number,VERSIONNUMBER,,Version Number,,,,,Unknown
+VERSIONNUMBER,VERSIONNUMBER,,Version Number,,,,,Unknown
 VERTICAL_RESOLUTION,VERTICAL_RESOLUTION,,VERTICAL_RESOLUTION,,,,,Unknown
 VIEWPORT,VIEWPORT,,VIEWPORT,,,,,Unknown
-Virtual Path,VIRTUALPATH,,Virtual Path,,,,,Unknown
+VIRTUALPATH,VIRTUALPATH,,Virtual Path,,,,,Unknown
 VIRTUAL_PATH_SEGMENT_1,VIRTUAL_PATH_SEGMENT_1,Virtual Path Segment 1,Virtual Path Segment 1,,Dropdown List,Standard,,Unknown
 VIRTUAL_PATH_SEGMENT_10,VIRTUAL_PATH_SEGMENT_10,,,,,,,Unknown
 VIRTUAL_PATH_SEGMENT_11,VIRTUAL_PATH_SEGMENT_11,,,,,,,Unknown
@@ -676,9 +672,38 @@ WIDTH,WIDTH,,WIDTH,,,,,Unknown
 WIDTH__PIXELS_,WIDTH__PIXELS_,,WIDTH__PIXELS_,,,,,Unknown
 Witness,TAG_CRIM_WITNESS_MATCH,Witness,,,MultiValueList,MultiSelect,,Unknown
 Witness Pack,TAG_CRIM_WITNESSPACK_NUMERIC,Witness Pack,,,undefined,ComboboxBoolean,,Unknown
-Word Count,WORDCOUNT,,Word Count,,,,,Unknown
+WordCount,WORDCOUNT,,Word Count,,,,,Unknown
 WS_TRACKING_ID,WS_TRACKING_ID,,WS_TRACKING_ID,,,,,Unknown
 XD_SIGNATURE,XD_SIGNATURE,,XD_SIGNATURE,,,,,Unknown
 XML_COM.ADOBE.XMP,XML_COM.ADOBE.XMP,,XML_COM.ADOBE.XMP,,,,,Unknown
 X-UA-COMPATIBLE,X-UA-COMPATIBLE,,X-UA-COMPATIBLE,,,,,Unknown
 YCBCR_POSITIONING,YCBCR_POSITIONING,,YCBCR_POSITIONING,,,,,Unknown
+_ADHOCREVIEWCYCLEID,_ADHOCREVIEWCYCLEID,,,,,,,Unknown
+_AUTHOREMAIL,_AUTHOREMAIL,,,,,,,Unknown
+_AUTHOREMAILDISPLAYNAME,_AUTHOREMAILDISPLAYNAME,,,,,,,Unknown
+_EMAILSUBJECT,_EMAILSUBJECT,,,,,,,Unknown
+_PREVIOUSADHOCREVIEWCYCLEID,_PREVIOUSADHOCREVIEWCYCLEID,,,,,,,Unknown
+BARCLAYSDC,BARCLAYSDC,,,,,,,Unknown
+BJDOCUMENTLABELXML,BJDOCUMENTLABELXML,,,,,,,Unknown
+BJDOCUMENTLABELXML-0,BJDOCUMENTLABELXML-0,,,,,,,Unknown
+BJDOCUMENTSECURITYLABEL,BJDOCUMENTSECURITYLABEL,,,,,,,Unknown
+BJSAVER,BJSAVER,,,,,,,Unknown
+DOCINDEXREF,DOCINDEXREF,,,,,,,Unknown
+MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_APPLICATION,MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_APPLICATION,,,,,,,Unknown
+MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_ENABLED,MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_ENABLED,,,,,,,Unknown
+MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_EXTENDED_MSFT_METHOD,MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_EXTENDED_MSFT_METHOD,,,,,,,Unknown
+MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_NAME,MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_NAME,,,,,,,Unknown
+MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_OWNER,MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_OWNER,,,,,,,Unknown
+MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_SETDATE,MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_SETDATE,,,,,,,Unknown
+MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_SITEID,MSIP_LABEL_C754CBB2-29ED-4FFE-AF90-A08465E0DD2C_SITEID,,,,,,,Unknown
+MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_APPLICATION,MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_APPLICATION,,,,,,,Unknown
+MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_ENABLED,MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_ENABLED,,,,,,,Unknown
+MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_EXTENDED_MSFT_METHOD,MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_EXTENDED_MSFT_METHOD,,,,,,,Unknown
+MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_NAME,MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_NAME,,,,,,,Unknown
+MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_OWNER,MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_OWNER,,,,,,,Unknown
+MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_SETDATE,MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_SETDATE,,,,,,,Unknown
+MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_SITEID,MSIP_LABEL_809883C2-C98E-47BB-9665-F01EC16099D6_SITEID,,,,,,,Unknown
+AUN_OCR_STATUS_MATCH_PARAMETRIC,AUN_OCR_STATUS_MATCH_PARAMETRIC,,,,,,,Unknown
+BJFOOTERBOTHDOCPROPERTY,BJFOOTERBOTHDOCPROPERTY,,,,,,,Unknown
+BJFOOTEREVENPAGEDOCPROPERTY,BJFOOTEREVENPAGEDOCPROPERTY,,,,,,,Unknown
+BJFOOTERFIRSTPAGEDOCPROPERTY,BJFOOTERFIRSTPAGEDOCPROPERTY,,,,,,,Unknown
