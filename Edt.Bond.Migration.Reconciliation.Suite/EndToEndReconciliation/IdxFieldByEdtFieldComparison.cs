@@ -49,7 +49,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             TestLogger.Debug($"Using EDT database column for comparison: {_idxToEdtConversionService.MappedEdtDatabaseColumn}");
 
             //Get 
-            var edtValues = GetEdtFieldValues(mappingUnderTest);            
+            var edtValues = GetEdtFieldValues(mappingUnderTest);
 
             //loop thru each sample document
             foreach (var idxDocument in _idxSample)
@@ -70,7 +70,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         if (!string.IsNullOrEmpty(edtValueForIdxRecord))
                         {
                             documentsInEdtButNotInIdx++;
-                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Edt had value {edtValueForIdxRecord} for field {mappingUnderTest.EdtName} when Idx had no value."));
+                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Edt had value \"{edtValueForIdxRecord}\" for field {mappingUnderTest.EdtName} when Idx had no value."));
                         }
                         else
                         {
@@ -81,7 +81,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     else
                     {
                         try
-                        {                            
+                        {
                             if (!string.IsNullOrEmpty(edtValueForIdxRecord)) populated++;
 
                             var expectedEdtValue = _idxToEdtConversionService.ConvertValueToEdtForm(idxField);
@@ -94,7 +94,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                             else
                             {
                                 matched++;
-                            }                            
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -119,6 +119,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             Assert.Zero(different, $"Differences were seen between expected value and actual value for this Edt field {mappingUnderTest.EdtName}");
             Assert.Zero(unexpectedErrors, $"Unexpected errors experienced during processing {mappingUnderTest.EdtName}");
             Assert.Zero(documentsInIdxButNotInEdt, $"Idx documents were not found in EDT.");
+
+            
             Assert.Zero(documentsInEdtButNotInIdx, "Edt was found to have field populated for instances where Idx was null");
            
             if (idxUnfound > 0)
@@ -130,10 +132,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
         private string GetIdxFieldValue(Framework.Models.IdxLoadFile.Document idxDocument, StandardMapping mappingUnderTest)
         {
-            if (mappingUnderTest.EdtType != "MultiValueList" && !mappingUnderTest.IsEmailField())
-                return idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(mappingUnderTest.IdxName))?.Value;
+            var idxName = mappingUnderTest.IdxName.StartsWith("#DRE") ? mappingUnderTest.IdxName.Substring(4) : mappingUnderTest.IdxName;
 
-            var allFieldValues = idxDocument.AllFields.Where(x => x.Key.Equals(mappingUnderTest.IdxName))
+            /*if (mappingUnderTest.EdtType != "MultiValueList" && !mappingUnderTest.IsEmailField())
+                return idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(idxName))?.Value;*/
+
+            var allFieldValues = idxDocument.AllFields.Where(x => x.Key.Equals(idxName))
                                     .Select(x => x.Value)
                                     .OrderBy(x => x);
 

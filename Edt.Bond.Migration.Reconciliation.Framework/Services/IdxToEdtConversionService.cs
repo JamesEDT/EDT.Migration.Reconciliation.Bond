@@ -40,11 +40,18 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
         private ColumnDetails GetEdtColumnDetailsFromDisplayName(string displayName)
         {
+            if (displayName.Equals("host document id", StringComparison.InvariantCultureIgnoreCase))
+                return new ColumnDetails()
+                {
+                    ColumnName = "ImportedParentNumber",
+                    DataType = ColumnType.Text
+                };
+
             var lowerDisplayName = displayName.ToLower();
 
             var edtColumnDetails = EdtDocumentRepository.GetColumnDetails().ToList();
 
-            var matchedDbName = edtColumnDetails.FirstOrDefault(x => x.DisplayName.ToLower().Equals(lowerDisplayName));
+            var matchedDbName = edtColumnDetails.FirstOrDefault(x => x.DisplayName.ToLower().Equals(lowerDisplayName) || x.ExportDisplayName.ToLower().Equals(lowerDisplayName));
 
             if (matchedDbName != null)
                 return matchedDbName;
