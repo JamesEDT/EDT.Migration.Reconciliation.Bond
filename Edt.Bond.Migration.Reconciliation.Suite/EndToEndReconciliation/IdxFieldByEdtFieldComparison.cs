@@ -61,13 +61,13 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 if (!edtValues.TryGetValue(idxDocument.DocumentId, out var edtValueForIdxRecord) && !string.IsNullOrEmpty(idxField))
                 {
                     documentsInIdxButNotInEdt++;
-                    ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "Document not found in Edt's document table"));
+                    ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "No value found in Edt when Idx had a value"));
                 }
                 else
                 {
-                    if (string.IsNullOrEmpty(idxField))
+                    if (string.IsNullOrWhiteSpace(idxField))
                     {
-                        if (!string.IsNullOrEmpty(edtValueForIdxRecord))
+                        if (!string.IsNullOrWhiteSpace(edtValueForIdxRecord))
                         {
                             documentsInEdtButNotInIdx++;
                             ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Edt had value \"{edtValueForIdxRecord}\" for field {mappingUnderTest.EdtName} when Idx had no value."));
@@ -75,14 +75,14 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         else
                         {
                             idxUnfound++;
-                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Field { mappingUnderTest.IdxName } not found in Idx for document"));
+                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"No value found in Idx for document"));
                         }
                     }
                     else
                     {
                         try
                         {
-                            if (!string.IsNullOrEmpty(edtValueForIdxRecord)) populated++;
+                            if (!string.IsNullOrWhiteSpace(edtValueForIdxRecord)) populated++;
 
                             var expectedEdtValue = _idxToEdtConversionService.ConvertValueToEdtForm(idxField);
 
@@ -124,7 +124,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             Assert.Zero(documentsInEdtButNotInIdx, "Edt was found to have field populated for instances where Idx was null");
            
             if (idxUnfound > 0)
-                TestLogger.Info($"The Idx was found to not have a value for field {mappingUnderTest.IdxName} in {idxUnfound} documents/instances.");
+                TestLogger.Info($"The Idx was found to not have a value for field {mappingUnderTest.IdxNames} in {idxUnfound} documents/instances.");
 
             if(populated == 0)
                 TestLogger.Info($"No sampled documents had the Edt field {mappingUnderTest.EdtName} populated.");          
@@ -132,16 +132,25 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
         private string GetIdxFieldValue(Framework.Models.IdxLoadFile.Document idxDocument, StandardMapping mappingUnderTest)
         {
-            var idxName = mappingUnderTest.IdxName.StartsWith("#DRE") ? mappingUnderTest.IdxName.Substring(4) : mappingUnderTest.IdxName;
+            List<string> allValues = new List<string>();
 
-            /*if (mappingUnderTest.EdtType != "MultiValueList" && !mappingUnderTest.IsEmailField())
-                return idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(idxName))?.Value;*/
+            foreach (var idxName in mappingUnderTest.IdxNames)
+            {
+                var idxNameLookup = idxName.StartsWith("#DRE") ? idxName.Substring(4) : idxName;
 
-            var allFieldValues = idxDocument.AllFields.Where(x => x.Key.Equals(idxName))
-                                    .Select(x => x.Value)
-                                    .OrderBy(x => x);
+                /*if (mappingUnderTest.EdtType != "MultiValueList" && !mappingUnderTest.IsEmailField())
+                    return idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(idxName))?.Value;*/
 
-            return string.Join(";", allFieldValues);                                
+                var allFieldValues = idxDocument.AllFields.Where(x => x.Key.Equals(idxNameLookup))
+                                        .Select(x => x.Value)
+                                        .Distinct()
+                                        .OrderBy(x => x);
+
+                allValues.AddRange(allFieldValues);
+            }
+
+            return string.Join(";", allValues);
+            
         }
 
         private Dictionary<string,string> GetEdtFieldValues(StandardMapping mappingUnderTest)
@@ -151,9 +160,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 return GetEmailFieldValues(_idxDocumentIds, mappingUnderTest.EdtName);                
             }            
 
-            if (mappingUnderTest.EdtType == "MultiValueList")
+            if ((!string.IsNullOrEmpty(mappingUnderTest.EdtType) && mappingUnderTest.EdtType.Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase)) || _idxToEdtConversionService.MappedEdtDatabaseColumnType.Value == ColumnType.MultiValueList)
             {
-                var allFieldValues = EdtDocumentRepository.GetMultiValueFieldValues(_idxDocumentIds, _idxToEdtConversionService.MappedEdtDatabaseColumn);
+                var allFieldValues = EdtDocumentRepository.GetMultiValueFieldValues(_idxDocumentIds, _idxToEdtConversionService.EdtColumnDetails.DisplayName);
 
                 var combinedValues = allFieldValues.GroupBy(x => x.DocNumber)
                                         .Select(group => new
@@ -210,10 +219,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 return
                     new StandardMapReader()
                     .GetStandardMappings()
-                    .Where(x => !string.IsNullOrEmpty(x.EdtName) && !string.IsNullOrEmpty(x.IdxName))
+                    .Where(x => !string.IsNullOrEmpty(x.EdtName) && x.IdxNames.Any())
                     .Select(x => new TestCaseData(x)
-                        .SetName($"\"{x.IdxName}\" vs \"{x.EdtName}\"")
-                        .SetDescription($"For subset of data compare Edt database field values for \"{x.IdxName}\" with Idx values of field \"{x.EdtName}\""));
+                        .SetName($"\"{string.Join("|", x.IdxNames)}\" vs \"{x.EdtName}\"")
+                        .SetDescription($"For subset of data compare Edt database field values for \"{string.Join("|", x.IdxNames)}\" with Idx values of field \"{x.EdtName}\""));
             }
         }
     }

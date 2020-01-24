@@ -15,6 +15,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
         public string MappedEdtDatabaseColumn => _edtColumnDetails?.ColumnName;
 
+        public ColumnDetails EdtColumnDetails => _edtColumnDetails;
+
         public ColumnType? MappedEdtDatabaseColumnType => _edtColumnDetails?.DataType;
        
         public IdxToEdtConversionService(StandardMapping standardMapping)
@@ -27,7 +29,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
         public string ConvertValueToEdtForm(string value)
         {
-            if(_edtColumnDetails?.DataType == ColumnType.Date || _standardMapping.EdtType.Equals("Date", StringComparison.InvariantCultureIgnoreCase))
+            if(_edtColumnDetails?.DataType == ColumnType.Date || (!string.IsNullOrWhiteSpace(_standardMapping.EdtType) && _standardMapping.EdtType.Equals("Date", StringComparison.InvariantCultureIgnoreCase)))
             {
                 return GetDateString(value);
             }
@@ -51,18 +53,18 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
             var edtColumnDetails = EdtDocumentRepository.GetColumnDetails().ToList();
 
-            var matchedDbName = edtColumnDetails.FirstOrDefault(x => x.DisplayName.ToLower().Equals(lowerDisplayName) || x.ExportDisplayName.ToLower().Equals(lowerDisplayName));
+            var matchedDbName = edtColumnDetails.Where(x => x.DisplayName.ToLower().Equals(lowerDisplayName) || x.ExportDisplayName.ToLower().Equals(lowerDisplayName));
 
             if (matchedDbName != null)
-                return matchedDbName;
+                return matchedDbName.First();
 
             Regex rgx = new Regex("[^a-zA-Z0-9]");
             lowerDisplayName = rgx.Replace(lowerDisplayName, "");
 
-            matchedDbName = edtColumnDetails.Find(x => x.GetAlphaNumbericOnlyDisplayName().ToLower()
+            matchedDbName = edtColumnDetails.FindAll(x => x.GetAlphaNumbericOnlyDisplayName().ToLower()
                                         .Replace(" ", string.Empty).Equals(lowerDisplayName));
 
-            return matchedDbName ?? throw new Exception($"Unable to determine Edt Db column name from mapped display name {displayName}");
+            return matchedDbName.First() ?? throw new Exception($"Unable to determine Edt Db column name from mapped display name {displayName}");
         }
 
         private static string GetDateString(string sourceDateValue)

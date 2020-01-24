@@ -35,17 +35,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
                         if (newMappingTokens == null) continue;
 
-                        var mapping = new StandardMapping()
+                        var mapping = new StandardMapping(newMappingTokens[EdtFieldNameColumn], newMappingTokens[IdxNameColumn], newMappingTokens[StoredEdtTypeColumn], newMappingTokens[ImporterGroupColumn]);
+                        
+                        if (mapping.EdtName.Equals(mapping.IdxNames.First()) || fieldsToIgnore.Contains(mapping.IdxNames.First()) || mapping.EdtName.EndsWith("_unmapped"))
                         {
-                            EdtName = newMappingTokens[EdtFieldNameColumn],
-                            IdxName = newMappingTokens[IdxNameColumn],
-                            EdtType = newMappingTokens[StoredEdtTypeColumn],
-                            ImportGroup = newMappingTokens[ImporterGroupColumn]
-                        };
-
-                        if (mapping.EdtName.Equals(mapping.IdxName) || fieldsToIgnore.Contains(mapping.IdxName) || mapping.EdtName.EndsWith("_unmapped"))
-                        {
-                            swIgnored.WriteLine($"{mapping.EdtName},{mapping.IdxName}");
+                            swIgnored.WriteLine($"{mapping.EdtName},{mapping.IdxNames}");
                         }
                         else
                         {
@@ -57,6 +51,16 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                             mappings.Add(mapping);
                         }
                     }
+
+                    //dedupe where EDT 
+                    var dedupedMappings = mappings.GroupBy(x => x.EdtName.ToLowerInvariant())
+                        .Select(x => {
+                            var toKeep = x.First();
+                            toKeep.IdxNames = x.Select(y => y.IdxNames.First()).ToList();
+                            return toKeep;
+                        }).ToList();
+
+                    mappings = dedupedMappings;
 
                     if (mappings.Count <= 0)
                         throw new Exception("Failed to read mappings from standard mapping doc, count is 0");

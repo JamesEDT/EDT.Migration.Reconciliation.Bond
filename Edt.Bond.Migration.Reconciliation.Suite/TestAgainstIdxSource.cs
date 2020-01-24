@@ -29,7 +29,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             {
                 logger.Debug("Analysing Standard Mappings");
 
-                StandardMappings = new StandardMapReader().GetStandardMappings().Where(x => !string.IsNullOrEmpty(x.EdtName) && !string.IsNullOrEmpty(x.IdxName));
+                StandardMappings = new StandardMapReader().GetStandardMappings().Where(x => !string.IsNullOrEmpty(x.EdtName) && x.IdxNames.Any(y => !string.IsNullOrWhiteSpace(y)));
 
                 if (!StandardMappings.Any())
                     throw new Exception("Failed to read mappings - count is 0 post attempt");

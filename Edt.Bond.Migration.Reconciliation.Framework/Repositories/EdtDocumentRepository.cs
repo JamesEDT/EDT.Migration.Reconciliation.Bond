@@ -198,12 +198,12 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 	                        FROM {GetDatabaseName()}.[MvField] mvField
 	                        WHERE mvField.ParentID = 0
                           ) as Field on mvField.ParentID = Field.Id
-                        WHERE DocNumber in {GetDocumentIDQuery(documentIds)}
-                        AND Field.Name = @fieldName";
+                            And Field.Name = @fieldName
+                        WHERE document.DocNumber in {GetDocumentIDQuery(documentIds)}";
 
             var multiValueListResults = SqlExecutor.Query(sql, new { fieldName });
 
-            return multiValueListResults;
+           return multiValueListResults;
         }
 
 		private static string GetConnectionStringByName()
