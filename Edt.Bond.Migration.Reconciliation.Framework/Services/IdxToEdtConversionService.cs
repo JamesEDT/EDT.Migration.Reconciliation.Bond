@@ -1,5 +1,6 @@
 ﻿using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
+using Edt.Bond.Migration.Reconciliation.Framework.Models.Exceptions;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using System;
 using System.Globalization;
@@ -53,18 +54,18 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
             var edtColumnDetails = EdtDocumentRepository.GetColumnDetails().ToList();
 
-            var matchedDbName = edtColumnDetails.Where(x => x.DisplayName.ToLower().Equals(lowerDisplayName) || x.ExportDisplayName.ToLower().Equals(lowerDisplayName));
+            var matchedDbNames = edtColumnDetails.Where(x => x.DisplayName.ToLower().Equals(lowerDisplayName) || x.ExportDisplayName.ToLower().Equals(lowerDisplayName));
 
-            if (matchedDbName != null)
-                return matchedDbName.First();
+            if (matchedDbNames != null && matchedDbNames.Count() > 0)
+                return matchedDbNames.First();
 
             Regex rgx = new Regex("[^a-zA-Z0-9]");
             lowerDisplayName = rgx.Replace(lowerDisplayName, "");
 
-            matchedDbName = edtColumnDetails.FindAll(x => x.GetAlphaNumbericOnlyDisplayName().ToLower()
+            matchedDbNames = edtColumnDetails.FindAll(x => x.GetAlphaNumbericOnlyDisplayName().ToLower()
                                         .Replace(" ", string.Empty).Equals(lowerDisplayName));
 
-            return matchedDbName.First() ?? throw new Exception($"Unable to determine Edt Db column name from mapped display name {displayName}");
+            return matchedDbNames?.FirstOrDefault() ?? throw new EdtColumnException($"Unable to determine Edt Db column name from mapped display name {displayName}");
         }
 
         private static string GetDateString(string sourceDateValue)

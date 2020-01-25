@@ -91,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Logging\UnMappedFieldLogger.cs" />
     <Compile Include="Models\CaseConfigXml\AdvancedSearchField.cs" />
     <Compile Include="Models\CaseConfigXml\CodingRule.cs" />
     <Compile Include="Models\CaseConfigXml\ColumnField.cs" />
@@ -132,10 +133,12 @@
     <Compile Include="Models\EdtDatabase\Message.cs" />
     <Compile Include="Models\EdtDatabase\MvField.cs" />
     <Compile Include="Models\EdtDatabase\Party.cs" />
+    <Compile Include="Models\Exceptions\EdtColumnException.cs" />
     <Compile Include="Models\IdxLoadFile\Document.cs" />
     <Compile Include="Models\IdxLoadFile\Field.cs" />
     <Compile Include="Models\Reporting\ComparisonError.cs" />
     <Compile Include="Models\Reporting\ComparisonResult.cs" />
+    <Compile Include="Output\LoadFileWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\EdtDocumentRepository.cs" />
     <Compile Include="Repositories\ConversionLoadFileRepository.cs" />
