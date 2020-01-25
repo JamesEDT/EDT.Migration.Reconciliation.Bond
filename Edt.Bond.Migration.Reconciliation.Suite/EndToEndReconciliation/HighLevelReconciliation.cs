@@ -150,6 +150,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			var edtIds = EdtDocumentRepository.GetDocumentNumbers();
 			var textFileDocsIds = Directory
 				.GetFiles(Settings.MicroFocusStagingDirectoryTextPath, "*.txt", SearchOption.AllDirectories)
+                .Where(x => new FileInfo(x).Length > 3)
 				.Select(x => GetDocumentIdFromFilePath(x)).Where(x => edtIds.Contains(x));
 
 			var mircoFocusDocCount = textFileDocsIds.Count();
