@@ -1,4 +1,5 @@
-﻿using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
+﻿using Edt.Bond.Migration.Reconciliation.Framework.Logging;
+using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Exceptions;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
@@ -11,7 +12,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 {
     public class IdxToEdtConversionService
     {
-        private StandardMapping _standardMapping;
+        public StandardMapping _standardMapping;
         private ColumnDetails _edtColumnDetails;
 
         public string MappedEdtDatabaseColumn => _edtColumnDetails?.ColumnName;
@@ -84,7 +85,17 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 }
                 else
                 {
-                    convertedDate = FromUnixTime(long.Parse(sourceDateValue));
+                    try
+                    {
+                        convertedDate = DateTimeOffset.FromUnixTimeSeconds(long.Parse(sourceDateValue)).UtcDateTime;
+
+                        //convertedDate = FromUnixTime(long.Parse(sourceDateValue));
+                    }
+                    catch (Exception e)
+                    {
+                        DebugLogger.Instance.WriteException(e, $"Epoch Date Conversion of {sourceDateValue}");
+                        throw e;
+                    }
                 }
             }
             return convertedDate.ToString("dd/MM/yyyy HH:mm:ss");

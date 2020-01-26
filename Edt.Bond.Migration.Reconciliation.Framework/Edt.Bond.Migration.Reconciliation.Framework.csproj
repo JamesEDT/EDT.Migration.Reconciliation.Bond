@@ -91,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Logging\DebugLogger.cs" />
     <Compile Include="Logging\UnMappedFieldLogger.cs" />
     <Compile Include="Models\CaseConfigXml\AdvancedSearchField.cs" />
     <Compile Include="Models\CaseConfigXml\CodingRule.cs" />
@@ -139,6 +140,8 @@
     <Compile Include="Models\IdxLoadFile\Field.cs" />
     <Compile Include="Models\Reporting\ComparisonError.cs" />
     <Compile Include="Models\Reporting\ComparisonResult.cs" />
+    <Compile Include="Output\FullLoadFileWriter.cs" />
+    <Compile Include="Output\LocationFileWriter.cs" />
     <Compile Include="Output\LoadFileWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\EdtDocumentRepository.cs" />

@@ -7,10 +7,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Edt.Bond.Migration.Reconciliation.Framework;
+using Edt.Bond.Migration.Reconciliation.Framework.Output;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
     [TestFixture]
+    [Category("Transformed")]
     [Description("Compare Idx field with Edt Database field to validate implementation of EDTs customised value generation.")]
 
     public class TransformedFieldValidation : TestBase
@@ -29,6 +31,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         }
 
         [Test]
+        [Category("Tags")]
         [Description("Validate mapping and conversion of AUN_WORKBOOK folders to EDT Tags")]
         public void Tags()
         {
@@ -116,6 +119,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         }
 
 		[Test]
+        [Category("Locations")]
 		[Description("Validate mapping and conversion of IDX Locations to EDT Locations")]
 		public void Locations()
 		{
@@ -127,42 +131,47 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
 			var allEdtLocations = EdtDocumentRepository.GetDocumentLocations(_idxDocumentIds);
 
-			foreach (var idxDocument in _idxSample)
-			{
+            using (var locationFileWriter = new LocationFileWriter())
+            {
 
-				allEdtLocations.TryGetValue(idxDocument.DocumentId, out var edtLocation);
+                foreach (var idxDocument in _idxSample)
+                {
 
-				if (string.IsNullOrWhiteSpace(edtLocation))
-				{
-					different++;
-					ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "Location not present in EDT"));
-				}
+                    allEdtLocations.TryGetValue(idxDocument.DocumentId, out var edtLocation);
 
-				string group =  idxDocument.AllFields.SingleOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[0])).Value;
-				string custodian = idxDocument.AllFields.SingleOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[1])).Value;
-				string source = idxDocument.AllFields.SingleOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[2])).Value;
+                    if (string.IsNullOrWhiteSpace(edtLocation))
+                    {
+                        different++;
+                        ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "Location not present in EDT"));
+                    }
 
-				string location = $@"{group}\{custodian}\{source}";
+                    string group = idxDocument.AllFields.SingleOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[0])).Value;
+                    string custodian = idxDocument.AllFields.SingleOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[1])).Value;
+                    string source = idxDocument.AllFields.SingleOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[2])).Value;
 
-				idxDocument.AllFields.Where(c => c.Key.StartsWith(Settings.LocationIdxFields[3])).OrderBy(c=> c.Key).ToList().ForEach(
-					c =>
-					{
-						if (!string.IsNullOrWhiteSpace(c.Value) && !c.Value.Contains(".msg:"))
-						{
-							location += @"\" + c.Value.Replace(":", "-");
-						} 
-					});
-				 
-				if (!location.Equals(edtLocation, StringComparison.InvariantCultureIgnoreCase))
-				{
-					different++;
-					ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtLocation, location, location));
-				}
-				else
-				{
-					matched++;
-				}
-			}
+                    string location = $@"{group}\{custodian}\{source}";
+
+                    idxDocument.AllFields.Where(c => c.Key.StartsWith(Settings.LocationIdxFields[3])).OrderBy(c => c.Key).ToList().ForEach(
+                        c =>
+                        {
+                            if (!string.IsNullOrWhiteSpace(c.Value) && !c.Value.Contains(".msg:"))
+                            {
+                                location += @"\" + c.Value.Replace(":", "-");
+                            }
+                        });
+
+                    if (!location.Equals(edtLocation, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        different++;
+                        ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtLocation, location, location));
+                        locationFileWriter.OutputRecord(idxDocument.DocumentId, location);
+                    }
+                    else
+                    {
+                        matched++;
+                    }
+                }
+            }
 
 			var diffFile = PrintComparisonTables("Locations");
 			TestLogger.Info($"Difference and error details written to: <a href=\"{diffFile}\">Report\\{diffFile}</a>");

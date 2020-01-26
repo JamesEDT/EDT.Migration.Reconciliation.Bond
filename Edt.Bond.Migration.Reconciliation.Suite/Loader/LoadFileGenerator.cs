@@ -15,149 +15,50 @@ using System.Linq;
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
     [TestFixture]
-    [Category("IdxComparison")]
-    [Description("Compare Idx field with Edt Database field to validate implementation of mapping, for a subset of records.")]
+    [Category("LoadFile")]
 
-    public class IdxFieldByEdtFieldComparison : TestBase
+    public class LoadFileGenerator : TestBase
     {
         private IEnumerable<Framework.Models.IdxLoadFile.Document> _idxSample;
         private List<string> _idxDocumentIds;
         private IdxToEdtConversionService _idxToEdtConversionService;
 
-        [OneTimeSetUp]
-        public void SetIdxSample()
+
+        [Test]    
+        public void Generate()
         {
             _idxSample = new IdxDocumentsRepository().GetSample();
 
-            _idxDocumentIds = _idxSample.Select(x => x.DocumentId).ToList();
+            var standardMappings = new StandardMapReader().GetStandardMappings().Where(x => !string.IsNullOrEmpty(x.EdtName) && x.IdxNames.Any(y => !string.IsNullOrWhiteSpace(y))).ToList();
 
-            FeatureRunner.Log(AventStack.ExtentReports.Status.Info, $"{_idxSample.Count()} sampled from Idx records.");
-        }
+            var conversionServices = standardMappings.Select(x => new IdxToEdtConversionService(x));
 
-        [Test]        
-        [TestCaseSource(typeof(IdxFieldByEdtFieldComparison), nameof(StandardMappingsToTest))]
-        public void ValidateFieldPopulation(StandardMapping mappingUnderTest)
-        {
-            long populated = 0;
-            long different = 0;
-            long documentsInIdxButNotInEdt = 0;
-            long documentsInEdtButNotInIdx = 0;
-            long idxUnfound = 0;
-            long unexpectedErrors = 0;
-            long matched = 0;
-            long totalsampled = 0;
 
             //initiliase conversion service for field under test
             try
             {
 
-                _idxToEdtConversionService = new IdxToEdtConversionService(mappingUnderTest);
-
-                using (var loadFileWriter = new LoadFileWriter())
+                using (var loadFileWriter = new FullLoadFileWriter())
                 {
-                    loadFileWriter.OutputHeader(mappingUnderTest.EdtName);
+                    loadFileWriter.OutputHeaders(standardMappings.Select(x => x.EdtName).ToList());
 
-                    TestLogger.Debug($"Using EDT database column for comparison: {_idxToEdtConversionService.MappedEdtDatabaseColumn}");
-                    
-                    //Get 
-                    var edtValues = Settings.OnlyGenerateLoadFile ? new Dictionary<string, string>() : GetEdtFieldValues(mappingUnderTest);
-
-                    //loop thru each sample document
-                    foreach (var idxDocument in _idxSample)
+                    foreach(var idxrecord in _idxSample)
                     {
-                        totalsampled++;
-
-                        var idxField = GetIdxFieldValue(idxDocument, mappingUnderTest);                        
-                        
-                        var expectedEdtValue = string.IsNullOrWhiteSpace(idxField) ? idxField : _idxToEdtConversionService.ConvertValueToEdtForm(idxField);
-
-                        loadFileWriter.OutputRecord(idxDocument.DocumentId, idxField == null ? string.Empty : expectedEdtValue);
-
-                        if (!Settings.OnlyGenerateLoadFile)
+                       
+                        var values = standardMappings.Select(x =>
                         {
-                            if (!edtValues.TryGetValue(idxDocument.DocumentId, out var edtValueForIdxRecord) && !string.IsNullOrEmpty(idxField))
-                            {
-                                documentsInIdxButNotInEdt++;
-                                ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "No value found in Edt when Idx had a value"));
+                            var converter = conversionServices.First(y => y._standardMapping.EdtName == x.EdtName);
 
-                            }
-                            else
-                            {
-                                if (string.IsNullOrWhiteSpace(idxField))
-                                {
-                                    if (!string.IsNullOrWhiteSpace(edtValueForIdxRecord))
-                                    {
-                                        documentsInEdtButNotInIdx++;
-                                        ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Edt had value \"{edtValueForIdxRecord}\" for field {mappingUnderTest.EdtName} when Idx had no value."));
-                                    }
-                                    else
-                                    {
-                                        idxUnfound++;
-                                        ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"No value found in Idx for document"));
-                                    }
-                                }
-                                else
-                                {
-                                    try
-                                    {
-                                        if (!string.IsNullOrWhiteSpace(edtValueForIdxRecord)) populated++;
+                            return converter.ConvertValueToEdtForm(idxrecord.AllFields.FirstOrDefault(f => f.Key == x.IdxNames.First())?.Value ?? idxrecord.AllFields.FirstOrDefault(f => f.Key == x.IdxNames.Last())?.Value);
+                        });
 
-
-                                        if (!edtValueForIdxRecord.Equals(expectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
-                                        {
-                                            different++;
-                                            ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtValueForIdxRecord, expectedEdtValue, idxField));
-                                        }
-                                        else
-                                        {
-                                            matched++;
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        unexpectedErrors++;
-                                        var error = $"{ex.Message}<br></br>{ex.StackTrace}";
-                                        ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, error));
-                                    }
-                                }
-
-                            }
-                        }
+                        loadFileWriter.OutputRecord(idxrecord.DocumentId, values);
                     }
-
-                    PrintStats(different, matched, documentsInIdxButNotInEdt, documentsInEdtButNotInIdx, idxUnfound, unexpectedErrors, populated, totalsampled);
-
-                    if (ComparisonErrors.Count() > 0 || ComparisonResults.Count() > 0)
-                    {
-                        var diffFile = PrintComparisonTables(mappingUnderTest.EdtName);
-                        TestLogger.Info($"Difference and error details written to: <a href=\"{diffFile}\">{diffFile}</a>");
-                        PrintExpectedOutputFile(mappingUnderTest.EdtName);
-                    }
-
-                    Assert.Zero(different, $"Differences were seen between expected value and actual value for this Edt field {mappingUnderTest.EdtName}");
-                    Assert.Zero(unexpectedErrors, $"Unexpected errors experienced during processing {mappingUnderTest.EdtName}");
-                    Assert.Zero(documentsInIdxButNotInEdt, $"Idx documents were not found in EDT.");
-
-
-                    Assert.Zero(documentsInEdtButNotInIdx, "Edt was found to have field populated for instances where Idx was null");
-
-                    if (idxUnfound > 0)
-                        TestLogger.Info($"The Idx was found to not have a value for field {mappingUnderTest.IdxNames} in {idxUnfound} documents/instances.");
-
-                    if (populated == 0)
-                        TestLogger.Info($"No sampled documents had the Edt field {mappingUnderTest.EdtName} populated.");
                 }
             }
-            catch (EdtColumnException e)
+            catch(Exception e)
             {
-                if (DoesIdxContainAnyValue(mappingUnderTest))
-                {
-                    Assert.Fail($"Idx has value but Edt column not found {e.Message}");
-                }
-                else
-                {
-                    UnMappedFieldLogger.Instance.WriteUnmappedFile(string.Join(";", mappingUnderTest.IdxNames), mappingUnderTest.EdtName);
-                }
+                DebugLogger.Instance.WriteException(e, "load generator");
             }
         }
 

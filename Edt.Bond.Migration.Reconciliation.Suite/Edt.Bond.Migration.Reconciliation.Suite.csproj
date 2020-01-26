@@ -104,6 +104,7 @@
     <Compile Include="EndToEndReconciliation\IdxFieldByEdtFieldComparison.cs" />
     <Compile Include="EndToEndReconciliation\HighLevelReconciliation.cs" />
     <Compile Include="HtmlReport.cs" />
+    <Compile Include="Loader\LoadFileGenerator.cs" />
     <Compile Include="RunSettingsLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestAgainstIdxSource.cs" />
@@ -119,6 +120,7 @@
       <Name>Edt.Bond.Migration.Reconciliation.Framework</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
