@@ -116,6 +116,7 @@
     <Compile Include="Models\CaseConfigXml\WorkStream.cs" />
     <Compile Include="Models\Conversion\DesiredType.cs" />
     <Compile Include="Models\Conversion\StandardMapping.cs" />
+    <Compile Include="Models\Conversion\Tag.cs" />
     <Compile Include="Models\EdtDatabase\Batch.cs" />
     <Compile Include="Models\EdtDatabase\ColumnDetails.cs" />
     <Compile Include="Models\EdtDatabase\CorrespondanceType.cs" />

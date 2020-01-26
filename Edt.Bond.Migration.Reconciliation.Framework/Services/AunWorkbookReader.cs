@@ -1,28 +1,66 @@
 ﻿using Edt.Bond.Migration.Reconciliation.Framework.Extensions;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Tag = Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion.Tag;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 {
     public class AunWorkbookReader
     {
-        public static Dictionary<string,string> Read()
+        public static List<Tag> Read()
         {
-            using (var streamReader = new StreamReader(Settings.MicroFocusAunWorkbookPath))
-            {
-                var headers = streamReader.ReadLine();
+	        var tags = new List<Tag>();
 
-                var aun_folders = new Dictionary<string, string>();
+	        using (var streamReader = new StreamReader(Settings.MicroFocusAunWorkbookPath))
+	        {
+		        var headers = streamReader.ReadLine(); 
 
-                while (!streamReader.EndOfStream)
-                {
-                    var line = streamReader.ReadLine()?.SplitCsv();
+		        while (!streamReader.EndOfStream)
+		        {
+			        var line = streamReader.ReadLine()?.SplitCsv();
 
-                    aun_folders.Add(line[0], line[1]);
-                }
+			        tags.Add(new Tag
+			        {
+				        Id = line[0],
+				        Level = int.Parse(line[4]),
+				        Name = line[1],
+						  ParentID = line[8]
+			        });
+		        } 
+	        }
 
-                return aun_folders;
-            }            
+	        tags.Where(c => c.ParentID == "NULL").ToList().ForEach(c =>
+	        {
+				  c.FullPath = c.Name;
+
+				  var children = tags.Where(d => d.ParentID == c.Id).ToList();
+
+		        if (children.Any())
+		        {
+			        SetFullPath(c.Name, children, tags);
+
+		        } 
+	        }); 
+			 return tags;
         }
+
+        private static void SetFullPath(string parentName, List<Tag> parents, List<Tag> tags)
+        {
+	        parents.ForEach(c =>
+	        { 
+		        c.FullPath = parentName + @"\" + c.Name; 
+
+		        var children = tags.Where(d => d.ParentID == c.Id && c.Id != d.Id).ToList();
+
+		        if (children.Any())
+		        {
+			        SetFullPath(c.FullPath, children, tags);
+
+		        } 
+	        });
+		}
     }
+
+
 }

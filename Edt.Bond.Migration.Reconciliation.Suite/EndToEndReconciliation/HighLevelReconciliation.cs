@@ -146,6 +146,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			//For each Document in Batch, Count where Body is not null
 			var edtDocsWithBody = EdtDocumentRepository.GetDocuentNumbersWithABody();
 
+
+
 			//compare against Text count in microfocus dir
 			var edtIds = EdtDocumentRepository.GetDocumentNumbers();
 			var textFileDocsIds = Directory

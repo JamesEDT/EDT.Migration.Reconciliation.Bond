@@ -38,53 +38,61 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             long matched = 0;
             long different = 0;
             
-
             var workbookRecords = AunWorkbookReader.Read();
             var allEdtTags = EdtDocumentRepository.GetDocumentTags(_idxDocumentIds);
 
-            foreach(var idxRecord in _idxSample)
+            foreach (var idxRecord in _idxSample)
             {
-                var aunWorkbookIds = idxRecord.AllFields.Where(x => x.Key.Equals("AUN_WORKBOOK_NUMERIC"));
-                var foundEdtValue = allEdtTags.TryGetValue(idxRecord.DocumentId, out var relatedEdTags);
+	            var aunWorkbookIds = idxRecord.AllFields.Where(x => x.Key.Equals("AUN_WORKBOOK_NUMERIC"));
+	            var foundEdtValue = allEdtTags.TryGetValue(idxRecord.DocumentId, out var relatedEdTags);
 
-                if (aunWorkbookIds.Count() == 0)
-                {
-                    idxUnpopulated++;
-                    ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId, "AUN_WORKBOOK_NUMERIC field was not present for idx record"));
+	            if (!aunWorkbookIds.Any())
+	            {
+		            idxUnpopulated++;
+		            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
+			            "AUN_WORKBOOK_NUMERIC field was not present for idx record"));
 
-                    if (relatedEdTags != null && relatedEdTags.Count() > 0)
-                    {
-                        edtUnexpectedlyPopulated++;
-                        ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId, $"EDT has value(s) {string.Join(",", relatedEdTags)} when Idx record had no value"));
-                    }
+		            if (relatedEdTags != null && relatedEdTags.Any())
+		            {
+			            edtUnexpectedlyPopulated++;
+			            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
+				            $"EDT has value(s) {string.Join(",", relatedEdTags)} when Idx record had no value"));
+		            }
 
-                    continue;
-                }
+		            continue;
+	            }
 
-                foreach (var aunWorkbookId in aunWorkbookIds)
-                {
-                    var foundWorkbookName = workbookRecords.TryGetValue(aunWorkbookId.Value, out var aunWorkbookName);
+	            foreach (var aunWorkbookId in aunWorkbookIds)
+	            { 
+		            var tag = workbookRecords.SingleOrDefault(c => c.Id == aunWorkbookId.Value);
 
-                    if (foundWorkbookName)
-                    {
-                        if (!foundEdtValue || (relatedEdTags != null && !relatedEdTags.Any(x => x != null && x.Equals(aunWorkbookName, System.StringComparison.InvariantCultureIgnoreCase))))
-                        {
-                            different++;
-                            var edtLogValue = relatedEdTags != null ? string.Join(";", relatedEdTags) : "none found";
+		            if (tag != null)
+		            { 
+			            if (string.IsNullOrWhiteSpace(tag.FullPath))
+			            {
+				            if (!foundEdtValue || (relatedEdTags != null && !relatedEdTags.Any(x =>
+					                                   x != null && x.Equals(tag.FullPath,
+						                                   System.StringComparison.InvariantCultureIgnoreCase))))
+				            {
+					            different++;
+					            var edtLogValue = relatedEdTags != null ? string.Join(";", relatedEdTags) : "none found";
 
-                            ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxRecord.DocumentId, edtLogValue, aunWorkbookName, aunWorkbookId.Value.ToString()));
-                        }
-                        else
-                        {
-                            matched++;
-                        }
-                    }
-                    else
-                    {
-                        errors++;
-                        ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId, $"Couldnt convert aun workbook id {aunWorkbookId} to name"));
-                    }
-                }
+					            ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxRecord.DocumentId,
+						            edtLogValue, tag.FullPath, aunWorkbookId.Value.ToString()));
+				            }
+				            else
+				            {
+					            matched++;
+				            }
+			            }
+			            else
+			            {
+				            errors++;
+				            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
+					            $"Couldnt convert aun workbook id {aunWorkbookId} to name"));
+			            }
+		            } 
+	            }
             }
 
             var diffFile = PrintComparisonTables("Tags");
