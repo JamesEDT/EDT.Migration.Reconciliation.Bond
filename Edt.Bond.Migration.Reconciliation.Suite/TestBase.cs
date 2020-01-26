@@ -2,6 +2,7 @@
 using AventStack.ExtentReports.Gherkin.Model;
 using AventStack.ExtentReports.MarkupUtils;
 using Edt.Bond.Migration.Reconciliation.Framework;
+using Edt.Bond.Migration.Reconciliation.Framework.Logging;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Reporting;
 using NUnit.Framework;
 using System;
@@ -63,6 +64,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             }            
 
             TestTotal++;
+        }
+
+        [OneTimeTearDown]
+        public void CloseLoggers()
+        {
+            DebugLogger.Instance.Dispose();
         }
 
         public void PrintExpectedOutputFile(string mappingName)

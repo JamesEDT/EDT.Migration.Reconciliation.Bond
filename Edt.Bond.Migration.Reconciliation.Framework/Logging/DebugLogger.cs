@@ -5,6 +5,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Logging
 {
     public class DebugLogger : IDisposable
     {
+        private TextWriter textWriter;
         private StreamWriter _streamWriter;
 
         public static DebugLogger Instance
@@ -24,29 +25,44 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Logging
         public DebugLogger()
         {
             _streamWriter = new StreamWriter(Path.Combine(Settings.LogDirectory, $"DebugLog_{Settings.EdtCaseId}.txt"));
+            
+        }
+
+        public void WriteLine(string line)
+        {
+            lock (_streamWriter)
+            {
+                _streamWriter.WriteLine(line);
+            }
         }
 
         public void WriteException(Exception e, string comment = null)
         {
-            if (comment != null)
-                _streamWriter.WriteLine(comment);
-
-            _streamWriter.WriteLine(e.Message);
-            _streamWriter.WriteLine(e.StackTrace);
-
-            if(e.InnerException != null)
+            lock (_streamWriter)
             {
-                _streamWriter.WriteLine(e.InnerException.Message);
-                _streamWriter.WriteLine(e.InnerException.StackTrace);
+                if (comment != null)
+                    _streamWriter.WriteLine(comment);
+
+                _streamWriter.WriteLine(e.Message);
+                _streamWriter.WriteLine(e.StackTrace);
+
+                if (e.InnerException != null)
+                {
+                    _streamWriter.WriteLine(e.InnerException.Message);
+                    _streamWriter.WriteLine(e.InnerException.StackTrace);
+                }
             }
         }
 
         public void Dispose()
         {
-            if (_streamWriter != null)
+            lock (_streamWriter)
             {
-                _streamWriter.Flush();
-                _streamWriter.Close();
+                if (_streamWriter != null)
+                {
+                    _streamWriter.Flush();
+                    _streamWriter.Close();
+                }
             }
         }
     }

@@ -67,13 +67,16 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
         {
             var columns = SqlExecutor.Query<ColumnDetails>($"SELECT * FROM {GetDatabaseName()}.[ColumnDetails]");
 
-            using (var sw = new StreamWriter(Path.Combine(Settings.LogDirectory, "edt_db_cols.csv")))
+            if (!File.Exists(Path.Combine(Settings.LogDirectory, "edt_db_cols.csv")))
             {
-                sw.WriteLine("id,displayname,columnname");
-
-                foreach (var column in columns)
+                using (var sw = new StreamWriter(Path.Combine(Settings.LogDirectory, "edt_db_cols.csv")))
                 {
-                    sw.WriteLine($"{column.ColumnDetailsID},{column.DisplayName},{column.ColumnName}");
+                    sw.WriteLine("id,displayname,columnname");
+
+                    foreach (var column in columns)
+                    {
+                        sw.WriteLine($"{column.ColumnDetailsID},{column.DisplayName},{column.ColumnName}");
+                    }
                 }
             }
 

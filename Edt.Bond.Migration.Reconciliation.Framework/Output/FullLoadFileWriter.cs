@@ -11,6 +11,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Output
 
         private string _encap = "\"";
         private string _delimiter = "\t";
+        private bool _generateLoad = Settings.GenerateLoadFile;
 
         public StreamWriter _streamWriter;
 
@@ -21,7 +22,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Output
 
         public void OutputHeaders(List<string> headers)
         {
-            if (Settings.GenerateLoadFile)
+            if (_generateLoad)
             {
                 var joined = string.Join(_delimiter, headers);
 
@@ -31,11 +32,14 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Output
 
         public void OutputRecord(string documber, IEnumerable<string> values)
         {
-	        if (Settings.GenerateLoadFile)
+	        if (_generateLoad)
 	        {
                 var joined = string.Join(_delimiter, values.Select(x => $"{_encap}{x}{_encap}"));
 
-			    _streamWriter.WriteLine($"{documber}{_delimiter}{joined}");
+                lock (_streamWriter)
+                {
+                    _streamWriter.WriteLine($"{documber}{_delimiter}{joined}");
+                }
 	        }
         }
 

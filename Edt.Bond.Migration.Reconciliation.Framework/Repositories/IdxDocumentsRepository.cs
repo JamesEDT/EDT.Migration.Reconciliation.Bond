@@ -133,10 +133,16 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             {
                 var documents = db.GetCollection<Document>("Documents");
 
-                var skip = Settings.IdxSampleSize != 0 ? (int) (GetNumberOfDocuments() / Settings.IdxSampleSize) : 0;
-                var requiredRecords = Settings.IdxSampleSize != 0 ? Settings.IdxSampleSize : (int) GetNumberOfDocuments();
+                if (Settings.IdxSampleSize != 0)
+                {
+                    var skip = (int)(GetNumberOfDocuments() / Settings.IdxSampleSize);
 
-                return documents.Find(x => x.DocumentId != null, skip, requiredRecords);
+                    return documents.Find(x => x.DocumentId != null, skip, Settings.IdxSampleSize);
+                }
+                else
+                {
+                    return documents.FindAll();
+                }
             }
         }
 

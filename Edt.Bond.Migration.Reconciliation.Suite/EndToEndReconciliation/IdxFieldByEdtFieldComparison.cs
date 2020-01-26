@@ -180,7 +180,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 allValues.AddRange(allFieldValues);
             }
 
-            return string.Join(";", allValues);
+            return string.Join("; ", allValues);
             
         }
 
@@ -208,7 +208,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 return GetEmailFieldValues(_idxDocumentIds, mappingUnderTest.EdtName);                
             }            
 
-            if ((!string.IsNullOrEmpty(mappingUnderTest.EdtType) && mappingUnderTest.EdtType.Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase)) || _idxToEdtConversionService.MappedEdtDatabaseColumnType.Value == ColumnType.MultiValueList)
+            if ((!string.IsNullOrEmpty(mappingUnderTest.EdtType) && mappingUnderTest.EdtType.Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase)) || (_idxToEdtConversionService.MappedEdtDatabaseColumnType.HasValue && _idxToEdtConversionService.MappedEdtDatabaseColumnType.Value == ColumnType.MultiValueList))
             {
                 var allFieldValues = EdtDocumentRepository.GetMultiValueFieldValues(_idxDocumentIds, _idxToEdtConversionService.EdtColumnDetails.DisplayName);
 
@@ -224,7 +224,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             }
             else
             {
-                return (_idxToEdtConversionService.MappedEdtDatabaseColumnType == ColumnType.Date) ? EdtDocumentRepository.GetDocumentDateField(_idxDocumentIds, _idxToEdtConversionService.MappedEdtDatabaseColumn)
+                return (_idxToEdtConversionService.MappedEdtDatabaseColumnType.HasValue && _idxToEdtConversionService.MappedEdtDatabaseColumnType == ColumnType.Date) ? EdtDocumentRepository.GetDocumentDateField(_idxDocumentIds, _idxToEdtConversionService.MappedEdtDatabaseColumn)
                                                                     :   EdtDocumentRepository.GetDocumentField(_idxDocumentIds, _idxToEdtConversionService.MappedEdtDatabaseColumn);               
             }
         }

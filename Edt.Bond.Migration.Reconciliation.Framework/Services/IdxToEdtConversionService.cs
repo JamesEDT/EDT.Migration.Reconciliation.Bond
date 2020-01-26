@@ -31,14 +31,21 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
         public string ConvertValueToEdtForm(string value)
         {
-            if(_edtColumnDetails?.DataType == ColumnType.Date || (!string.IsNullOrWhiteSpace(_standardMapping.EdtType) && _standardMapping.EdtType.Equals("Date", StringComparison.InvariantCultureIgnoreCase)))
+            try
             {
-                return GetDateString(value);
+                if (_edtColumnDetails?.DataType == ColumnType.Date || (!string.IsNullOrWhiteSpace(_standardMapping.EdtType) && _standardMapping.EdtType.Equals("Date", StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    return GetDateString(value);
+                }
+
+                if (_edtColumnDetails?.DataType == ColumnType.Boolean)
+                    return GetBooleanString(value);
             }
-
-            if (_edtColumnDetails?.DataType == ColumnType.Boolean)
-                return GetBooleanString(value);
-
+            catch (Exception e)
+            {
+                DebugLogger.Instance.WriteException(e, $"Convert value {value} to {_edtColumnDetails?.DataType}");
+            }
+            
             return value;
         }
 
@@ -66,7 +73,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             matchedDbNames = edtColumnDetails.FindAll(x => x.GetAlphaNumbericOnlyDisplayName().ToLower()
                                         .Replace(" ", string.Empty).Equals(lowerDisplayName));
 
-            return matchedDbNames?.FirstOrDefault() ?? throw new EdtColumnException($"Unable to determine Edt Db column name from mapped display name {displayName}");
+            return matchedDbNames?.FirstOrDefault();
+            //?? throw new EdtColumnException($"Unable to determine Edt Db column name from mapped display name {displayName}");
         }
 
         private static string GetDateString(string sourceDateValue)

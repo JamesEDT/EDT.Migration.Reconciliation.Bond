@@ -2,8 +2,6 @@
 using Edt.Bond.Migration.Reconciliation.Framework;
 using Edt.Bond.Migration.Reconciliation.Framework.Logging;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
-using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
-using Edt.Bond.Migration.Reconciliation.Framework.Models.Exceptions;
 using Edt.Bond.Migration.Reconciliation.Framework.Output;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using Edt.Bond.Migration.Reconciliation.Framework.Services;
@@ -20,18 +18,17 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
     public class LoadFileGenerator : TestBase
     {
         private IEnumerable<Framework.Models.IdxLoadFile.Document> _idxSample;
-        private List<string> _idxDocumentIds;
-        private IdxToEdtConversionService _idxToEdtConversionService;
-
 
         [Test]    
         public void Generate()
         {
             _idxSample = new IdxDocumentsRepository().GetSample();
 
+            DebugLogger.Instance.WriteLine("idx sample size:" + _idxSample.LongCount());
+
             var standardMappings = new StandardMapReader().GetStandardMappings().Where(x => !string.IsNullOrEmpty(x.EdtName) && x.IdxNames.Any(y => !string.IsNullOrWhiteSpace(y))).ToList();
 
-            var conversionServices = standardMappings.Select(x => new IdxToEdtConversionService(x));
+            var conversionServices = standardMappings.Select(x => new IdxToEdtConversionService(x)).ToList();
 
 
             //initiliase conversion service for field under test
@@ -42,18 +39,28 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 {
                     loadFileWriter.OutputHeaders(standardMappings.Select(x => x.EdtName).ToList());
 
-                    foreach(var idxrecord in _idxSample)
+                    _idxSample.AsParallel().ForAll(idxrecord =>
+                    //foreach(var idxrecord in _idxSample)
                     {
-                       
-                        var values = standardMappings.Select(x =>
+
+                        var values = standardMappings.AsParallel().Select(x =>
                         {
                             var converter = conversionServices.First(y => y._standardMapping.EdtName == x.EdtName);
 
-                            return converter.ConvertValueToEdtForm(idxrecord.AllFields.FirstOrDefault(f => f.Key == x.IdxNames.First())?.Value ?? idxrecord.AllFields.FirstOrDefault(f => f.Key == x.IdxNames.Last())?.Value);
+                            List<string> idxValues = new List<string>();
+                            foreach (var idxSourceField in x.IdxNames)
+                            {
+
+                                idxValues.AddRange(idxrecord.AllFields.Where(f => f.Key.Equals(idxSourceField, StringComparison.InvariantCultureIgnoreCase)).Select(f => f.Value));
+                            }
+
+                            var convertedValues = idxValues.Select(c => converter.ConvertValueToEdtForm(c));
+
+                            return string.Join("; ", convertedValues);
                         });
 
                         loadFileWriter.OutputRecord(idxrecord.DocumentId, values);
-                    }
+                    });
                 }
             }
             catch(Exception e)
@@ -102,33 +109,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             return hasIdxValue;
         }
 
-        private Dictionary<string,string> GetEdtFieldValues(StandardMapping mappingUnderTest)
-        {
-            if(mappingUnderTest.IsEmailField())
-            {
-                return GetEmailFieldValues(_idxDocumentIds, mappingUnderTest.EdtName);                
-            }            
-
-            if ((!string.IsNullOrEmpty(mappingUnderTest.EdtType) && mappingUnderTest.EdtType.Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase)) || _idxToEdtConversionService.MappedEdtDatabaseColumnType.Value == ColumnType.MultiValueList)
-            {
-                var allFieldValues = EdtDocumentRepository.GetMultiValueFieldValues(_idxDocumentIds, _idxToEdtConversionService.EdtColumnDetails.DisplayName);
-
-                var combinedValues = allFieldValues.GroupBy(x => x.DocNumber)
-                                        .Select(group => new
-                                        {
-                                            DocNumber = group.Key,
-                                            Values = group.Select(x => x.FieldValue).OrderBy(x => x)
-                                        });
-         
-                var dictionaryValues =  combinedValues.ToDictionary(x => (string) x.DocNumber, x => string.Join(";", x.Values));
-                return dictionaryValues;
-            }
-            else
-            {
-                return (_idxToEdtConversionService.MappedEdtDatabaseColumnType == ColumnType.Date) ? EdtDocumentRepository.GetDocumentDateField(_idxDocumentIds, _idxToEdtConversionService.MappedEdtDatabaseColumn)
-                                                                    :   EdtDocumentRepository.GetDocumentField(_idxDocumentIds, _idxToEdtConversionService.MappedEdtDatabaseColumn);               
-            }
-        }
+       
 
         private Dictionary<string, string> GetEmailFieldValues(List<string> documentIds, string fieldType)
         {
