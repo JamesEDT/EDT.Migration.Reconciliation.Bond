@@ -60,69 +60,67 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     TestLogger.Debug($"Using EDT database column for comparison: {_idxToEdtConversionService.MappedEdtDatabaseColumn}");
                     
                     //Get 
-                    var edtValues = Settings.OnlyGenerateLoadFile ? new Dictionary<string, string>() : GetEdtFieldValues(mappingUnderTest);
+                    var edtValues = GetEdtFieldValues(mappingUnderTest);
 
                     //loop thru each sample document
                     foreach (var idxDocument in _idxSample)
                     {
                         totalsampled++;
 
-                        var idxField = GetIdxFieldValue(idxDocument, mappingUnderTest);                        
-                        
+                        var idxField = GetIdxFieldValue(idxDocument, mappingUnderTest);
+
                         var expectedEdtValue = string.IsNullOrWhiteSpace(idxField) ? idxField : _idxToEdtConversionService.ConvertValueToEdtForm(idxField);
 
                         loadFileWriter.OutputRecord(idxDocument.DocumentId, idxField == null ? string.Empty : expectedEdtValue);
 
-                        if (!Settings.OnlyGenerateLoadFile)
+                        if (!edtValues.TryGetValue(idxDocument.DocumentId, out var edtValueForIdxRecord) && !string.IsNullOrEmpty(idxField))
                         {
-                            if (!edtValues.TryGetValue(idxDocument.DocumentId, out var edtValueForIdxRecord) && !string.IsNullOrEmpty(idxField))
-                            {
-                                documentsInIdxButNotInEdt++;
-                                ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "No value found in Edt when Idx had a value"));
+                            documentsInIdxButNotInEdt++;
+                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "No value found in Edt when Idx had a value"));
 
-                            }
-                            else
+                        }
+                        else
+                        {
+                            if (string.IsNullOrWhiteSpace(idxField))
                             {
-                                if (string.IsNullOrWhiteSpace(idxField))
+                                if (!string.IsNullOrWhiteSpace(edtValueForIdxRecord))
                                 {
-                                    if (!string.IsNullOrWhiteSpace(edtValueForIdxRecord))
-                                    {
-                                        documentsInEdtButNotInIdx++;
-                                        ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Edt had value \"{edtValueForIdxRecord}\" for field {mappingUnderTest.EdtName} when Idx had no value."));
-                                    }
-                                    else
-                                    {
-                                        idxUnfound++;
-                                        ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"No value found in Idx for document"));
-                                    }
+                                    documentsInEdtButNotInIdx++;
+                                    ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Edt had value \"{edtValueForIdxRecord}\" for field {mappingUnderTest.EdtName} when Idx had no value."));
                                 }
                                 else
                                 {
-                                    try
+                                    idxUnfound++;
+                                    ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"No value found in Idx for document"));
+                                }
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    if (!string.IsNullOrWhiteSpace(edtValueForIdxRecord)) populated++;
+
+
+                                    if (!edtValueForIdxRecord.Equals(expectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
                                     {
-                                        if (!string.IsNullOrWhiteSpace(edtValueForIdxRecord)) populated++;
-
-
-                                        if (!edtValueForIdxRecord.Equals(expectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
-                                        {
-                                            different++;
-                                            ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtValueForIdxRecord, expectedEdtValue, idxField));
-                                        }
-                                        else
-                                        {
-                                            matched++;
-                                        }
+                                        different++;
+                                        ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtValueForIdxRecord, expectedEdtValue, idxField));
                                     }
-                                    catch (Exception ex)
+                                    else
                                     {
-                                        unexpectedErrors++;
-                                        var error = $"{ex.Message}<br></br>{ex.StackTrace}";
-                                        ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, error));
+                                        matched++;
                                     }
                                 }
-
+                                catch (Exception ex)
+                                {
+                                    unexpectedErrors++;
+                                    var error = $"{ex.Message}<br></br>{ex.StackTrace}";
+                                    ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, error));
+                                }
                             }
+
                         }
+
                     }
 
                     PrintStats(different, matched, documentsInIdxButNotInEdt, documentsInEdtButNotInIdx, idxUnfound, unexpectedErrors, populated, totalsampled);

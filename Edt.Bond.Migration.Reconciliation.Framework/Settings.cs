@@ -32,10 +32,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
         public static int IdxSampleSize => int.Parse(GetSetting("IdxSampleSize"));
 
         public static bool GenerateLoadFile => bool.Parse(GetSetting("GenerateLoadFile"));
-
-        public static bool OnlyGenerateLoadFile => bool.Parse(GetSetting("OnlyGenerateLoadFile"));
-
-         public static string[] IgnoredIdxFieldsFromComparison => GetSetting("IgnoredIdxFieldsFromComparison").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+        
+        public static string[] IgnoredIdxFieldsFromComparison => GetSetting("IgnoredIdxFieldsFromComparison").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
         public static string[] LocationIdxFields => GetSetting("LocationIdxFields").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
