@@ -31,16 +31,23 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Output
 
         public void OutputRecord(string docNumber, string record)
         {
-            var line = _streamReader != null ? $"{_streamReader.ReadLine()}{_delimiter}": $"{_encap}{docNumber}{_encap}{_delimiter}";
 
-            if (line.Contains(docNumber))
-            {
-                _streamWriter.WriteLine($"{line}{_encap}{record ?? string.Empty}{_encap}");
-            }
-            else
-            {
-                throw new Exception("Tried to output for different doc");
-            }
+	        if (Settings.GenerateLoadFile)
+	        {
+
+		        var line = _streamReader != null
+			        ? $"{_streamReader.ReadLine()}{_delimiter}"
+			        : $"{_encap}{docNumber}{_encap}{_delimiter}";
+
+		        if (line.Contains(docNumber))
+		        {
+			        _streamWriter.WriteLine($"{line}{_encap}{record ?? string.Empty}{_encap}");
+		        }
+		        else
+		        {
+			        throw new Exception("Tried to output for different doc");
+		        }
+	        }
         }
 
         public void Dispose()
