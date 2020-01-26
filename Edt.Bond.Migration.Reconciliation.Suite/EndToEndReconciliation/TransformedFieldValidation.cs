@@ -67,9 +67,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 		            var tag = workbookRecords.SingleOrDefault(c => c.Id == aunWorkbookId.Value);
 
 		            if (tag != null)
-		            { 
-			            if (string.IsNullOrWhiteSpace(tag.FullPath))
-			            {
+		            {  
 				            if (!foundEdtValue || (relatedEdTags != null && !relatedEdTags.Any(x =>
 					                                   x != null && x.Equals(tag.FullPath,
 						                                   System.StringComparison.InvariantCultureIgnoreCase))))
@@ -90,8 +88,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 				            errors++;
 				            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
 					            $"Couldnt convert aun workbook id {aunWorkbookId} to name"));
-			            }
-		            } 
+			            } 
 	            }
             }
 

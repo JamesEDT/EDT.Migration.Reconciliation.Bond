@@ -141,7 +141,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static Dictionary<string, List<string>> GetDocumentTags(List<string> documentIds)
         {
-            var sql = $@"SELECT doc.DocNumber as DocumentNumber, tag.TagName as Tag FROM {GetDatabaseName()}.[Document] doc
+            var sql = $@"SELECT doc.DocNumber as DocumentNumber, tag.FullName as Tag FROM {GetDatabaseName()}.[Document] doc
                           INNER JOIN {GetDatabaseName()}.[DocumentTag] documentTag ON doc.DocumentID = documentTag.DocumentID
                           INNER JOIN {GetDatabaseName()}.[Tag] tag ON documentTag.TagID = tag.TagID
                           WHERE {GetDocumentIDQuery(documentIds)}";
