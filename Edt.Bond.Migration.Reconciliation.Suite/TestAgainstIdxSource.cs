@@ -34,31 +34,45 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
                 if (!StandardMappings.Any())
                     throw new Exception("Failed to read mappings - count is 0 post attempt");
 
-                var idxPath = Settings.IdxFilePath;
 
-                Document[] documents;
-
-                IdxDocumentsRepository = new IdxDocumentsRepository();
-                IdxDocumentsRepository.Initialise(true);
-
-                logger.Debug("Reading Idx chunks");
-                do
+                if (Settings.UseExistingIdxAnalysis)
                 {
-                    documents = IdxProcessingService.GetNextDocumentChunkFromFile(idxPath).ToArray();
+                    logger.Debug("Using existing Idx analysis");
+                    if(!IdxDocumentsRepository.Exists())
+                    {
+                        throw new Exception("Idx analysis db not present but config is to use existing analysis");
+                    }
+                }
+                else
+                {
 
-                    if (!documents.Any()) return;
+                    var idxPath = Settings.IdxFilePath;
 
-                    IdxDocumentsRepository.AddDocuments(documents);
-                    IdxDocumentsProcessed = +documents.Length;
+                    Document[] documents;
 
-                } while (documents.Length > 0);
+                    IdxDocumentsRepository = new IdxDocumentsRepository();
+                    IdxDocumentsRepository.Initialise(true);
 
-                logger.Debug("Completed reading Idx");
+                    logger.Debug("Reading Idx chunks");
+                    do
+                    {
+                        documents = IdxProcessingService.GetNextDocumentChunkFromFile(idxPath).ToArray();
 
-                IdxDocumentsRepository.CreateDocumentIdIndex();
+                        if (!documents.Any()) return;
 
-                logger.Pass("Idx pre reading completed");
+                        IdxDocumentsRepository.AddDocuments(documents);
+                        IdxDocumentsProcessed = +documents.Length;
+
+                    } while (documents.Length > 0);
+
+                    logger.Debug("Completed reading Idx");
+
+                    IdxDocumentsRepository.CreateDocumentIdIndex();
+
+                    logger.Pass("Idx pre reading completed");
+                }
                 HtmlReport.Writer.Flush();
+                
             }
             catch(Exception ex)
             {

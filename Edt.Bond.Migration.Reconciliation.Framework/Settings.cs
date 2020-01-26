@@ -7,6 +7,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
 {
     public class Settings
     {
+        public static bool UseExistingIdxAnalysis => bool.Parse(GetSetting("UseExistingIdxAnalysis"));
+
         public static string EdtCaseId => GetSetting("EdtCaseId");
 
         public static string StandardMapPath => GetSetting("StandardMapPath");

@@ -41,6 +41,17 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
                 File.Delete(DbName);
         }
 
+        public static bool Exists()
+        {
+            var caseId = ConfigurationManager.AppSettings["EdtCaseId"];
+            var idxName = ConfigurationManager.AppSettings["IdxName"]?.Replace(".", string.Empty);
+
+            var dbName = $".\\IdxRepo_{caseId}_{idxName}.db";
+
+            return File.Exists(dbName);
+               
+        }
+
         public void AddDocuments(IEnumerable<Document> documents)
         {
             using (var db = new LiteDatabase(DbName))
