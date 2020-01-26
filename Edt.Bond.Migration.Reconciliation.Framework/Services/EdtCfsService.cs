@@ -10,6 +10,12 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
     {
         public static long GetDocumentCountForBatch()
         {
+            return GetDocumentsForBatch().LongCount();
+            
+        }
+
+        public static IEnumerable<string> GetDocumentsForBatch()
+        {
             var allDocumentIds = EdtDocumentRepository.GetAllDocumentIds();
 
             var allNativeFilesInEdt = Directory
@@ -19,8 +25,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 .Distinct();
 
             var presentDocuments = allDocumentIds.Intersect(allNativeFilesInEdt);
-            
-            return presentDocuments.LongCount();
+
+            return presentDocuments;
         }
 
         private static void LogNativeFileLocations(List<DerivedFileLocation> derivedFiles)

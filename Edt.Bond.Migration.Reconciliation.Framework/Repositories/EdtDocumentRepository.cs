@@ -98,9 +98,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             return SqlExecutor.Query<dynamic>(sql);
         }
 
-        public static List<string> GetDocuentNumbersWithABody()
+        public static List<string> GetDocumentNumbersWithABody()
         {
-            var sql = $@"SELECT document.DocumentId FROM {GetDatabaseName()}.[Batch] batch
+            var sql = $@"SELECT document.DocNumber FROM {GetDatabaseName()}.[Batch] batch
                          INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
                          WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'
                          AND document.Body IS NOT NULL";

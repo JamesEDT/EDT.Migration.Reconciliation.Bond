@@ -86,7 +86,22 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
 			TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
-			Assert.AreEqual(_idxDocumentCount, cfsCount, "File counts should be equal for Idx and Load file");
+            if (_idxDocumentCount != cfsCount)
+            {
+                //output diff list
+                var outputFile = Path.Combine(Settings.ReportingDirectory, "NativesMissing.csv");
+                using (var sw = new StreamWriter(outputFile))
+                {
+                    var idxDocumentIds = new IdxDocumentsRepository().GetDocumentIds();
+                    var cfsIds = EdtCfsService.GetDocumentsForBatch();
+
+                    idxDocumentIds.Where(x => !cfsIds.Contains(x)).ToList().ForEach(x => sw.WriteLine(x));
+
+                    TestLogger.Info($"List of Ids without body output to: {new FileInfo(outputFile).FullName}");
+                }
+            }
+
+            Assert.AreEqual(_idxDocumentCount, cfsCount, "File counts should be equal for Idx and Load file");
 		}
 
 		[Test]
@@ -144,18 +159,17 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 		public void TextCountsAreEqualBetweenIdxAndEdtFileStore()
 		{
 			//For each Document in Batch, Count where Body is not null
-			var edtDocsWithBody = EdtDocumentRepository.GetDocuentNumbersWithABody();
-
-
+			var edtDocsWithBody = EdtDocumentRepository.GetDocumentNumbersWithABody();
 
 			//compare against Text count in microfocus dir
-			var edtIds = EdtDocumentRepository.GetDocumentNumbers();
-			var textFileDocsIds = Directory
+			var documentIdsWithinEdt = EdtDocumentRepository.GetDocumentNumbers();
+
+			var microFocusExportDocuments = Directory
 				.GetFiles(Settings.MicroFocusStagingDirectoryTextPath, "*.txt", SearchOption.AllDirectories)
                 .Where(x => new FileInfo(x).Length > 3)
-				.Select(x => GetDocumentIdFromFilePath(x)).Where(x => edtIds.Contains(x));
+				.Select(x => GetDocumentIdFromFilePath(x)).Where(x => documentIdsWithinEdt.Contains(x));
 
-			var mircoFocusDocCount = textFileDocsIds.Count();
+			var mircoFocusDocCount = microFocusExportDocuments.Count();
 
 			//output counts
 			string[][] data =
@@ -173,7 +187,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 				var outputFile = Path.Combine(Settings.ReportingDirectory, "TextContentMissing.csv");
 				using (var sw = new StreamWriter(outputFile))
 				{
-					var missingBodies = textFileDocsIds.Where(x => !edtDocsWithBody.Contains(x));
+					var missingBodies = microFocusExportDocuments.Where(x => !edtDocsWithBody.Contains(x));
 					foreach (var missing in missingBodies)
 					{
 						sw.WriteLine(missing);
