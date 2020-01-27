@@ -43,12 +43,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     //foreach(var idxrecord in _idxSample)
                     {
 
-                        var values = standardMappings.AsParallel().Select(x =>
+                        var values = standardMappings.AsParallel().Select(standardMapping =>
                         {
-                            var converter = conversionServices.First(y => y._standardMapping.EdtName == x.EdtName);
+                            var converter = conversionServices.First(y => y._standardMapping.EdtName == standardMapping.EdtName);
 
                             List<string> idxValues = new List<string>();
-                            foreach (var idxSourceField in x.IdxNames)
+                            foreach (var idxSourceField in standardMapping.IdxNames)
                             {
 
                                 idxValues.AddRange(idxrecord.AllFields.Where(f => f.Key.Equals(idxSourceField, StringComparison.InvariantCultureIgnoreCase)).Select(f => f.Value));
