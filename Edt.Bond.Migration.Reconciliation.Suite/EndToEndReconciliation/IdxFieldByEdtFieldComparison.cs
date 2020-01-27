@@ -17,7 +17,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
     [TestFixture]
     [Category("IdxComparison")]
     [Description("Compare Idx field with Edt Database field to validate implementation of mapping, for a subset of records.")]
-
+    [Parallelizable(ParallelScope.Children)]
     public class IdxFieldByEdtFieldComparison : TestBase
     {
         private IEnumerable<Framework.Models.IdxLoadFile.Document> _idxSample;
@@ -63,7 +63,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     var edtValues = GetEdtFieldValues(mappingUnderTest);
 
                     //loop thru each sample document
-                    foreach (var idxDocument in _idxSample)
+                    _idxSample.AsParallel().ForAll(idxDocument =>
                     {
                         totalsampled++;
 
@@ -121,7 +121,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                         }
 
-                    }
+                    });
 
                     PrintStats(different, matched, documentsInIdxButNotInEdt, documentsInEdtButNotInIdx, idxUnfound, unexpectedErrors, populated, totalsampled);
 

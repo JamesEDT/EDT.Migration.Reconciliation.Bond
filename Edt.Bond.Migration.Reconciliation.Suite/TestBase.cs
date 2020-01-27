@@ -6,6 +6,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Logging;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Reporting;
 using NUnit.Framework;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,8 +21,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
         public ExtentTest TestLogger;
         public int TestFailures = 0;
         public int TestTotal = 0;
-        public List<ComparisonError> ComparisonErrors;
-        public List<ComparisonResult> ComparisonResults;
+        public ConcurrentBag<ComparisonError> ComparisonErrors;
+        public ConcurrentBag<ComparisonResult> ComparisonResults;
 
         [OneTimeSetUp]
         public void SetUpSuiteLog()
@@ -40,8 +41,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
             TestLogger = string.IsNullOrEmpty(description) ? FeatureRunner.CreateNode(testName) : FeatureRunner.CreateNode<Scenario>(testName, description);
 
-            ComparisonErrors = new List<ComparisonError>();
-            ComparisonResults = new List<ComparisonResult>();
+            ComparisonErrors = new ConcurrentBag<ComparisonError>();
+            ComparisonResults = new ConcurrentBag<ComparisonResult>();
         }        
 
         [TearDown]
