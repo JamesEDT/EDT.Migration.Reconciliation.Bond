@@ -67,19 +67,28 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         var aunWorkbookIds = idxRecord.AllFields.Where(x => x.Key.Equals("AUN_WORKBOOK_NUMERIC", StringComparison.InvariantCultureIgnoreCase));
                         var foundEdtValue = allEdtTags.TryGetValue(idxRecord.DocumentId, out var relatedEdTags);
 
-                        var cleanedEdTags = relatedEdTags?.Select(x => x?.ReplaceTagChars()).ToList();
+                        DebugLogger.Instance.WriteLine("foundEdtValue");
+
+                        var cleanedEdTags = foundEdtValue ? relatedEdTags?.Select(x => x?.ReplaceTagChars()).ToList() : new List<string>();
 
                         DebugLogger.Instance.WriteLine("cleanedEdTags");
 
 
                         if (!aunWorkbookIds.Any())
                         {
+
+                            DebugLogger.Instance.WriteLine("aunWorkbookIds");
+
                             idxUnpopulated++;
                             ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
                                 "AUN_WORKBOOK_NUMERIC field was not present for idx record"));
 
                             if (relatedEdTags != null && relatedEdTags.Any())
                             {
+
+                                DebugLogger.Instance.WriteLine("aunWorkbookIds2");
+
+
                                 edtUnexpectedlyPopulated++;
                                 ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
                                     $"EDT has value(s) {(relatedEdTags != null ? string.Join(",", relatedEdTags) : string.Empty)} when Idx record had no value"));
@@ -88,42 +97,58 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                             continue;
                         }
 
-                      
 
-                        var outputTags = aunWorkbookIds.Select(x => workbookRecords.SingleOrDefault(c => c.Id == x.Value).FullPathOutput);
+                        DebugLogger.Instance.WriteLine("outputTags-pre");
 
-                        writer.WriteLine($"{idxRecord.DocumentId},\"{(outputTags != null ? string.Join(";", outputTags) : string.Empty)}\"");
+                        var outputTags = aunWorkbookIds.Select(x => workbookRecords.SingleOrDefault(c => c.Id == x.Value)?.FullPathOutput).ToList();
 
-                        foreach (var aunWorkbookId in aunWorkbookIds)
+                        DebugLogger.Instance.WriteLine("outputTags");
+
+                        if (outputTags.Any())
                         {
-                            var tag = workbookRecords.SingleOrDefault(c => c.Id == aunWorkbookId.Value);
+                            writer.WriteLine($"{idxRecord.DocumentId},\"{(outputTags != null ? string.Join(";", outputTags) : string.Empty)}\"");
 
-                            if (tag != null)
+                            foreach (var aunWorkbookId in aunWorkbookIds)
                             {
 
+                                DebugLogger.Instance.WriteLine("aunWorkbookId2");
 
-                                if (!foundEdtValue || (relatedEdTags != null && !relatedEdTags.Any(x =>
-                                                           x != null && x.Equals(tag.FullPath,
-                                                               System.StringComparison.InvariantCultureIgnoreCase))))
+                                var tag = workbookRecords.SingleOrDefault(c => c.Id == aunWorkbookId.Value);
+
+                                if (tag != null)
                                 {
-                                    different++;
-                                    var edtLogValue = relatedEdTags != null ? string.Join(";", relatedEdTags) : "none found";
 
-                                    ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxRecord.DocumentId,
-                                        edtLogValue, tag.FullPath, aunWorkbookId.Value.ToString()));
+
+                                    if (!foundEdtValue || (relatedEdTags != null && !relatedEdTags.Any(x =>
+                                                               x != null && x.Equals(tag.FullPath,
+                                                                   System.StringComparison.InvariantCultureIgnoreCase))))
+                                    {
+                                        different++;
+                                        var edtLogValue = relatedEdTags != null ? string.Join(";", relatedEdTags) : "none found";
+
+                                        ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxRecord.DocumentId,
+                                            edtLogValue, tag.FullPath, aunWorkbookId.Value.ToString()));
+                                    }
+                                    else
+                                    {
+                                        matched++;
+                                    }
                                 }
                                 else
                                 {
-                                    matched++;
+                                    errors++;
+                                    ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
+                                        $"Couldnt convert aun workbook id {aunWorkbookId} to name"));
                                 }
                             }
-                            else
-                            {
-                                errors++;
-                                ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
-                                    $"Couldnt convert aun workbook id {aunWorkbookId} to name"));
-                            }
+
                         }
+                        else
+                        {
+                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId, "No tags exist for this document"));
+                        }
+
+                       
                     }
                 }
 
