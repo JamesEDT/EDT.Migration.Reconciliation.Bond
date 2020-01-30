@@ -41,5 +41,10 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Extensions
             Regex rgx = new Regex("[^a-zA-Z0-9 -]");
             return rgx.Replace(input, "");
         }
+
+        public static string ReplaceTagChars(this string input)
+        {
+            return input?.Replace('/', '~').Replace('.', '~').Replace('-','~');
+        }
     }
 }

@@ -8,11 +8,6 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 {
     public class EdtCfsService
     {
-        public static long GetDocumentCountForBatch()
-        {
-            return GetDocumentsForBatch().LongCount();
-            
-        }
 
         public static IEnumerable<string> GetDocumentsForBatch()
         {
@@ -22,11 +17,12 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 .GetFiles(Path.Combine(Settings.EdtCfsDirectory, $"Site01_Case{Settings.EdtCaseId.ToString().PadLeft(4, '0')}"), "*.*", SearchOption.AllDirectories)
                 .Select(x => new FileInfo(x).Name)
                 .Select(x => x.Substring(0, x.IndexOf('_')))
-                .Distinct();
+                .Distinct()
+                .ToList();
 
-            var presentDocuments = allDocumentIds.Intersect(allNativeFilesInEdt);
+            var presentDocuments = allDocumentIds.Where(x => allNativeFilesInEdt.Contains( x.DocumentId.ToString()));
 
-            return presentDocuments;
+            return presentDocuments.ToList().Select(x => (string) x.DocumentNumber);
         }
 
         private static void LogNativeFileLocations(List<DerivedFileLocation> derivedFiles)

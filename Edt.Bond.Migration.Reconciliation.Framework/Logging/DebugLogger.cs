@@ -5,7 +5,6 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Logging
 {
     public class DebugLogger : IDisposable
     {
-        private TextWriter textWriter;
         private StreamWriter _streamWriter;
 
         public static DebugLogger Instance
@@ -13,7 +12,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Logging
             get
             {
                 if (_instance == null)
+                {
                     _instance = new DebugLogger();
+                }
 
                 return _instance;
 
@@ -25,6 +26,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Logging
         public DebugLogger()
         {
             _streamWriter = new StreamWriter(Path.Combine(Settings.LogDirectory, $"DebugLog_{Settings.EdtCaseId}.txt"));
+            _streamWriter.AutoFlush = true;
             
         }
 

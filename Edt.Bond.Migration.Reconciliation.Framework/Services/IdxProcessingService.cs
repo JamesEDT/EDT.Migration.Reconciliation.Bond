@@ -10,7 +10,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
     public class IdxProcessingService
     {
         private static StreamReader _streamReader;
-        private const long ProcessingChunkSize = 1000;
+        private const long ProcessingChunkSize = 100;
         private static readonly string[] DocumentEndTag = new string[] {"#DREENDDOC"};
         
 

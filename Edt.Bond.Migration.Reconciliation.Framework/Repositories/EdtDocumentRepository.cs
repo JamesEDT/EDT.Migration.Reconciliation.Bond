@@ -106,7 +106,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             var sql = $@"SELECT document.DocNumber FROM {GetDatabaseName()}.[Batch] batch
                          INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
                          WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'
-                         AND document.Body IS NOT NULL";
+                         AND document.Body IS NOT NULL
+                         AND LEN(document.Body) > 0";
 
             return SqlExecutor.Query<string>(sql).ToList();
         }
@@ -229,13 +230,14 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         }
 
-        public static IEnumerable<string> GetAllDocumentIds()
+        public static IEnumerable<dynamic> GetAllDocumentIds()
         {
-            var sql = $@"SELECT document.DocumentId FROM {GetDatabaseName()}.[Batch] batch
+            var sql = $@"SELECT document.DocumentId as DocumentId, document.DocNumber as DocumentNumber
+                        FROM {GetDatabaseName()}.[Batch] batch
                         INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
                         WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
 
-            return SqlExecutor.Query<string>(sql);
+            return SqlExecutor.Query<dynamic>(sql);
         }
     }
 }

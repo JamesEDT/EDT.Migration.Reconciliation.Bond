@@ -14,6 +14,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
     {
         public StandardMapping _standardMapping;
         private ColumnDetails _edtColumnDetails;
+        private bool _ignoreMissingEdtColumn = false;
 
         public string MappedEdtDatabaseColumn => _edtColumnDetails?.ColumnName;
 
@@ -21,12 +22,13 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
         public ColumnType? MappedEdtDatabaseColumnType => _edtColumnDetails?.DataType;
        
-        public IdxToEdtConversionService(StandardMapping standardMapping)
+        public IdxToEdtConversionService(StandardMapping standardMapping, bool ignoreMissingEdtColumn = false)
         {
             _standardMapping = standardMapping;
 
             if (!_standardMapping.IsEmailField())
                 _edtColumnDetails = GetEdtColumnDetailsFromDisplayName(standardMapping.EdtName);
+            _ignoreMissingEdtColumn = ignoreMissingEdtColumn;
         }
 
         public string ConvertValueToEdtForm(string value)
@@ -73,8 +75,13 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             matchedDbNames = edtColumnDetails.FindAll(x => x.GetAlphaNumbericOnlyDisplayName().ToLower()
                                         .Replace(" ", string.Empty).Equals(lowerDisplayName));
 
-            return matchedDbNames?.FirstOrDefault();
-            //?? throw new EdtColumnException($"Unable to determine Edt Db column name from mapped display name {displayName}");
+            var matchedDb = matchedDbNames?.FirstOrDefault();
+
+            if (!_ignoreMissingEdtColumn && matchedDb == null)
+            {
+                throw new EdtColumnException($"Unable to determine Edt Db column name from mapped display name {displayName}");
+            }
+            return matchedDb;
         }
 
         private static string GetDateString(string sourceDateValue)

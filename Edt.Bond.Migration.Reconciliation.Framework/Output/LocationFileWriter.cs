@@ -22,9 +22,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Output
         public void OutputRecord(string docNumber, string record)
         {
 
-	        if (Settings.GenerateLoadFile)
+            lock(_streamWriter)
 	        {
-			    _streamWriter.WriteLine($"{_encap}{record ?? string.Empty}{_encap}");
+			    _streamWriter.WriteLine($"{docNumber}{_delimiter}{_encap}{record ?? string.Empty}{_encap}");
 	        }
         }
 

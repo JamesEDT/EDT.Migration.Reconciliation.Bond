@@ -17,7 +17,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
     [TestFixture]
     [Category("IdxComparison")]
     [Description("Compare Idx field with Edt Database field to validate implementation of mapping, for a subset of records.")]
-    //[Parallelizable(ParallelScope.Children)]
+    //[Parallelizable(ParallelScope.)]
     public class IdxFieldByEdtFieldComparison : TestBase
     {
         private IEnumerable<Framework.Models.IdxLoadFile.Document> _idxSample;
@@ -119,6 +119,22 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                                         if (!trimmedActualEdtValue.Equals(trimmedExpectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
                                         {
+                                            if (mappingUnderTest.EdtName.Equals("Host Document Id", StringComparison.InvariantCultureIgnoreCase))
+                                            {
+                                                //if .pst, check that null
+                                                var fileType = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals("FILETYPE_PARAMETRIC", StringComparison.InvariantCultureIgnoreCase));
+                                                if(fileType.Value.Equals(".pst", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    matched++;
+                                                    ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "Host document id null due to being .pst"));
+                                                }  
+                                                else
+                                                {
+                                                    different++;
+                                                    ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtValueForIdxRecord, expectedEdtValue, idxField));
+                                                }
+                                            }
+                                            
                                             different++;
                                             ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtValueForIdxRecord, expectedEdtValue, idxField));
                                         }
@@ -187,7 +203,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 /*if (mappingUnderTest.EdtType != "MultiValueList" && !mappingUnderTest.IsEmailField())
                     return idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(idxName))?.Value;*/
 
-                var allFieldValues = idxDocument.AllFields.Where(x => x.Key.Equals(idxNameLookup))
+                var allFieldValues = idxDocument.AllFields.Where(x => x.Key.Equals(idxNameLookup) && !string.IsNullOrWhiteSpace(x.Value))
                                         .Select(x => x.Value)
                                         .Distinct()
                                         .OrderBy(x => x);

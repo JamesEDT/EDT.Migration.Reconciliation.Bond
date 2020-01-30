@@ -1,10 +1,13 @@
 ﻿using AventStack.ExtentReports.MarkupUtils;
 using Edt.Bond.Migration.Reconciliation.Framework;
+using Edt.Bond.Migration.Reconciliation.Framework.Logging;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using Edt.Bond.Migration.Reconciliation.Framework.Services;
 using NUnit.Framework;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Edt.Bond.Migration.Reconciliation.Framework.Extensions;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
@@ -14,19 +17,21 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 	public class HighLevelReconciliation : TestBase
 	{
 		private long _idxDocumentCount;
+        private List<string> _idxDocumentIds;
 
 		[OneTimeSetUp]
 		public void GetIdxCount()
-		{
-			_idxDocumentCount = new IdxDocumentsRepository().GetNumberOfDocuments();
-		}
+		{			
+            _idxDocumentIds = new IdxDocumentsRepository().GetDocumentIds();
+            _idxDocumentCount = _idxDocumentIds.Count;
+        }
 
 		[Test]
 		[Description(
 			"Comparing the count of documents detailed in the Idx compared to the document count found in the Edt database")]
 		public void DatabaseDocumentsCountsAreEqualBetweenIdxAndEdtDatabase()
 		{
-			var EdtDocumentCount = EdtDocumentRepository.GetDocumentCount();
+            var EdtDocumentCount = EdtDocumentRepository.GetDocumentCount();
 
 			string[][] data = new string[][]
 			{
@@ -37,8 +42,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
 			TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
-			if (_idxDocumentCount != EdtDocumentCount)
-				PrintOutIdDiffs();
+            if (_idxDocumentCount != EdtDocumentCount)
+            {
+                PrintOutIdDiffs();
+            }
 
 			Assert.AreEqual(_idxDocumentCount, EdtDocumentCount, "File counts should be equal for Idx and Load file");
 		}
@@ -46,10 +53,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 		private void PrintOutIdDiffs()
 		{
 			var EdtIds = EdtDocumentRepository.GetDocumentNumbers();
-			var IdxIds = new IdxDocumentsRepository().GetDocumentIds();
 
-			var edtExceptIdx = EdtIds.Except(IdxIds);
-			var IdxExceptEdt = IdxIds.Except(EdtIds);
+			var edtExceptIdx = EdtIds.Except(_idxDocumentIds);
+			var IdxExceptEdt = _idxDocumentIds.Except(EdtIds);
+
+
 
 			using (var sw = new StreamWriter($"{Settings.ReportingDirectory}\\DocumentCountDifferences_IdLists.csv"))
 			{
@@ -75,7 +83,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			"Comparing the count of documents detailed in the Idx to the Edt Central File Store, thus validating all natives are imported to EDT.")]
 		public void NativeCountsAreEqualBetweenIdxAndEdtFileStore()
 		{
-			var cfsCount = EdtCfsService.GetDocumentCountForBatch();
+            var cfsDocsForBatch = EdtCfsService.GetDocumentsForBatch();
+
+            var cfsCount = cfsDocsForBatch.Count();
 
 			string[][] data = new string[][]
 			{
@@ -88,17 +98,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             if (_idxDocumentCount != cfsCount)
             {
-                //output diff list
-                var outputFile = Path.Combine(Settings.ReportingDirectory, "NativesMissing.csv");
-                using (var sw = new StreamWriter(outputFile))
-                {
-                    var idxDocumentIds = new IdxDocumentsRepository().GetDocumentIds();
-                    var cfsIds = EdtCfsService.GetDocumentsForBatch();
+  
+                ListExtensions.DifferencesToFile(cfsDocsForBatch.ToList(), _idxDocumentIds, Path.Combine(Settings.ReportingDirectory, "NativesMissing_InCfsOnly.csv"));
+                ListExtensions.DifferencesToFile(_idxDocumentIds, cfsDocsForBatch.ToList(), Path.Combine(Settings.ReportingDirectory,  "NativesMissing_InIdxOnly.csv"));
 
-                    idxDocumentIds.Where(x => !cfsIds.Contains(x)).ToList().ForEach(x => sw.WriteLine(x));
-
-                    TestLogger.Info($"List of Ids without body output to: {new FileInfo(outputFile).FullName}");
-                }
+                TestLogger.Info($"List of Ids without body output to reporting directory (NativeMissing_)");
+                
             }
 
             Assert.AreEqual(_idxDocumentCount, cfsCount, "File counts should be equal for Idx and Load file");
@@ -112,7 +117,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			int lppDocCount = EdtDocumentRepository.GetDocumentQuarantineDocumentCount();
 			int idxLppDocCount = new IdxDocumentsRepository().GetNumberOfLppDocs();
 
-			string[][] data =
+            //DebugLogger.Instance.WriteLine("Determine Counts between idx and quarantine - starting scan files");
+
+            string[][] data =
 			{
 				new[] {"Item Evaluated", "Count of LPP Documents"},
 				new[] {"Idx file", idxLppDocCount.ToString()},
@@ -158,16 +165,19 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			"Comparing the text document counts in the Idx to the Edt Document.Body, thus validating all text fies are imported to EDT.")]
 		public void TextCountsAreEqualBetweenIdxAndEdtFileStore()
 		{
-			//For each Document in Batch, Count where Body is not null
-			var edtDocsWithBody = EdtDocumentRepository.GetDocumentNumbersWithABody();
+            //For each Document in Batch, Count where Body is not null
+            var edtDocsWithBody = EdtDocumentRepository.GetDocumentNumbersWithABody();
 
 			//compare against Text count in microfocus dir
 			var documentIdsWithinEdt = EdtDocumentRepository.GetDocumentNumbers();
 
-			var microFocusExportDocuments = Directory
-				.GetFiles(Settings.MicroFocusStagingDirectoryTextPath, "*.txt", SearchOption.AllDirectories)
-                .Where(x => new FileInfo(x).Length > 3)
-				.Select(x => GetDocumentIdFromFilePath(x)).Where(x => documentIdsWithinEdt.Contains(x));
+            var microFocusExportDocuments = Directory
+                .GetFiles(Settings.MicroFocusStagingDirectoryTextPath, "*.txt", SearchOption.AllDirectories)
+                .Select(x => new FileInfo(x))
+                .Where(x => x.Length > 3)
+                .Select(x => GetDocumentIdFromFilePath(x))
+                .Where(x => documentIdsWithinEdt.Contains(x))
+                .ToList();
 
 			var mircoFocusDocCount = microFocusExportDocuments.Count();
 
@@ -181,30 +191,21 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
 			TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
-			if (mircoFocusDocCount != edtDocsWithBody.Count())
-			{
-				//output diff list
-				var outputFile = Path.Combine(Settings.ReportingDirectory, "TextContentMissing.csv");
-				using (var sw = new StreamWriter(outputFile))
-				{
-					var missingBodies = microFocusExportDocuments.Where(x => !edtDocsWithBody.Contains(x));
-					foreach (var missing in missingBodies)
-					{
-						sw.WriteLine(missing);
-					}
+            if (mircoFocusDocCount != edtDocsWithBody.Count())
+            {
+                ListExtensions.DifferencesToFile(microFocusExportDocuments, edtDocsWithBody, Path.Combine(Settings.ReportingDirectory, "TextContent_MicrofocusOnly.csv"));
+                ListExtensions.DifferencesToFile(edtDocsWithBody, microFocusExportDocuments, Path.Combine(Settings.ReportingDirectory, "TextContent_EdtOnly.csv"));
 
-					TestLogger.Info($"List of Ids without body output to: {new FileInfo(outputFile).FullName}");
-				}
-			}
+                TestLogger.Info($"List of Ids without body output to reporting directory (TextContent_)");
+
+            }
 
 			Assert.AreEqual(mircoFocusDocCount, edtDocsWithBody.Count(),
 				"File counts should be equal for Microfocus load and EDT");
 		}
 
-		private string GetDocumentIdFromFilePath(string FilePath)
+		private string GetDocumentIdFromFilePath(FileInfo fileInfo)
 		{
-			var fileInfo = new FileInfo(FilePath);
-
 			var fileName = fileInfo.Name.Split(new char[] {'.'}).First();
 
 			return fileName;

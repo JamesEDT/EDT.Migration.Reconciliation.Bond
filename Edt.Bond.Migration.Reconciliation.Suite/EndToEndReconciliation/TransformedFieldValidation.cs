@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using Edt.Bond.Migration.Reconciliation.Framework;
 using Edt.Bond.Migration.Reconciliation.Framework.Output;
+using Edt.Bond.Migration.Reconciliation.Framework.Extensions;
+using Edt.Bond.Migration.Reconciliation.Framework.Logging;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
@@ -40,66 +42,96 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             long errors = 0;
             long matched = 0;
             long different = 0;
-            
+
             var workbookRecords = AunWorkbookReader.Read();
+
+            DebugLogger.Instance.WriteLine("workbookRecords");
+
+
             var allEdtTags = EdtDocumentRepository.GetDocumentTags(_idxDocumentIds);
 
-            foreach (var idxRecord in _idxSample)
+            DebugLogger.Instance.WriteLine("allEdtTags");
+
+            try
             {
-	            var aunWorkbookIds = idxRecord.AllFields.Where(x => x.Key.Equals("AUN_WORKBOOK_NUMERIC"));
-	            var foundEdtValue = allEdtTags.TryGetValue(idxRecord.DocumentId, out var relatedEdTags);
 
-	            if (!aunWorkbookIds.Any())
-	            {
-		            idxUnpopulated++;
-		            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
-			            "AUN_WORKBOOK_NUMERIC field was not present for idx record"));
+                using (var writer = new StreamWriter(Path.Combine(Settings.ReportingDirectory, "idx_tags.csv")))
+                {
 
-		            if (relatedEdTags != null && relatedEdTags.Any())
-		            {
-			            edtUnexpectedlyPopulated++;
-			            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
-				            $"EDT has value(s) {string.Join(",", relatedEdTags)} when Idx record had no value"));
-		            }
+                    DebugLogger.Instance.WriteLine("idx_tags.csv");
 
-		            continue;
-	            }
+                    writer.WriteLine("DocId,Tag");
 
-	            foreach (var aunWorkbookId in aunWorkbookIds)
-	            { 
-		            var tag = workbookRecords.SingleOrDefault(c => c.Id == aunWorkbookId.Value);
+                    foreach (var idxRecord in _idxSample)
+                    {
+                        var aunWorkbookIds = idxRecord.AllFields.Where(x => x.Key.Equals("AUN_WORKBOOK_NUMERIC", StringComparison.InvariantCultureIgnoreCase));
+                        var foundEdtValue = allEdtTags.TryGetValue(idxRecord.DocumentId, out var relatedEdTags);
 
-		            if (tag != null)
-		            {  
-				            if (!foundEdtValue || (relatedEdTags != null && !relatedEdTags.Any(x =>
-					                                   x != null && x.Equals(tag.FullPath,
-						                                   System.StringComparison.InvariantCultureIgnoreCase))))
-				            {
-					            different++;
-					            var edtLogValue = relatedEdTags != null ? string.Join(";", relatedEdTags) : "none found";
+                        var cleanedEdTags = relatedEdTags?.Select(x => x?.ReplaceTagChars()).ToList();
 
-					            ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxRecord.DocumentId,
-						            edtLogValue, tag.FullPath, aunWorkbookId.Value.ToString()));
-				            }
-				            else
-				            {
-					            matched++;
-				            }
-			            }
-			            else
-			            {
-				            errors++;
-				            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
-					            $"Couldnt convert aun workbook id {aunWorkbookId} to name"));
-			            } 
-	            }
-            }
+                        DebugLogger.Instance.WriteLine("cleanedEdTags");
 
-            var diffFile = PrintComparisonTables("Tags");
-            TestLogger.Info($"Difference and error details written to: <a href=\"{diffFile}\">{diffFile}</a>");
 
-            //print table of stats
-            string[][] data = new string[][]{
+                        if (!aunWorkbookIds.Any())
+                        {
+                            idxUnpopulated++;
+                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
+                                "AUN_WORKBOOK_NUMERIC field was not present for idx record"));
+
+                            if (relatedEdTags != null && relatedEdTags.Any())
+                            {
+                                edtUnexpectedlyPopulated++;
+                                ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
+                                    $"EDT has value(s) {(relatedEdTags != null ? string.Join(",", relatedEdTags) : string.Empty)} when Idx record had no value"));
+                            }
+
+                            continue;
+                        }
+
+                      
+
+                        var outputTags = aunWorkbookIds.Select(x => workbookRecords.SingleOrDefault(c => c.Id == x.Value).FullPathOutput);
+
+                        writer.WriteLine($"{idxRecord.DocumentId},\"{(outputTags != null ? string.Join(";", outputTags) : string.Empty)}\"");
+
+                        foreach (var aunWorkbookId in aunWorkbookIds)
+                        {
+                            var tag = workbookRecords.SingleOrDefault(c => c.Id == aunWorkbookId.Value);
+
+                            if (tag != null)
+                            {
+
+
+                                if (!foundEdtValue || (relatedEdTags != null && !relatedEdTags.Any(x =>
+                                                           x != null && x.Equals(tag.FullPath,
+                                                               System.StringComparison.InvariantCultureIgnoreCase))))
+                                {
+                                    different++;
+                                    var edtLogValue = relatedEdTags != null ? string.Join(";", relatedEdTags) : "none found";
+
+                                    ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxRecord.DocumentId,
+                                        edtLogValue, tag.FullPath, aunWorkbookId.Value.ToString()));
+                                }
+                                else
+                                {
+                                    matched++;
+                                }
+                            }
+                            else
+                            {
+                                errors++;
+                                ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
+                                    $"Couldnt convert aun workbook id {aunWorkbookId} to name"));
+                            }
+                        }
+                    }
+                }
+
+                var diffFile = PrintComparisonTables("Tags");
+                TestLogger.Info($"Difference and error details written to: <a href=\"{diffFile}\">{diffFile}</a>");
+
+                //print table of stats
+                string[][] data = new string[][]{
                 new string[]{ "<b>Comparison Statistics:</b>"},
                 new string[]{ "Statistic", "Count"},
                 new string[] { "Differences", different.ToString() },
@@ -108,14 +140,29 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 new string[] { "Edt document(s) incorrectly have a value when Idx is null", edtUnexpectedlyPopulated.ToString() },
                 new string[] { "Idx document(s) not populated for field under test (and EDt is also null)", idxUnpopulated.ToString() } };
 
-            TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
+                TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
-            Assert.Zero(different, $"Differences were seen between expected value and actual value");
-            Assert.Zero(edtUnexpectedlyPopulated, "Edt was found to have field populated for instances where Idx was null");
-            Assert.Zero(errors, "Expected errors encountered during processing");
+                Assert.Zero(different, $"Differences were seen between expected value and actual value");
+                Assert.Zero(edtUnexpectedlyPopulated, "Edt was found to have field populated for instances where Idx was null");
+                Assert.Zero(errors, "Expected errors encountered during processing");
 
-            if (idxUnpopulated > 0)
-                TestLogger.Info($"The Idx was found to not have a value for field AUN_WORKBOOK_NUMERIC in {idxUnpopulated} documents/instances.");
+                if (idxUnpopulated > 0)
+                    TestLogger.Info($"The Idx was found to not have a value for field AUN_WORKBOOK_NUMERIC in {idxUnpopulated} documents/instances.");
+            }
+            catch(Exception e)
+            {
+                TestLogger.Error(e.Message);
+                TestLogger.Error(e.StackTrace);
+                TestLogger.Error(e.Source);
+                if(e.InnerException != null)
+                {
+                    TestLogger.Error(e.InnerException.Message);
+                    TestLogger.Error(e.InnerException.StackTrace);
+
+                }
+
+                Assert.Fail(e.Message);
+            }
         }
 
 		[Test]
@@ -145,11 +192,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "Location not present in EDT"));
                     }
 
-                    string group = idxDocument.AllFields.SingleOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[0])).Value;
-                    string custodian = idxDocument.AllFields.SingleOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[1])).Value;
-                    string source = idxDocument.AllFields.SingleOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[2])).Value;
+                    string group = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[0])).Value;
+                    string custodian = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[1])).Value;
+                    string source = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[2])).Value;
 
-                    string location = $@"{group}\{custodian}\{source}";
+                    string location = $@"{group?? string.Empty}\{custodian ?? string.Empty}\{source ?? string.Empty}";
 
                     idxDocument.AllFields.Where(c => c.Key.StartsWith(Settings.LocationIdxFields[3])).OrderBy(c => c.Key).ToList().ForEach(
                         c =>
@@ -160,16 +207,19 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                             }
                         });
 
-                    if (!location.Equals(edtLocation, StringComparison.InvariantCultureIgnoreCase))
+                    locationFileWriter.OutputRecord(idxDocument.DocumentId, location);
+
+                    if (!location.ReplaceTagChars().Equals(edtLocation.ReplaceTagChars(), StringComparison.InvariantCultureIgnoreCase))
                     {
                         different++;
                         ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtLocation, location, location));
-                        locationFileWriter.OutputRecord(idxDocument.DocumentId, location);
+                        
                     }
                     else
                     {
                         matched++;
                     }
+                   
                 }
             }
 

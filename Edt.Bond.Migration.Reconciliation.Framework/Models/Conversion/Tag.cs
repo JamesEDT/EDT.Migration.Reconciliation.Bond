@@ -13,5 +13,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion
 		public string Name { get; set; }
 		public string Id { get; set; }
 		public string FullPath { get; set; }
+        public string FullPathOutput { get; set; }
+        public string FullPathCleaned { get; set; }
 	}
 }

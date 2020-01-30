@@ -25,37 +25,42 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 				        Id = line[0],
 				        Level = int.Parse(line[4]),
 				        Name = line[1],
-						  ParentID = line[8]
+						ParentID = line[8],
 			        });
 		        } 
 	        }
 
-	        tags.Where(c => c.ParentID == "NULL").ToList().ForEach(c =>
+	        tags.Where(c => c.Level == 0).ToList().ForEach(c =>
 	        {
-				  c.FullPath = c.Name;
+				c.FullPath = $"Ems Folders:{c.Name.TrimEnd()}";
+                c.FullPathCleaned = c.FullPath.ReplaceTagChars();
+                c.FullPathOutput = c.FullPath;
 
-				  var children = tags.Where(d => d.ParentID == c.Id).ToList();
+                    var children = tags.Where(d => d.ParentID == c.Id).ToList();
 
 		        if (children.Any())
 		        {
-			        SetFullPath(c.Name, children, tags);
+			        SetFullPath(c, children, tags);
 
 		        } 
 	        }); 
+
 			 return tags;
         }
 
-        private static void SetFullPath(string parentName, List<Tag> parents, List<Tag> tags)
+        private static void SetFullPath(Tag parent, List<Tag> parents, List<Tag> tags)
         {
 	        parents.ForEach(c =>
 	        { 
-		        c.FullPath = parentName + @"\" + c.Name; 
+		        c.FullPath = parent.FullPath + ":" + c.Name.TrimEnd();
+                c.FullPathCleaned = parent.FullPathCleaned.ReplaceTagChars();
+                c.FullPathOutput = parent.FullPathOutput + @"\\" + c.Name.TrimEnd();
 
-		        var children = tags.Where(d => d.ParentID == c.Id && c.Id != d.Id).ToList();
+                var children = tags.Where(d => d.ParentID == c.Id && c.Id != d.Id).ToList();
 
 		        if (children.Any())
 		        {
-			        SetFullPath(c.FullPath, children, tags);
+			        SetFullPath(c, children, tags);
 
 		        } 
 	        });

@@ -18,6 +18,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
         {
             _connectionString = connectionString;
             _streamWriter = new StreamWriter(Path.Combine(Settings.LogDirectory, "SqlExecutor.txt"), true);
+            _streamWriter.AutoFlush = true;
             _streamWriter.WriteLine($"Log opened {DateTime.Now.ToString()}");
         }
 

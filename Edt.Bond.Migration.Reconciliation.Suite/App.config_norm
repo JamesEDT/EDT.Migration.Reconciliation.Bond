@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <appSettings>
+    <!-- Per Case / Conversion Settings -->
+    
+    <!--MicroFocus Input paths-->
+    <add key="MicroFocusAunWorkbookPath" value="C:\EDT\BondData\Migration Data\Migration Data\393\AUN_WORKBOOK.CSV" />
+    <add key="MicroFocusStagingDirectoryTextPath" value="C:\EDT\BondData\Migration Data\Migration Data\393" />
+    <add key="MicroFocusStagingDirectoryNativePath" value="C:\EDT\BondData\Migration Data\Migration Data\393"/>
+    <add key="IdxFilePath" value="C:\EDT\BondData\Migration Data\Migration Data\393\10000.idx"/>
+    <add key="RedactionsFilePath" value="C:\EDT\BondData\Migration Data\Migration Data\393\redactions.csv"/>
+    
+    <!--Conversion Related Paths-->
+    <add key="ConversionToolOutputDirectory" value="C:\edt\Validator\Validator\Load_Package_Validator" />
+    <add key="StandardMapPath" value="C:\GitHub\Edt.Bond.Migration.Reconciliation\StandardMap_v4.csv" />
+    
+    <!-- EDT case and import settings-->
+    <add key="EdtCaseId" value="1"/>
+    <add key="EdtImporterDataSetName" value="Validation"/>
+	  <add key="dbName" value="[eDiscoveryToolbox.Case.001].[dbo]"/>
+
+    <!-- EDT Product Settings -->
+    <add key="EdtCfsDirectory" value="C:\eDiscovery\Store"/>
+    <add key="EdtDatabaseConnectionString" value="Data Source=localhost;Initial Catalog=eDiscoveryMaster;User Id=ToolboxUser;Password=DiscoverEdt123;"/>
+    
+    <!-- Validation Settings -->
+    <add key="UseExistingIdxAnalysis" value="True"/>
+    <add key="IdxSampleSize" value="0"/>
+    <add key="IgnoredIdxFieldsFromComparison" value="AUN_VIRTUAL_CUSTODIAN|AUN_VIRTUAL_GROUP|AUN_VIRTUAL_SOURCE_NAME|AUN_WORKBOOK_NUMERIC"/>
+    <add key="EmailFieldIdentifyingPrefix" value="Recipients-"/>
+    <add key="LocationIdxFields" value="AUN_VIRTUAL_GROUP|AUN_VIRTUAL_CUSTODIAN|AUN_VIRTUAL_SOURCE_NAME|VIRTUAL_PATH_SEGMENT_"/>
+    <add key="GenerateLoadFile" value="False"/>
+
+
+
+		<add key="Version" value="1.2"/>
+	</appSettings>
+</configuration>
