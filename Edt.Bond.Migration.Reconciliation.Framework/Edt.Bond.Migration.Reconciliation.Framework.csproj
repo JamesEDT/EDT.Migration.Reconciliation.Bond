@@ -138,6 +138,7 @@
     <Compile Include="Models\EdtDatabase\Party.cs" />
     <Compile Include="Models\Exceptions\EdtColumnException.cs" />
     <Compile Include="Models\IdxLoadFile\Document.cs" />
+    <Compile Include="Models\IdxLoadFile\EMSFolder.cs" />
     <Compile Include="Models\IdxLoadFile\Field.cs" />
     <Compile Include="Models\Reporting\ComparisonError.cs" />
     <Compile Include="Models\Reporting\ComparisonResult.cs" />

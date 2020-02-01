@@ -10,6 +10,7 @@ using Edt.Bond.Migration.Reconciliation.Framework;
 using Edt.Bond.Migration.Reconciliation.Framework.Output;
 using Edt.Bond.Migration.Reconciliation.Framework.Extensions;
 using Edt.Bond.Migration.Reconciliation.Framework.Logging;
+using Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
@@ -200,6 +201,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			long errors = 0;
 			long matched = 0;
 			long different = 0;
+            List<EmsFolder> observedEmsFolders = new List<EmsFolder>();
 
 			var allEdtLocations = EdtDocumentRepository.GetDocumentLocations(_idxDocumentIds);
 
@@ -217,27 +219,29 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "Location not present in EDT"));
                     }
 
-                    string group = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[0])).Value;
-                    string custodian = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[1])).Value;
-                    string source = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[2])).Value;
-
-                    string location = $@"{group?? string.Empty}\{custodian ?? string.Empty}\{source ?? string.Empty}";
+                    var emsFolder = new EmsFolder()
+                    {
+                        Group = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[0])).Value,
+                        Custodian = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[1])).Value,
+                        Source = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[2])).Value
+                    };
 
                     idxDocument.AllFields.Where(c => c.Key.StartsWith(Settings.LocationIdxFields[3])).OrderBy(c => c.Key).ToList().ForEach(
                         c =>
                         {
                             if (!string.IsNullOrWhiteSpace(c.Value) && !c.Value.Contains(".msg:"))
                             {
-                                location += @"\" + c.Value.Replace(":", "-");
+                                emsFolder.VIRTUAL_PATH_SEGMENTs.Add(c.Value.Replace(":", "-"));
                             }
                         });
 
-                    locationFileWriter.OutputRecord(idxDocument.DocumentId, location);
+                    observedEmsFolders.Add(emsFolder);
+                    locationFileWriter.OutputRecord(idxDocument.DocumentId, emsFolder.ConvertedEdtLocation);
 
-                    if (!location.ReplaceTagChars().Equals(edtLocation.ReplaceTagChars(), StringComparison.InvariantCultureIgnoreCase))
+                    if (!emsFolder.ConvertedEdtLocation.ReplaceTagChars().Equals(edtLocation.ReplaceTagChars(), StringComparison.InvariantCultureIgnoreCase))
                     {
                         different++;
-                        ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtLocation, location, location));
+                        ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtLocation, emsFolder.ConvertedEdtLocation, emsFolder.ConvertedEdtLocation));
                         
                     }
                     else
@@ -247,6 +251,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                    
                 }
             }
+
+            PrintObservedLocations(observedEmsFolders);
 
 			var diffFile = PrintComparisonTables("Locations");
 			TestLogger.Info($"Difference and error details written to: <a href=\"{diffFile}\">Report\\{diffFile}</a>");
@@ -268,5 +274,18 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			Assert.Zero(errors, "Expected errors encountered during processing");
 
 		}
+
+        private void PrintObservedLocations(List<EmsFolder> emsFolders)
+        {
+            using (var writer = new StreamWriter(Path.Combine(Settings.ReportingDirectory, "locations_observedIdxRawValues.csv")))
+            {
+                writer.WriteLine("Group, Custodians, Source, Virtual Path Segmenets");
+
+                emsFolders
+                    .Distinct()
+                    .ToList()
+                    .ForEach(x => writer.WriteLine($"{x.Group},{x.Custodian},{x.Source},{x.VirtualPathSegements}"));
+            }
+        }
 	}
 }
