@@ -20,12 +20,13 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 		        {
 			        var line = streamReader.ReadLine()?.SplitCsv();
 
-			        tags.Add(new Tag
-			        {
-				        Id = line[0],
-				        Level = int.Parse(line[4]),
-				        Name = line[1],
-						ParentID = line[8],
+                    tags.Add(new Tag
+                    {
+                        Id = line[0],
+                        Level = int.Parse(line[4]),
+                        Name = line[1],
+                        ParentID = line[8],
+                        FullTagHierarchy = new List<string>() { line[8]}
 			        });
 		        } 
 	        }
@@ -36,7 +37,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 c.FullPathCleaned = c.FullPath.ReplaceTagChars();
                 c.FullPathOutput = c.FullPath;
 
-                    var children = tags.Where(d => d.ParentID == c.Id).ToList();
+                var children = tags.Where(d => d.ParentID == c.Id).ToList();
 
 		        if (children.Any())
 		        {
@@ -54,7 +55,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 	        { 
 		        c.FullPath = parent.FullPath + ":" + c.Name.TrimEnd();
                 c.FullPathCleaned = parent.FullPathCleaned.ReplaceTagChars();
-                c.FullPathOutput = parent.FullPathOutput + @"\\" + c.Name.TrimEnd();
+                c.FullPathOutput = parent.FullPathOutput + @"\\" + c.Name.TrimEnd();                
+                c.FullTagHierarchy.AddRange(parent.FullTagHierarchy);
+                c.FullTagHierarchy.Add(c.ParentID);
 
                 var children = tags.Where(d => d.ParentID == c.Id && c.Id != d.Id).ToList();
 

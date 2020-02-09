@@ -268,5 +268,45 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			Assert.Zero(errors, "Expected errors encountered during processing");
 
 		}
-	}
+
+        [Test]
+        [Category("TagList")]
+        [Description("Idenfity unmigrated tags from aun workbook.csv")]
+        public void NonMigratedEmsFoldersToTags()
+        {
+            var workbookRecords = AunWorkbookReader.Read();
+
+            DebugLogger.Instance.WriteLine("workbookRecords");
+
+            //var allDistinctEdtTags = EdtDocumentRepository.GetDocumentTags(_idxDocumentIds).SelectMany(x => x.Value)
+            //                            .Distinct().ToList();
+
+            var allIdxDistinctTags = _idxSample.SelectMany(x => x.AllFields.Where(field => field.Key.Equals("AUN_WORKBOOK_NUMERIC", StringComparison.InvariantCultureIgnoreCase)))
+                                                .Select(x => x.Value)
+                                                .Distinct()
+                                                .ToList();
+
+            var workbookRecordIds = workbookRecords.Select(x => x.Id).ToList();
+
+            foreach (var idxTag in allIdxDistinctTags)
+            {
+                var relevantWorkbookRecord = workbookRecords.SingleOrDefault(x => x.Id == idxTag);
+                if (relevantWorkbookRecord != null)
+                {
+                    workbookRecordIds.Remove(idxTag);
+                    workbookRecordIds.RemoveAll(x => relevantWorkbookRecord.FullTagHierarchy.Contains(x));
+                }
+            }
+
+            using (var sw = new StreamWriter(Path.Combine(Settings.ReportingDirectory, "nonidx_workbookRecords.csv")))
+            {
+                workbookRecordIds.ForEach(x => {
+                    var workbookRecord = workbookRecords.SingleOrDefault(record => record.Id == x);
+                    sw.WriteLine($"{workbookRecord.Id}\t{workbookRecord.Name}\t{workbookRecord.FullPath}");
+                });
+            }
+
+        }
+
+    }
 }
