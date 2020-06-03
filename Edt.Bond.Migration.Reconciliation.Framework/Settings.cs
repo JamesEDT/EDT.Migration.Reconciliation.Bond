@@ -31,7 +31,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
 
         public static int IdxSampleSize => int.Parse(GetSetting("IdxSampleSize"));
 
-        public static bool GenerateLoadFile => bool.Parse(GetSetting("GenerateLoadFile"));
+        public static bool GenerateLoadFile => bool.Parse(GetOptionalSetting("GenerateLoadFile") ?? "false");
         
         public static string[] IgnoredIdxFieldsFromComparison => GetSetting("IgnoredIdxFieldsFromComparison").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -73,6 +73,12 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
         {
             return ConfigurationManager.AppSettings[key] ??
                 throw new Exception($"Setting {key} not found in App.config");
+        }
+
+        private static string GetOptionalSetting(string key)
+        {
+            return ConfigurationManager.AppSettings[key] ??
+                   null;
         }
     }
 }

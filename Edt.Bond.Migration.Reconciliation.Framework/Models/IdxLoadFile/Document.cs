@@ -83,8 +83,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
             tokens.Remove(key);
             var valueString = string.Join(delimiter, tokens);
 
-            //remove all quotes
-            valueString = valueString.Replace("\"", string.Empty );
+            if (removeEncapsulation && valueString.StartsWith("\"") && valueString.EndsWith("\""))
+            {
+                valueString = valueString.Substring(1);
+                valueString = valueString.Substring(0, valueString.Length - 1);
+            }
 
             return new Field(key, valueString);
         }    

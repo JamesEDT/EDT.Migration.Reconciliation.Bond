@@ -62,7 +62,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Logging
             {
                 if (_streamWriter != null)
                 {
-                    _streamWriter.Flush();
+                    if(_streamWriter.BaseStream != null)
+                        _streamWriter.Flush();
                     _streamWriter.Close();
                 }
             }

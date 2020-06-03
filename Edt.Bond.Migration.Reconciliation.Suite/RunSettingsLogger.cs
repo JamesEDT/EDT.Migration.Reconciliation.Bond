@@ -13,7 +13,6 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
             using (var sw = new StreamWriter(Path.Combine(Settings.LogDirectory, "settings.csv")))
             {
-                sw.WriteLine("conv tool dir:" + Settings.ConversionToolOutputDirectory);
                 sw.WriteLine("edt case id:" + Settings.EdtCaseId);
                 sw.WriteLine("edt cfs:" + Settings.EdtCfsDirectory);
                 sw.WriteLine("dataset:" + Settings.EdtImporterDatasetName);

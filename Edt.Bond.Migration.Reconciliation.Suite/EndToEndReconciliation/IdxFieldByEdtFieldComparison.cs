@@ -29,7 +29,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         {
             _idxSample = new IdxDocumentsRepository().GetSample();
 
-            _idxDocumentIds = _idxSample.Select(x => x.DocumentId).ToList();
+            _idxDocumentIds = _idxSample.Select(x => x.DocumentId)?.ToList();
 
             FeatureRunner.Log(AventStack.ExtentReports.Status.Info, $"{_idxSample.Count()} sampled from Idx records.");
         }
@@ -42,10 +42,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             long different = 0;
             long documentsInIdxButNotInEdt = 0;
             long documentsInEdtButNotInIdx = 0;
-            long idxUnfound = 0;
+            long idxNotFound = 0;
             long unexpectedErrors = 0;
             long matched = 0;
-            long totalsampled = 0;
+            long totalSampled = 0;
             bool emptyField = false;
 
             //initiliase conversion service for field under test
@@ -63,12 +63,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     var edtValues = GetEdtFieldValues(mappingUnderTest);
 
                     // if all values empty
-                    if (edtValues.Values.All(x => string.IsNullOrWhiteSpace(x)))
+                    if (edtValues.Values.All(string.IsNullOrWhiteSpace))
                     {
                         if(_idxSample.AsParallel().All(x => string.IsNullOrWhiteSpace(GetIdxFieldValue(x, mappingUnderTest))))
                         {
-                            idxUnfound = _idxSample.LongCount();
-                            matched = idxUnfound;
+                            idxNotFound = _idxSample.LongCount();
+                            matched = idxNotFound;
                             _idxSample.ToList().ForEach(x => loadFileWriter.OutputRecord(x.DocumentId, string.Empty));
                             emptyField = true;
                         }
@@ -79,7 +79,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         //loop thru each sample document
                         _idxSample.AsParallel().ForAll(idxDocument =>
                         {
-                            totalsampled++;
+                            totalSampled++;
 
                             var idxField = GetIdxFieldValue(idxDocument, mappingUnderTest);
 
@@ -104,7 +104,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                     }
                                     else
                                     {
-                                        idxUnfound++;
+                                        idxNotFound++;
                                         ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"No value found in Idx for document"));
                                     }
                                 }
@@ -156,9 +156,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         });
                     }
 
-                    PrintStats(different, matched, documentsInIdxButNotInEdt, documentsInEdtButNotInIdx, idxUnfound, unexpectedErrors, populated, totalsampled);
+                    PrintStats(different, matched, documentsInIdxButNotInEdt, documentsInEdtButNotInIdx, idxNotFound, unexpectedErrors, populated, totalSampled);
 
-                    if (ComparisonErrors.Count() > 0 || ComparisonResults.Count() > 0)
+                    if (ComparisonErrors.Any() || ComparisonResults.Any())
                     {
                         var diffFile = PrintComparisonTables(mappingUnderTest.EdtName);
                         TestLogger.Info($"Difference and error details written to: <a href=\"{diffFile}\">{diffFile}</a>");
@@ -172,8 +172,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                     Assert.Zero(documentsInEdtButNotInIdx, "Edt was found to have field populated for instances where Idx was null");
 
-                    if (idxUnfound > 0)
-                        TestLogger.Info($"The Idx was found to not have a value for field {mappingUnderTest.IdxNames} in {idxUnfound} documents/instances.");
+                    if (idxNotFound > 0)
+                        TestLogger.Info($"The Idx was found to not have a value for field {mappingUnderTest.IdxNames} in {idxNotFound} documents/instances.");
 
                     if (populated == 0)
                         TestLogger.Info($"No sampled documents had the Edt field {mappingUnderTest.EdtName} populated.");
@@ -298,7 +298,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 return
                     new StandardMapReader()
                     .GetStandardMappings()
-                    .Where(x => !string.IsNullOrEmpty(x.EdtName) && x.IdxNames.Any())
+                    .Where(x => !string.IsNullOrEmpty(x.EdtName) &&
+                                !x.EdtName.Equals("UNMAPPED", StringComparison.InvariantCultureIgnoreCase) &&
+                                x.IdxNames.Any())
                     .Select(x => new TestCaseData(x)
                         .SetName($"\"{string.Join("|", x.IdxNames)}\" vs \"{x.EdtName}\"")
                         .SetDescription($"For subset of data compare Edt database field values for \"{string.Join("|", x.IdxNames)}\" with Idx values of field \"{x.EdtName}\""));

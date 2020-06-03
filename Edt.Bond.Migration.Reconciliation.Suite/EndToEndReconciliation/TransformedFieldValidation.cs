@@ -287,7 +287,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     .ForEach(x => writer.WriteLine($"{x.Group},{x.Custodian},{x.Source},{x.VirtualPathSegements}"));
             }
         }
-	}
+	
 
         [Test]
         [Category("TagList")]

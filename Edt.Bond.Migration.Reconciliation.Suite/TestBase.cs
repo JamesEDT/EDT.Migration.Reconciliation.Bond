@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Edt.Bond.Migration.Reconciliation.Framework.Output;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite
 {
@@ -93,37 +94,38 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
         public string PrintComparisonTables(string mappingName)
         {
-            var filename = Path.Combine(Settings.ReportingDirectory,$"differences_{mappingName.Replace(" ", string.Empty)}.csv");
+            //var filename = Path.Combine(Settings.ReportingDirectory,$"differences_{mappingName.Replace(" ", string.Empty)}.csv");
 
-            using (var sw = new StreamWriter(filename))
-            {
-                //print comparision
-                if (ComparisonResults.Count > 0)
-                {
-                    sw.WriteLine("Differences:");
-                    sw.WriteLine("DocumentId,Idx value,Expected Edt value,Edt value");
+            //using (var sw = new StreamWriter(filename))
+            //{
+            //    //print comparision
+            //    if (ComparisonResults.Count > 0)
+            //    {
+            //        sw.WriteLine("Differences:");
+            //        sw.WriteLine("DocumentId,Idx value,Expected Edt value,Edt value");
 
-                    foreach (var result in ComparisonResults) {
-                        sw.WriteLine($"{result.DocumentId},\"{result.IdxValue}\",\"{result.IdxConvertedValue}\",\"{result.EdtValue}\"");                        
-                    }
-                }
+            //        foreach (var result in ComparisonResults) {
+            //            sw.WriteLine($"{result.DocumentId},\"{result.IdxValue}\",\"{result.IdxConvertedValue}\",\"{result.EdtValue}\"");                        
+            //        }
+            //    }
 
-                //print errors
-                if (ComparisonErrors.Count > 0)
-                {
-                    sw.WriteLine();
-                    sw.WriteLine("Errors/Warnings:");
-                    sw.WriteLine("DocumentId,Error/Warning");
-                    var data = new List<string[]>() { new string[] { "<b>Errors:</b>" }, new string[] { "DocumentId", "Error message" } };
+            //    //print errors
+            //    if (ComparisonErrors.Count > 0)
+            //    {
+            //        sw.WriteLine();
+            //        sw.WriteLine("Errors/Warnings:");
+            //        sw.WriteLine("DocumentId,Error/Warning");
+            //        var data = new List<string[]>() { new string[] { "<b>Errors:</b>" }, new string[] { "DocumentId", "Error message" } };
 
-                    foreach(var error in ComparisonErrors)
-                    {
-                        sw.WriteLine($"{error.DocumentId},{error.ErrorMessage}");
-                    }
-                }
-            }
+            //        foreach(var error in ComparisonErrors)
+            //        {
+            //            sw.WriteLine($"{error.DocumentId},{error.ErrorMessage}");
+            //        }
+            //    }
+            //}
 
-            return filename;
+            return HtmlDifferencesReport.WriteReport(Settings.ReportingDirectory, mappingName.Replace(" ", string.Empty),
+                ComparisonResults, ComparisonErrors);
         }
 
         [OneTimeTearDown]
