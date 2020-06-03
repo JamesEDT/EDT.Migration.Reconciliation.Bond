@@ -1,10 +1,8 @@
-﻿using System;
-using Edt.Bond.Migration.Reconciliation.Framework.Models.Reporting;
+﻿using Edt.Bond.Migration.Reconciliation.Framework.Models.Reporting;
 using HtmlTags;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
-using Microsoft.Extensions.DependencyModel.Resolution;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Output
 {

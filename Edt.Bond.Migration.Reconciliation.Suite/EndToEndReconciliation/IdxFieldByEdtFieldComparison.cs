@@ -156,14 +156,15 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         });
                     }
 
-                    PrintStats(different, matched, documentsInIdxButNotInEdt, documentsInEdtButNotInIdx, idxNotFound, unexpectedErrors, populated, totalSampled);
-
                     if (ComparisonErrors.Any() || ComparisonResults.Any())
                     {
                         var diffFile = PrintComparisonTables(mappingUnderTest.EdtName);
                         TestLogger.Info($"Difference and error details written to: <a href=\"{diffFile}\">{diffFile}</a>");
                         PrintExpectedOutputFile(mappingUnderTest.EdtName);
                     }
+
+                    PrintStats(different, matched, documentsInIdxButNotInEdt, documentsInEdtButNotInIdx, idxNotFound, unexpectedErrors, populated, totalSampled);
+
 
                     Assert.Zero(different, $"Differences were seen between expected value and actual value for this Edt field {mappingUnderTest.EdtName}");
                     Assert.Zero(unexpectedErrors, $"Unexpected errors experienced during processing {mappingUnderTest.EdtName}");
@@ -276,17 +277,26 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
         private void PrintStats(long different, long matched, long documentsInIdxButNotInEdt, long documentsInEdtButNotIdx, long idxMissingField, long unexpectedErrors, long populated, long total)
         {
-            string[][] data = new string[][]{
+            //TestLogger.Info($"Total Idx records sampled {total}");
+
+            string[][] topdata = new string[][]{
                 new string[]{ "<b>Comparison Statistics:</b>"},
                 new string[]{ "Statistic", "Count"},
                 new string[] { "Differences", different.ToString() },
                 new string[] { "Matched", matched.ToString() },
                 new string[] { "Idx document(s) incorrectly without a value in Edt", documentsInIdxButNotInEdt.ToString() },
                 new string[] { "Edt document(s) incorrectly have a value when Idx is null", documentsInEdtButNotIdx.ToString() },
-                new string[] { "Idx document(s) not populated for field under test (and EDt is also null)", idxMissingField.ToString() },
-                new string[] { "Unexpected Errors during processing", unexpectedErrors.ToString()},
-                new string[] { "Edt documents(s) populated with a value", populated.ToString()},
-                new string[] { "Total Idx records sampled", total.ToString()}
+                //new string[] { "Idx document(s) not populated for field under test (and EDt is also null)", idxMissingField.ToString() },
+                new string[] { "Unexpected Errors during processing", unexpectedErrors.ToString()}
+            };
+
+            TestLogger.Info(MarkupHelper.CreateTable(topdata));
+
+            string[][] data = new string[][]{
+                new string[]{ "<b>EDT Field Population Statistics:</b>"},
+                new string[]{ "Statistic", "Count"},
+                new string[] { "Populated", populated.ToString()},
+                new string[] { "Empty", (total-populated).ToString()},
             };
 
             TestLogger.Info(MarkupHelper.CreateTable(data));
