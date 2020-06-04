@@ -88,20 +88,20 @@ td{
         private static HtmlTag BuildDifferences(ConcurrentBag<ComparisonResult> results)
         {
             var differencesTable = new HtmlTag("table")
-                .Append(new HtmlTag("tr"))
-                .Append(new HtmlTag("th").Text("Document Id"))
-                .Append(new HtmlTag("th").Text("Idx value"))
-                .Append(new HtmlTag("th").Text("Expected value"))
-                .Append(new HtmlTag("th").Text("EDT value"));
+                .Append(new HtmlTag("tr").Append(new HtmlTag("th").Text("Document Id")).Append(new HtmlTag("th").Text("Comparisons")));
 
 
             foreach (var comparisonResult in results)
             {
+                var diffTable = new HtmlTag("table")
+                    .Append(new HtmlTag("tr").Append(new HtmlTag("td").Text("Idx")).Append(new HtmlTag("td").Text(comparisonResult.IdxValue)))
+                    .Append(new HtmlTag("tr").Append(new HtmlTag("td").Text("Expected")).Append(new HtmlTag("td")
+                        .Text(comparisonResult.IdxConvertedValue)))
+                    .Append(new HtmlTag("tr").Append(new HtmlTag("td").Text("Edt")).Append(new HtmlTag("td").Text(comparisonResult.EdtValue)));
+
                 var resultRow = new HtmlTag("tr")
                     .Append(new HtmlTag("td").Text(comparisonResult.DocumentId))
-                    .Append(new HtmlTag("td").Text(comparisonResult.IdxValue))
-                    .Append(new HtmlTag("td").Text(comparisonResult.IdxConvertedValue))
-                    .Append(new HtmlTag("td").Text(comparisonResult.EdtValue));
+                    .Append(new HtmlTag("td").Append(diffTable));
 
                 differencesTable.Append(resultRow);
 

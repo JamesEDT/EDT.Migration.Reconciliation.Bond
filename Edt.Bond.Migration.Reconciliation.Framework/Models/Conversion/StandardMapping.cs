@@ -12,10 +12,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion
 
         public StandardMapping(string edtName, string idxName, string edtType, string importGroup)
         {
-            IdxNames = new List<string>();
-            IdxNames.Add(idxName);
+            IdxNames = new List<string>() {idxName};
             EdtName = edtName;
-            EdtType = EdtType;
+            EdtType = edtType;
             ImportGroup = importGroup;
             
         }

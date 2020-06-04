@@ -35,7 +35,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             var caseId = ConfigurationManager.AppSettings["EdtCaseId"];
             var idxName = ConfigurationManager.AppSettings["IdxName"]?.Replace(".", string.Empty);
 
-            _dbName = $".\\IdxRepo_{caseId}_{idxName}.db";
+            _dbName = $"{Settings.LogDirectory}\\IdxRepo_{caseId}_{idxName}.db";
+
 
             if(deleteExistingDb && File.Exists(DbName))
                 File.Delete(DbName);
@@ -46,7 +47,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             var caseId = ConfigurationManager.AppSettings["EdtCaseId"];
             var idxName = ConfigurationManager.AppSettings["IdxName"]?.Replace(".", string.Empty);
 
-            var dbName = $".\\IdxRepo_{caseId}_{idxName}.db";
+            var dbName = $"{Settings.LogDirectory}\\IdxRepo_{caseId}_{idxName}.db";
 
             return File.Exists(dbName);
                

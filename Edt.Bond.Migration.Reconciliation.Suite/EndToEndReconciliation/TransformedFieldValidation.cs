@@ -279,7 +279,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         {
             using (var writer = new StreamWriter(Path.Combine(Settings.ReportingDirectory, "locations_observedIdxRawValues.csv")))
             {
-                writer.WriteLine("Group, Custodians, Source, Virtual Path Segmenets");
+                writer.WriteLine("Group, Custodians, Source, Virtual Path Segments");
 
                 emsFolders
                     .Distinct()

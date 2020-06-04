@@ -25,6 +25,10 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             while(!_streamReader.EndOfStream && docsSeen <= ProcessingChunkSize)
             {
                 var line = _streamReader.ReadLine();
+
+                if(line != null && !line.StartsWith("#DRE"))
+                    line = $"\r\n{line}";
+
                 if (line != null && line.Contains(DocumentEndTag[0]))
                     docsSeen++;
 

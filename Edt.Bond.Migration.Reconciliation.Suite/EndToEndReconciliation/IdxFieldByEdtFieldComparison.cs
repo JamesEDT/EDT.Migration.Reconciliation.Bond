@@ -77,7 +77,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     if (!emptyField)
                     {
                         //loop thru each sample document
-                        _idxSample.AsParallel().ForAll(idxDocument =>
+                        _idxSample
+                            //.AsParallel().ForAll(idxDocument =>
+                            .ToList().ForEach(idxDocument => 
                         {
                             totalSampled++;
 
@@ -114,8 +116,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                     {
                                         if (!string.IsNullOrWhiteSpace(edtValueForIdxRecord)) populated++;
 
-                                        var trimmedActualEdtValue = edtValueForIdxRecord.Replace(" ", "");
-                                        var trimmedExpectedEdtValue = expectedEdtValue.Replace(" ", "");
+                                        var trimmedActualEdtValue = edtValueForIdxRecord;//.Replace(" ", "");
+                                        var trimmedExpectedEdtValue = expectedEdtValue;//.Replace(" ", "");
 
                                         if (!trimmedActualEdtValue.Equals(trimmedExpectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
                                         {
@@ -204,7 +206,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 /*if (mappingUnderTest.EdtType != "MultiValueList" && !mappingUnderTest.IsEmailField())
                     return idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(idxName))?.Value;*/
 
-                var allFieldValues = idxDocument.AllFields.Where(x => x.Key.Equals(idxNameLookup) && !string.IsNullOrWhiteSpace(x.Value))
+                var allFieldValues = idxDocument.AllFields.Where(x => x?.Key != null && x.Value != null && x.Key.Equals(idxNameLookup) && !string.IsNullOrWhiteSpace(x.Value))
                                         .Select(x => x.Value)
                                         .Distinct()
                                         .OrderBy(x => x);
@@ -212,7 +214,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 allValues.AddRange(allFieldValues);
             }
 
-            return string.Join("; ", allValues);
+            var delimiter = (mappingUnderTest.EdtType.ToLower().Contains("list") || mappingUnderTest.IsEmailField()) ? ";" : "; ";
+
+            return string.Join(delimiter, allValues);
             
         }
 

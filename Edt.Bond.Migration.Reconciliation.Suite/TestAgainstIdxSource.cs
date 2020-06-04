@@ -1,5 +1,4 @@
-﻿using AventStack.ExtentReports.Gherkin.Model;
-using Edt.Bond.Migration.Reconciliation.Framework;
+﻿using Edt.Bond.Migration.Reconciliation.Framework;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
@@ -7,7 +6,6 @@ using Edt.Bond.Migration.Reconciliation.Framework.Services;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite

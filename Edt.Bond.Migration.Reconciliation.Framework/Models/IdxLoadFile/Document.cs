@@ -75,7 +75,13 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
         private Field GenerateField(string rawItem, string delimiter = "=", bool removeEncapsulation = false)
         {
             if (rawItem.StartsWith("FIELD "))
+            {
                 rawItem = rawItem.Remove(0, 6);
+            }
+            else
+            {
+                rawItem = $"DRE{rawItem}";
+            }
 
             var tokens = rawItem.Split(new string[]{delimiter}, StringSplitOptions.None).ToList();
 
@@ -88,6 +94,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
                 valueString = valueString.Substring(1);
                 valueString = valueString.Substring(0, valueString.Length - 1);
             }
+
+            valueString = valueString.TrimEnd(new char[] {'\r', '\n'});
 
             return new Field(key, valueString);
         }    
