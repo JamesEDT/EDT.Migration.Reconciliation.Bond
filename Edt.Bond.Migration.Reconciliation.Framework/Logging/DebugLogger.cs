@@ -6,6 +6,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Logging
     public class DebugLogger : IDisposable
     {
         private StreamWriter _streamWriter;
+        private bool _isClosed;
 
         public static DebugLogger Instance
         {
@@ -22,18 +23,25 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Logging
         }
 
         private static DebugLogger _instance;
+        
 
         public DebugLogger()
         {
+            InitialiseLog();
+        }
+
+        private void InitialiseLog()
+        {
             _streamWriter = new StreamWriter(Path.Combine(Settings.LogDirectory, $"DebugLog_{Settings.EdtCaseId}.txt"));
             _streamWriter.AutoFlush = true;
-            
         }
 
         public void WriteLine(string line)
         {
             lock (_streamWriter)
             {
+                if (_isClosed) InitialiseLog();
+
                 _streamWriter.WriteLine(line);
             }
         }
@@ -42,6 +50,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Logging
         {
             lock (_streamWriter)
             {
+                if(_isClosed) InitialiseLog();
+
                 if (comment != null)
                     _streamWriter.WriteLine(comment);
 
@@ -60,12 +70,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Logging
         {
             lock (_streamWriter)
             {
-                if (_streamWriter != null)
-                {
-                    if(_streamWriter.BaseStream != null)
-                        _streamWriter.Flush();
-                    _streamWriter.Close();
-                }
+                _isClosed = true;
+                _streamWriter?.Close();
             }
         }
     }

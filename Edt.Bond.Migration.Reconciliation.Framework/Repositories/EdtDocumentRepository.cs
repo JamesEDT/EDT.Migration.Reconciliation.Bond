@@ -224,10 +224,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             return ConfigurationManager.AppSettings[EdtConnectionStringConfigKey];
         }
 
-        private static string GetDatabaseName()
+        public static string GetDatabaseName()
         {
-            return ConfigurationManager.AppSettings["DbName"];
-
+            return $"[{ConfigurationManager.AppSettings["EdtCaseDatabaseName"]}].[dbo]";
         }
 
         public static IEnumerable<dynamic> GetAllDocumentIds()

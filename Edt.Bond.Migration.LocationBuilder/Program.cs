@@ -3,10 +3,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile;
 using Edt.Bond.Migration.Reconciliation.Framework.Output;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Edt.Bond.Migration.LocationBuilder
 {
@@ -22,7 +19,6 @@ namespace Edt.Bond.Migration.LocationBuilder
 
                 using (var locationFileWriter = new LocationFileWriter())
                 {
-
                     foreach (var idxDocument in _idxSample)
                     {
                         var emsFolder = new EmsFolder()

@@ -13,11 +13,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
 
         public static string StandardMapPath => GetSetting("StandardMapPath");
 
-        public static string MicroFocusAunWorkbookPath => GetSetting("MicroFocusAunWorkbookPath");
+        public static string MicroFocusAunWorkbookPath => GetSetting("AunWorkbookPath");
 
-        public static string MicroFocusStagingDirectoryTextPath => GetSetting("MicroFocusStagingDirectoryTextPath");
+        public static string MicroFocusStagingDirectoryTextPath => GetSetting("TextPath");
 
-        public static string MicroFocusStagingDirectoryNativePath => GetSetting("MicroFocusStagingDirectoryNativePath");
+        public static string MicroFocusStagingDirectoryNativePath => GetSetting("NativePath");
 
         public static string IdxFilePath => GetSetting("IdxFilePath");
 
