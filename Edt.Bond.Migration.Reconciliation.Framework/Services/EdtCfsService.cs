@@ -1,4 +1,5 @@
-﻿using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase.Dto;
+﻿using System;
+using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase.Dto;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +24,18 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             var presentDocuments = allDocumentIds.Where(x => allNativeFilesInEdt.Contains( x.DocumentId.ToString()));
 
             return presentDocuments.ToList().Select(x => (string) x.DocumentNumber);
+        }
+
+        public static string GetCaseSize()
+        {
+            var totalBytes = 
+                Directory
+                .GetFiles(Path.Combine(Settings.EdtCfsDirectory, $"Site01_Case{Settings.EdtCaseId.ToString().PadLeft(4, '0')}"), "*.*", SearchOption.AllDirectories)
+                .Sum( x => new FileInfo(x).Length);
+
+            var inMb = ((decimal) totalBytes / 1024) / 1024;
+
+            return $"{Math.Round(inMb, 1)} Mb";
         }
 
         private static void LogNativeFileLocations(List<DerivedFileLocation> derivedFiles)

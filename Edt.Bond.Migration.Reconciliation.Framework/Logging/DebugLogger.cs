@@ -32,7 +32,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Logging
 
         private void InitialiseLog()
         {
-            _streamWriter = new StreamWriter(Path.Combine(Settings.LogDirectory, $"DebugLog_{Settings.EdtCaseId}.txt"));
+            _streamWriter = new StreamWriter(Path.Combine(Settings.LogDirectory, $"DebugLog_{Settings.EdtCaseId}_{DateTime.Now.Ticks}.txt"));
             _streamWriter.AutoFlush = true;
         }
 

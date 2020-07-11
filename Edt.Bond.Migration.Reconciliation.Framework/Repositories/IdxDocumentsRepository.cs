@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -39,7 +40,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
 
             if(deleteExistingDb && File.Exists(DbName))
-                File.Delete(DbName);
+                File.Move(DbName, $"{DbName}_{DateTime.Now.Ticks}");
         }
 
         public static bool Exists()

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using System.Text;
 using System.Threading;
 using Dapper;
+using Microsoft.AspNetCore.Routing;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 {
@@ -94,6 +96,20 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             using (var connection = new SqlConnection(_connectionString))
             {
                 return connection.Query(sql, parameters);
+            }
+        }
+
+        public IEnumerable<T> Query<T>(string database, string sql, object parameters = null)
+        {
+            WriteLog(sql);
+            SqlConnectionStringBuilder conn = new SqlConnectionStringBuilder(_connectionString)
+            {
+                InitialCatalog = database
+            };
+
+            using (var connection = new SqlConnection(conn.ConnectionString))
+            {
+                return connection.Query<T>(sql, parameters);
             }
         }
     }

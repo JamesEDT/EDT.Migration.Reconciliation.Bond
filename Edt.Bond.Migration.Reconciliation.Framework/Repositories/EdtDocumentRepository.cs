@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using MongoDB.Driver;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 {
@@ -237,6 +238,12 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
                         WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
 
             return SqlExecutor.Query<dynamic>(sql);
+        }
+
+        public static IEnumerable<dynamic> GetDatabaseStats()
+        {
+            var sql = "SELECT physical_name, size * 8.0 as size_kb from sys.database_files";
+            return SqlExecutor.Query<dynamic>(ConfigurationManager.AppSettings["EdtCaseDatabaseName"], sql);
         }
     }
 }
