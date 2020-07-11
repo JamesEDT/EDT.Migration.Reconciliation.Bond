@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.IO;
 using Edt.Bond.Migration.Reconciliation.Framework.Extensions;
+using NUnit.Framework;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework
 {
@@ -11,7 +12,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
 
         public static string EdtCaseId => GetSetting("EdtCaseId");
 
-        public static string StandardMapPath => GetSetting("StandardMapPath");
+        public static string StandardMapPath => GetSetting("CaseMapPath");
 
         public static string MicroFocusAunWorkbookPath => GetSetting("AunWorkbookPath");
 
@@ -30,6 +31,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
         public static string EdtCfsDirectory => GetSetting("EdtCfsDirectory");
 
         public static int IdxSampleSize => int.Parse(GetSetting("IdxSampleSize"));
+
+        public static string[] AutoPopulatedNullFields => GetSetting("AutoPopulatedIfNull").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
         public static bool GenerateLoadFile => bool.Parse(GetOptionalSetting("GenerateLoadFile") ?? "false");
         

@@ -33,7 +33,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
 	        tags.Where(c => c.Level == 0).ToList().ForEach(c =>
 	        {
-				c.FullPath = $"Ems Folders:{c.Name.TrimEnd()}";
+				c.FullPath = $"Ems Folders:{c.Name.Trim()}";
                 c.FullPathCleaned = c.FullPath.ReplaceTagChars();
                 c.FullPathOutput = c.FullPath;
 
@@ -53,7 +53,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
         {
 	        parents.ForEach(c =>
 	        { 
-		        c.FullPath = parent.FullPath + ":" + c.Name.TrimEnd();
+		        c.FullPath = parent.FullPath + ":" + c.Name.Trim();
                 c.FullPathCleaned = parent.FullPathCleaned.ReplaceTagChars();
                 c.FullPathOutput = parent.FullPathOutput + @"\\" + c.Name.TrimEnd();                
                 c.FullTagHierarchy.AddRange(parent.FullTagHierarchy);

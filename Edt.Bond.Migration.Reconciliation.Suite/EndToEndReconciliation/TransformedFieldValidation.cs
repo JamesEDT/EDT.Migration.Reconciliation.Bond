@@ -48,6 +48,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             DebugLogger.Instance.WriteLine("workbookRecords");
 
+            var unmigratedTags = new string[] { "Ems Folders:Deleted Items", "Ems Folders:15. LPP/Protected Review (and Subfolders)" };
+
 
             var allEdtTags = EdtDocumentRepository.GetDocumentTags(_idxDocumentIds);
 
@@ -84,7 +86,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                             ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
                                 "AUN_WORKBOOK_NUMERIC field was not present for idx record"));
 
-                            if (relatedEdTags != null && relatedEdTags.Any())
+                            if (relatedEdTags != null && relatedEdTags.Any()) //subject issues
                             {
 
                                 DebugLogger.Instance.WriteLine("aunWorkbookIds2");
@@ -118,21 +120,39 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                                 if (tag != null)
                                 {
-
-
-                                    if (!foundEdtValue || (relatedEdTags != null && !relatedEdTags.Any(x =>
-                                                               x != null && x.Equals(tag.FullPath,
-                                                                   System.StringComparison.InvariantCultureIgnoreCase))))
+                                    if (unmigratedTags.Contains(tag.FullPath))
                                     {
-                                        different++;
-                                        var edtLogValue = relatedEdTags != null ? string.Join(";", relatedEdTags) : "none found";
+                                        if(foundEdtValue && relatedEdTags.Any(x => x != null && x.Equals(tag.FullPath,
+                                                                       System.StringComparison.InvariantCultureIgnoreCase)))
+                                        {
+                                            different++;
+                                            var edtLogValue = relatedEdTags != null ? string.Join(";", relatedEdTags) : "none found";
 
-                                        ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxRecord.DocumentId,
-                                            edtLogValue, tag.FullPath, aunWorkbookId.Value.ToString()));
+                                            ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxRecord.DocumentId,
+                                                edtLogValue, $"{tag.FullPath} not to be migrated", aunWorkbookId.Value.ToString()));
+
+                                        }
+                                        else
+                                        {
+                                            matched++;
+                                        }
                                     }
                                     else
                                     {
-                                        matched++;
+                                        if (!foundEdtValue || (relatedEdTags != null && !relatedEdTags.Any(x =>
+                                                                   x != null && x.Equals(tag.FullPath,
+                                                                       System.StringComparison.InvariantCultureIgnoreCase))))
+                                        {
+                                            different++;
+                                            var edtLogValue = relatedEdTags != null ? string.Join(";", relatedEdTags) : "none found";
+
+                                            ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxRecord.DocumentId,
+                                                edtLogValue, tag.FullPath, aunWorkbookId.Value.ToString()));
+                                        }
+                                        else
+                                        {
+                                            matched++;
+                                        }
                                     }
                                 }
                                 else
@@ -202,8 +222,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			long matched = 0;
 			long different = 0;
             List<EmsFolder> observedEmsFolders = new List<EmsFolder>();
+            var textSegment = Settings.LocationIdxFields[3];
 
-			var allEdtLocations = EdtDocumentRepository.GetDocumentLocations(_idxDocumentIds);
+
+            var allEdtLocations = EdtDocumentRepository.GetDocumentLocations(_idxDocumentIds);
 
             using (var locationFileWriter = new LocationFileWriter())
             {
@@ -221,19 +243,27 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                     var emsFolder = new EmsFolder()
                     {
-                        Group = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[0])).Value,
-                        Custodian = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[1])).Value,
-                        Source = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[2])).Value
+                        Group = (idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[0])) ?? idxDocument.AllFields.SingleOrDefault(x =>
+                        x.Key.Equals("EMS DocLibrary Group", StringComparison.InvariantCultureIgnoreCase)))?.Value,
+                        Custodian = (idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[1])) ?? idxDocument.AllFields.SingleOrDefault(x =>
+                        x.Key.Equals("EMS DocLibrary Custodian", StringComparison.InvariantCultureIgnoreCase)))?.Value,
+                        Source = (idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[2])) ?? idxDocument.AllFields.SingleOrDefault(x =>
+                        x.Key.Equals("EMS DocLibrary Source", StringComparison.InvariantCultureIgnoreCase)))?.Value
                     };
 
-                    idxDocument.AllFields.Where(c => c.Key.StartsWith(Settings.LocationIdxFields[3])).OrderBy(c => c.Key).ToList().ForEach(
-                        c =>
+                    for (var i = 1; i < 30; i++)
+                    {
+                        //idxDocument.AllFields.Where(c => c.Key.StartsWith(Settings.LocationIdxFields[3])).OrderBy(c => c.Key).ToList().ForEach(
+                        //    c =>
+                        //     {
+                        var segment = idxDocument.AllFields.SingleOrDefault(c => c.Key.Equals($"{textSegment}{i}"))?.Value;
+
+                        if (!string.IsNullOrWhiteSpace(segment) && !segment.Contains(".msg:"))
                         {
-                            if (!string.IsNullOrWhiteSpace(c.Value) && !c.Value.Contains(".msg:"))
-                            {
-                                emsFolder.VIRTUAL_PATH_SEGMENTs.Add(c.Value.Replace(":", "-"));
-                            }
-                        });
+                            emsFolder.VIRTUAL_PATH_SEGMENTs.Add(segment.Replace(":", "-"));
+                        }
+                     //       });
+                    }
 
                     observedEmsFolders.Add(emsFolder);
                     locationFileWriter.OutputRecord(idxDocument.DocumentId, emsFolder.ConvertedEdtLocation);
