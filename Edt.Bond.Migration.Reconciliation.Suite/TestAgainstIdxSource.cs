@@ -21,7 +21,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
         [OneTimeSetUp]
         public void AnalyseIdx()
         {
-            var logger = HtmlReport.Writer.CreateTest("Validation Setup", "Processing Idx into local store for reconciliation tests against IdX");
+            var logger = HtmlReport.Instance.CreateTest("Validation Setup", "Processing Idx into local store for reconciliation tests against IdX");
 
             try
             {
@@ -65,11 +65,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
                     logger.Debug("Completed reading Idx");
 
+                    
                     IdxDocumentsRepository.CreateDocumentIdIndex();
 
                     logger.Pass("Idx pre reading completed");
                 }
-                HtmlReport.Writer.Flush();
+                HtmlReport.Instance.Flush();
                 
             }
             catch(Exception ex)
@@ -84,7 +85,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
                 }
                 logger.Fail("Failed to analyse Idx");
-                HtmlReport.Writer.Flush();
+                HtmlReport.Instance.Flush();
                 throw ex;
             }
         }

@@ -6,6 +6,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AventStack.ExtentReports;
 using Edt.Bond.Migration.Reconciliation.Framework;
 using Edt.Bond.Migration.Reconciliation.Framework.Output;
 using Edt.Bond.Migration.Reconciliation.Framework.Extensions;
@@ -18,19 +19,19 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
     [Category("Transformed")]
     [Description("Compare Idx field with Edt Database field to validate implementation of EDTs customised value generation.")]
 
-    public class TransformedFieldValidation : TestBase
+    public class TransformedFieldValidation : ComparisonTest
     {
-        private IEnumerable<Framework.Models.IdxLoadFile.Document> _idxSample;
+        private List<Framework.Models.IdxLoadFile.Document> _idxSample;
         private List<string> _idxDocumentIds;
 
         [OneTimeSetUp]
         public void SetIdxSample()
         {
-            _idxSample = new IdxDocumentsRepository().GetSample();
+            _idxSample = new IdxDocumentsRepository().GetSample().ToList();
 
             _idxDocumentIds = _idxSample.Select(x => x.DocumentId).ToList();
 
-            FeatureRunner.Log(AventStack.ExtentReports.Status.Info, $"{_idxSample.Count()} sampled from Idx records.");
+            TestSuite.Log(AventStack.ExtentReports.Status.Info, $"{_idxSample.Count()} sampled from Idx records.");
         }
 
         [Test]
@@ -38,6 +39,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         [Description("Validate mapping and conversion of AUN_WORKBOOK folders to EDT Tags")]
         public void Tags()
         {
+            EdtFieldUnderTest = "Tags";
             long idxUnpopulated = 0;
             long edtUnexpectedlyPopulated = 0;
             long errors = 0;
@@ -65,7 +67,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                     foreach (var idxRecord in _idxSample)
                     {
-                        var aunWorkbookIds = idxRecord.AllFields.Where(x => x.Key.Equals("AUN_WORKBOOK_NUMERIC", StringComparison.InvariantCultureIgnoreCase));
+                        var aunWorkbookIds = idxRecord.AllFields.Where(x => x.Key.Equals("AUN_WORKBOOK_NUMERIC", StringComparison.InvariantCultureIgnoreCase)).ToList();
                         var foundEdtValue = allEdtTags.TryGetValue(idxRecord.DocumentId, out var relatedEdTags);
 
                         DebugLogger.Instance.WriteLine("foundEdtValue");
@@ -81,18 +83,17 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                             DebugLogger.Instance.WriteLine("aunWorkbookIds");
 
                             idxUnpopulated++;
-                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
-                                "AUN_WORKBOOK_NUMERIC field was not present for idx record"));
+                            AddComparisonError(idxRecord.DocumentId,
+                                "AUN_WORKBOOK_NUMERIC field was not present for idx record");
 
                             if (relatedEdTags != null && relatedEdTags.Any())
                             {
 
                                 DebugLogger.Instance.WriteLine("aunWorkbookIds2");
 
-
                                 edtUnexpectedlyPopulated++;
-                                ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
-                                    $"EDT has value(s) {(relatedEdTags != null ? string.Join(",", relatedEdTags) : string.Empty)} when Idx record had no value"));
+                                AddComparisonError(idxRecord.DocumentId,
+                                    $"EDT has value(s) {string.Join(",", relatedEdTags)} when Idx record had no value");
                             }
 
                             continue;
@@ -118,8 +119,6 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                                 if (tag != null)
                                 {
-
-
                                     if (!foundEdtValue || (relatedEdTags != null && !relatedEdTags.Any(x =>
                                                                x != null && x.Equals(tag.FullPath,
                                                                    System.StringComparison.InvariantCultureIgnoreCase))))
@@ -127,8 +126,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                         different++;
                                         var edtLogValue = relatedEdTags != null ? string.Join(";", relatedEdTags) : "none found";
 
-                                        ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxRecord.DocumentId,
-                                            edtLogValue, tag.FullPath, aunWorkbookId.Value.ToString()));
+                                        AddComparisonResult(idxRecord.DocumentId,
+                                            edtLogValue, tag.FullPath, aunWorkbookId.Value.ToString());
                                     }
                                     else
                                     {
@@ -138,54 +137,50 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                 else
                                 {
                                     errors++;
-                                    ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
-                                        $"Couldnt convert aun workbook id {aunWorkbookId} to name"));
+                                    AddComparisonError(idxRecord.DocumentId, $"Couldnt convert aun workbook id {aunWorkbookId} to name");
                                 }
                             }
 
                         }
                         else
                         {
-                            ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId, "No tags exist for this document"));
+                            AddComparisonError(idxRecord.DocumentId, "No tags exist for this document");
                         }
 
                        
                     }
                 }
-
-                var diffFile = PrintComparisonTables("Tags");
-                TestLogger.Info($"Difference and error details written to: <a href=\"{diffFile}\">{diffFile}</a>");
-
+                
                 //print table of stats
-                string[][] data = new string[][]{
-                new string[]{ "<b>Comparison Statistics:</b>"},
-                new string[]{ "Statistic", "Count"},
-                new string[] { "Differences", different.ToString() },
-                new string[] { "Matched", matched.ToString() },
-                new string[] { "Unexpected Errors", errors.ToString() },
-                new string[] { "Edt document(s) incorrectly have a value when Idx is null", edtUnexpectedlyPopulated.ToString() },
-                new string[] { "Idx document(s) not populated for field under test (and EDt is also null)", idxUnpopulated.ToString() } };
+                LogComparisonStatistics( new string[][]{
+                    new string[] { "Differences", different.ToString() },
+                    new string[] { "Matched", matched.ToString() },
+                    new string[] { "Unexpected Errors", errors.ToString() },
+                    new string[] { "Edt document(s) incorrectly have a value when Idx is null", edtUnexpectedlyPopulated.ToString() },
+                    new string[] { "Idx document(s) not populated for field under test (and EDt is also null)", idxUnpopulated.ToString() }
+                });
 
-                TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
                 Assert.Zero(different, $"Differences were seen between expected value and actual value");
                 Assert.Zero(edtUnexpectedlyPopulated, "Edt was found to have field populated for instances where Idx was null");
                 Assert.Zero(errors, "Expected errors encountered during processing");
 
                 if (idxUnpopulated > 0)
-                    TestLogger.Info($"The Idx was found to not have a value for field AUN_WORKBOOK_NUMERIC in {idxUnpopulated} documents/instances.");
+                    Test.Info($"The Idx was found to not have a value for field AUN_WORKBOOK_NUMERIC in {idxUnpopulated} documents/instances.");
             }
             catch(Exception e)
             {
-                TestLogger.Error(e.Message);
-                TestLogger.Error(e.StackTrace);
-                TestLogger.Error(e.Source);
+                Test.Log(Status.Error, e);
+
+                /*Test.Error(e.Message);
+                Test.Error(e.StackTrace);
+                Test.Error(e.Source);
                 if(e.InnerException != null)
                 {
-                    TestLogger.Error(e.InnerException.Message);
-                    TestLogger.Error(e.InnerException.StackTrace);
+                    Test.Error(e.InnerException.Message);
+                    Test.Error(e.InnerException.StackTrace);
 
-                }
+                }*/
 
                 Assert.Fail(e.Message);
             }
@@ -195,19 +190,16 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         [Category("Locations")]
 		[Description("Validate mapping and conversion of IDX Locations to EDT Locations")]
 		public void Locations()
-		{
-			long idxUnpopulated = 0;
-			long edtUnexpectedlyPopulated = 0;
-			long errors = 0;
-			long matched = 0;
-			long different = 0;
-            List<EmsFolder> observedEmsFolders = new List<EmsFolder>();
+        {
+            EdtFieldUnderTest = "Locations";
+			var matched = 0;
+			var different = 0;
+            var observedEmsFolders = new List<EmsFolder>();
 
 			var allEdtLocations = EdtDocumentRepository.GetDocumentLocations(_idxDocumentIds);
 
             using (var locationFileWriter = new LocationFileWriter())
             {
-
                 foreach (var idxDocument in _idxSample)
                 {
 
@@ -216,7 +208,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     if (string.IsNullOrWhiteSpace(edtLocation))
                     {
                         different++;
-                        ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "Location not present in EDT"));
+                        AddComparisonError(idxDocument.DocumentId, "Location not present in EDT");
                     }
 
                     var emsFolder = new EmsFolder()
@@ -241,8 +233,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     if (!emsFolder.ConvertedEdtLocation.ReplaceTagChars().Equals(edtLocation.ReplaceTagChars(), StringComparison.InvariantCultureIgnoreCase))
                     {
                         different++;
-                        ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtLocation, emsFolder.ConvertedEdtLocation, emsFolder.ConvertedEdtLocation));
-                        
+                        AddComparisonResult(idxDocument.DocumentId, edtLocation, emsFolder.ConvertedEdtLocation, emsFolder.ConvertedEdtLocation);
                     }
                     else
                     {
@@ -254,28 +245,18 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             PrintObservedLocations(observedEmsFolders);
 
-			var diffFile = PrintComparisonTables("Locations");
-			TestLogger.Info($"Difference and error details written to: <a href=\"{diffFile}\">Report\\{diffFile}</a>");
+            //print table of stats
+            LogComparisonStatistics(new string[][]
+            {
+                new string[] {"Differences", different.ToString()},
+                new string[] {"Matched", matched.ToString()}
+            });
 
-			//print table of stats
-			string[][] data = new string[][]{
-					 new string[]{ "<b>Comparison Statistics:</b>"},
-					 new string[]{ "Statistic", "Count"},
-					 new string[] { "Differences", different.ToString() },
-					 new string[] { "Matched", matched.ToString() },
-					 new string[] { "Unexpected Errors", errors.ToString() },
-					 new string[] { "Edt document(s) incorrectly have a value when Idx is null", edtUnexpectedlyPopulated.ToString() },
-					 new string[] { "Idx document(s) not populated for field under test (and EDt is also null)", idxUnpopulated.ToString() } };
-
-			TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
-
-			Assert.Zero(different, $"Differences were seen between expected value and actual value");
-			Assert.Zero(edtUnexpectedlyPopulated, "Edt was found to have field populated for instances where Idx was null");
-			Assert.Zero(errors, "Expected errors encountered during processing");
+            Assert.Zero(different, $"Differences were seen between expected value and actual value");
 
 		}
 
-        private void PrintObservedLocations(List<EmsFolder> emsFolders)
+        private void PrintObservedLocations(IEnumerable<EmsFolder> emsFolders)
         {
             using (var writer = new StreamWriter(Path.Combine(Settings.ReportingDirectory, "locations_observedIdxRawValues.csv")))
             {
