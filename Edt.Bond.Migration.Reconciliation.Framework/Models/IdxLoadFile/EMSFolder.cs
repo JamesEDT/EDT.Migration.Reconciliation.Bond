@@ -23,14 +23,15 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
                 if (_edtLocation == null)
                 {
                     _edtLocation = $@"{Group ?? string.Empty}\{Custodian ?? string.Empty}\{Source ?? string.Empty}";
-                }
 
-                VIRTUAL_PATH_SEGMENTs.ForEach(c => 
-                    {
-                        if (!string.IsNullOrWhiteSpace(c) && !c.Contains(".msg:"))
-                            _edtLocation += @"\" + c.Replace(":", "-");
-                    }
-                );
+
+                    VIRTUAL_PATH_SEGMENTs.ForEach(c =>
+                        {
+                            if (!string.IsNullOrWhiteSpace(c) && !c.Contains(".msg:"))
+                                _edtLocation += @"\" + c.Replace(":", "-");
+                        }
+                    );
+                }
                 return _edtLocation;
             }
         }

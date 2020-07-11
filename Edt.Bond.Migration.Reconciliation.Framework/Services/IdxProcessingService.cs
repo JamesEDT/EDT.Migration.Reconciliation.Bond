@@ -7,34 +7,72 @@ using Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 {
-    public class IdxProcessingService
+    public class IdxReaderByChunk : IDisposable
     {
-        private static StreamReader _streamReader;
-        private const long ProcessingChunkSize = 100;
-        private static readonly string[] DocumentEndTag = new string[] {"#DREENDDOC"};
-        
+        private readonly int _chunkSize = 10000000;
+        private readonly StreamReader _streamReader;
+        private readonly string[] _documentEndTag = new string[] { "#DREENDDOC" };
+        private const string DocumentStartTag = "#DREREFERENCE";
+        private string _lastTokenFromPreviousBatch = null;
 
-        public static IEnumerable<Document> GetNextDocumentChunkFromFile(string filepath, bool removeEncapsulation = false)
+        public bool EndOfFile;
+
+        public IdxReaderByChunk(StreamReader streamReaderReader)
         {
-            if (_streamReader == null) 
-                _streamReader = new StreamReader(filepath);
+            _streamReader = streamReaderReader;
+        }
 
-            var stringBuilder = new StringBuilder();
-            var docsSeen = 0;
+        public IEnumerable<Document> GetNextDocumentBatch()
+        {
+            var buffer = new char[_chunkSize];
 
-            while(!_streamReader.EndOfStream && docsSeen <= ProcessingChunkSize)
+            var bytesRead = _streamReader.ReadBlock(buffer, 0, buffer.Length);
+
+            if (bytesRead > 0)
             {
-                var line = _streamReader.ReadLine();
+                var str = new string(buffer);
 
-                if(line != null && !line.StartsWith("#DRE"))
-                    line = $"\r\n{line}";
+                if (str.Contains(_documentEndTag[0]))
+                {
+                    var tokens = str.Split(_documentEndTag, StringSplitOptions.RemoveEmptyEntries).ToList();
 
-                if (line != null && line.Contains(DocumentEndTag[0]))
-                    docsSeen++;
+                    if (_lastTokenFromPreviousBatch != null)
+                    {
+                        if (tokens[0].StartsWith(DocumentStartTag))
+                        {
+                            tokens.Add(_lastTokenFromPreviousBatch);
+                        }
+                        else
+                        {
+                            tokens[0] = $"{_lastTokenFromPreviousBatch}{tokens[0]}";
+                        }
+                    }
 
-                stringBuilder.Append(line);
+                    _lastTokenFromPreviousBatch = tokens.Last();
+
+                    tokens.RemoveAt(tokens.Count - 1);
+
+                    return tokens
+                        //.AsParallel()
+                        .Select(x => new Document(x));
+
+                }
+                else
+                {
+                    _lastTokenFromPreviousBatch = $"{_lastTokenFromPreviousBatch}{str}";
+
+                }
+
+                EndOfFile = bytesRead < _chunkSize;
             }
-            return stringBuilder.ToString().Split(DocumentEndTag, StringSplitOptions.RemoveEmptyEntries).Select(x => new Document(x, removeEncapsulation));
+
+            return null;
+        }
+
+
+        public void Dispose()
+        {
+            _streamReader?.Close();
         }
     }
 }

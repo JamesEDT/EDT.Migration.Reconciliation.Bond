@@ -9,6 +9,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Services;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using MoreLinq;
 
@@ -23,6 +24,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         private IEnumerable<Framework.Models.IdxLoadFile.Document> _idxSample;
         private List<string> _idxDocumentIds;
         private IdxToEdtConversionService _idxToEdtConversionService;
+        private NativeFileFinder nativeFileFinder;
 
         [OneTimeSetUp]
         public void SetIdxSample()
@@ -49,6 +51,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             var totalSampled = 0;
             var emptyField = false;
 
+            bool isFieldAutoPopulatedIfNull = Settings.AutoPopulatedNullFields.Contains(mappingUnderTest.EdtName);
             //initiliase conversion service for field under test
             try
             {
@@ -100,7 +103,15 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                         AddComparisonError(idxDocument.DocumentId,
                                             "Document was not found in Edt, when Idx had a value");
 
-                                        return;
+                            }
+                            else
+                            {
+                                if (string.IsNullOrWhiteSpace(idxField))
+                                {
+                                    if (!string.IsNullOrWhiteSpace(edtValueForIdxRecord))
+                                    {
+                                        documentsInEdtButNotInIdx++;
+                                        ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, $"Edt had value \"{edtValueForIdxRecord}\" for field {mappingUnderTest.EdtName} when Idx had no value."));
                                     }
 
                                     //if idx field is null or empty
@@ -125,27 +136,21 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                     {
                                         if (!string.IsNullOrWhiteSpace(edtValueForIdxRecord)) populated++;
 
+                                        var trimmedActualEdtValue = edtValueForIdxRecord;//.Replace(" ", "");
+                                        var trimmedExpectedEdtValue = expectedEdtValue;//.Replace(" ", "");
 
-                                        if (!edtValueForIdxRecord.Equals(expectedEdtValue,
-                                            StringComparison.InvariantCultureIgnoreCase))
+                                        if (!trimmedActualEdtValue.Equals(trimmedExpectedEdtValue, StringComparison.InvariantCultureIgnoreCase))
                                         {
                                             if (mappingUnderTest.EdtName.Equals("Host Document Id",
                                                 StringComparison.InvariantCultureIgnoreCase))
                                             {
                                                 //if .pst, check that null
-                                                var fileType = idxDocument.AllFields.First(x =>
-                                                    x.Key.Equals("FILETYPE_PARAMETRIC",
-                                                        StringComparison.InvariantCultureIgnoreCase));
-
-                                                if (fileType.Value.Equals(".pst",
-                                                    StringComparison.InvariantCultureIgnoreCase))
+                                                var fileType = idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals("FILETYPE_PARAMETRIC", StringComparison.InvariantCultureIgnoreCase));
+                                                if(fileType.Value.Equals(".pst", StringComparison.InvariantCultureIgnoreCase))
                                                 {
                                                     matched++;
-                                                    ComparisonErrors.Add(
-                                                        new Framework.Models.Reporting.ComparisonError(
-                                                            idxDocument.DocumentId,
-                                                            "Host document id null due to being .pst"));
-                                                }
+                                                    ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxDocument.DocumentId, "Host document id null due to being .pst"));
+                                                }  
                                                 else
                                                 {
                                                     different++;
@@ -155,11 +160,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                             expectedEdtValue, idxField));
                                                 }
                                             }
-
+                                            
                                             different++;
-                                            ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(
-                                                idxDocument.DocumentId, edtValueForIdxRecord, expectedEdtValue,
-                                                idxField));
+                                            ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(idxDocument.DocumentId, edtValueForIdxRecord, expectedEdtValue, idxField));
                                         }
                                         else
                                         {

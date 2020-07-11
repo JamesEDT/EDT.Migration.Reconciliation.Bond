@@ -31,7 +31,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
 
             var tokens = raw.Split(new string[]{"#DRE"}, StringSplitOptions.RemoveEmptyEntries);
 
-            tokens.AsParallel().ForAll(GenerateFieldAndAddToFields);
+            tokens
+                //.AsParallel()
+                .ToList().ForEach(GenerateFieldAndAddToFields);
 
             DocumentId = GetFileName();
         }
@@ -67,37 +69,31 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
         private void GenerateFieldAndAddToFields(string rawItem)
         {
             var delimiter = rawItem.Contains("=") ? "=" : " ";
-            var field = GenerateField(rawItem, delimiter, true);
+            var field = GenerateField(rawItem, delimiter);
 
             AllFields.Add(field);
         }
 
-        private Field GenerateField(string rawItem, string delimiter = "=", bool removeEncapsulation = false)
+        private Field GenerateField(string rawItem, string delimiter = "=", bool removeEncapsulation = true)
         {
-            if (rawItem.StartsWith("FIELD "))
-            {
-                rawItem = rawItem.Remove(0, 6);
-            }
-            else
-            {
-                rawItem = $"DRE{rawItem}";
-            }
+            rawItem = rawItem.StartsWith("FIELD ") ? rawItem.Remove(0, 6) : $"DRE{rawItem}";
 
-            var tokens = rawItem.Split(new string[]{delimiter}, StringSplitOptions.None).ToList();
+            var tokens = rawItem.Split(new string[] { delimiter }, StringSplitOptions.None).ToList();
 
             var key = tokens.FirstOrDefault();
             tokens.Remove(key);
-            var valueString = string.Join(delimiter, tokens);
 
-            if (removeEncapsulation && valueString.StartsWith("\"") && valueString.EndsWith("\""))
+            var valueString = string.Join(delimiter, tokens).TrimEnd(new char[] { '\r', '\n' });
+
+            if (removeEncapsulation)
             {
-                valueString = valueString.Substring(1);
-                valueString = valueString.Substring(0, valueString.Length - 1);
+                var fieldEncapsulationChar = new char[] { '"' };
+
+                if (valueString.StartsWith("\"") && valueString.EndsWith("\""))
+                    valueString = valueString.Substring(1, valueString.Length - 2);
             }
 
-            valueString = valueString.TrimEnd(new char[] {'\r', '\n'});
-
-            return new Field(key, valueString);
-        }    
+            return new Field(key, valueString.TrimEnd(new char[] { '\r', '\n' }));
+        }
     }
 }

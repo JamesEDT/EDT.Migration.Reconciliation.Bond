@@ -41,7 +41,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 }
 
                 if (_edtColumnDetails?.DataType == ColumnType.Boolean)
-                    return GetBooleanString(value);
+                    return GetBooleanString(value);               
             }
             catch (Exception e)
             {
@@ -94,7 +94,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             }
             else
             {
-                if (sourceDateValue.Contains("/") || sourceDateValue.Contains("-") || sourceDateValue.Contains("\\"))
+                if (!sourceDateValue.Trim().Substring(1).All(char.IsNumber))
                 {
                     convertedDate = DateTime.Parse(sourceDateValue);
                 }
@@ -102,14 +102,19 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 {
                     try
                     {
-                        convertedDate = DateTimeOffset.FromUnixTimeSeconds(long.Parse(sourceDateValue)).UtcDateTime;
 
-                        //convertedDate = FromUnixTime(long.Parse(sourceDateValue));
+                        convertedDate = (sourceDateValue.Length <= 10 ? DateTimeOffset.FromUnixTimeSeconds(long.Parse(sourceDateValue)) : DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(sourceDateValue))).UtcDateTime;
+                        if (convertedDate.Year == 1970)
+                            throw new ArgumentOutOfRangeException("Suspected Epoch milliseconds");
+
+                    }
+                    catch (ArgumentOutOfRangeException)
+                    {
+                        convertedDate = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(sourceDateValue)).UtcDateTime;
                     }
                     catch (Exception e)
                     {
-                        DebugLogger.Instance.WriteException(e, $"Epoch Date Conversion of {sourceDateValue}");
-                        throw e;
+                        throw new Exception($"Epoch Date Conversion of {sourceDateValue}", e);
                     }
                 }
             }

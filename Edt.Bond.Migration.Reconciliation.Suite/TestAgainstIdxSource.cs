@@ -6,6 +6,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Services;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite
@@ -50,13 +51,14 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
                     IdxDocumentsRepository = new IdxDocumentsRepository();
                     IdxDocumentsRepository.Initialise(true);
+                    var idxProcessingService = new IdxReaderByChunk(File.OpenText(idxPath));
 
                     logger.Debug("Reading Idx chunks");
                     do
                     {
-                        documents = IdxProcessingService.GetNextDocumentChunkFromFile(idxPath).ToArray();
+                        documents = idxProcessingService.GetNextDocumentBatch()?.ToArray();
 
-                        if (!documents.Any()) return;
+                        if (documents == null || !documents.Any()) return;
 
                         IdxDocumentsRepository.AddDocuments(documents);
                         IdxDocumentsProcessed = +documents.Length;
