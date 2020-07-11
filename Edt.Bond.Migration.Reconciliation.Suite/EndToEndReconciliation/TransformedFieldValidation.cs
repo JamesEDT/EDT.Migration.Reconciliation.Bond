@@ -157,7 +157,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                 }
                                 else
                                 {
-                                    errors++;
+                                    //errors++;
                                     ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(idxRecord.DocumentId,
                                         $"Couldnt convert aun workbook id {aunWorkbookId} to name"));
                                 }

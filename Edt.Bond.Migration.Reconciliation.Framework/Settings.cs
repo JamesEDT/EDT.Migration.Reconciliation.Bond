@@ -13,6 +13,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
         public static string EdtCaseId => GetSetting("EdtCaseId");
 
         public static string StandardMapPath => GetSetting("CaseMapPath");
+        public static string SourceFolderPath => GetSetting("ExtractFolder");
 
         public static string MicroFocusAunWorkbookPath => GetSetting("AunWorkbookPath");
 

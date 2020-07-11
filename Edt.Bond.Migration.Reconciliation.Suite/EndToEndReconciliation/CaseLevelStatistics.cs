@@ -30,7 +30,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             tableData.Add(new string[] { "Total", EdtDocumentCounts.Sum(x => x.DocumentCount).ToString()});
 
-            Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(tableData.ToArray()));    
+            TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(tableData.ToArray()));    
         }
 
         [Test]
@@ -51,13 +51,13 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             tableData.Add(new string[] {"Cfs Size", EdtCfsService.GetCaseSize()});
             tableData.Add(new string[] { "Source Size", $"{GetSizeOfSourceFolder()} Mb" });
 
-            Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(tableData.ToArray()));
+            TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(tableData.ToArray()));
         }
 
 
         private decimal GetSizeOfSourceFolder()
         {
-            var sourceDir = new FileInfo(Settings.IdxFilePath).DirectoryName;
+            var sourceDir = new FileInfo(Settings.SourceFolderPath).DirectoryName;
 
             var totalBytes =
                 Directory
