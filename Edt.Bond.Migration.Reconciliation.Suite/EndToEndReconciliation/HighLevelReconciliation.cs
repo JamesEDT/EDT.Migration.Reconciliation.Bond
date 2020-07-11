@@ -40,7 +40,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 				new string[] {"Edt Database", EdtDocumentCount.ToString()}
 			};
 
-			TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
+			Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
             if (_idxDocumentCount != EdtDocumentCount)
             {
@@ -74,7 +74,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 				}
 			}
 
-			TestLogger.Info(
+			Test.Info(
 				$"Document Id differences output to <a href=\"DocumentCountDifferences_IdLists.csv\"> DocumentCountDifferences_IdLists.csv</a>");
 		}
 
@@ -94,7 +94,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 				new string[] {"Edt Central file store", cfsCount.ToString()}
 			};
 
-			TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
+			Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
             if (_idxDocumentCount != cfsCount)
             {
@@ -102,7 +102,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 ListExtensions.DifferencesToFile(cfsDocsForBatch.ToList(), _idxDocumentIds, Path.Combine(Settings.ReportingDirectory, "NativesMissing_InCfsOnly.csv"));
                 ListExtensions.DifferencesToFile(_idxDocumentIds, cfsDocsForBatch.ToList(), Path.Combine(Settings.ReportingDirectory,  "NativesMissing_InIdxOnly.csv"));
 
-                TestLogger.Info($"List of Ids without body output to reporting directory (NativeMissing_)");
+                Test.Info($"List of Ids without body output to reporting directory (NativeMissing_)");
                 
             }
 
@@ -126,7 +126,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 				new[] {"Quarantine Folder", lppDocCount.ToString()}
 			};
 
-			TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
+			Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
 			Assert.AreEqual(lppDocCount, idxLppDocCount,
 				"File counts should be equal between IDX and EDT Quarantine folder");
@@ -154,7 +154,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 				new[] {"Document Table", edtRedactionCount.ToString()}
 			};
 
-			TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
+			Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
 			Assert.AreEqual(redactionDocCount, edtRedactionCount,
 				"File counts should be equal between Redaction Load files and EDT");
@@ -189,14 +189,14 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 				new[] {"Edt Document.Body", edtDocsWithBody.Count().ToString()}
 			};
 
-			TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
+			Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
             if (mircoFocusDocCount != edtDocsWithBody.Count())
             {
                 ListExtensions.DifferencesToFile(microFocusExportDocuments, edtDocsWithBody, Path.Combine(Settings.ReportingDirectory, "TextContent_MicrofocusOnly.csv"));
                 ListExtensions.DifferencesToFile(edtDocsWithBody, microFocusExportDocuments, Path.Combine(Settings.ReportingDirectory, "TextContent_EdtOnly.csv"));
 
-                TestLogger.Info($"List of Ids without body output to reporting directory (TextContent_)");
+                Test.Info($"List of Ids without body output to reporting directory (TextContent_)");
 
             }
 

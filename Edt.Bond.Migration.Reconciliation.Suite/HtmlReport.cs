@@ -10,44 +10,38 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
     [SetUpFixture]
     public class HtmlReport
     {
-        public static ExtentReports Writer;       
+        public static ExtentReports Instance;       
 
         [OneTimeSetUp]
         public void ReportSetup()
         {
             var reportFolder = Path.Combine(Settings.ReportingDirectory, "index.html");
-
+            
             var htmlReporter = new ExtentHtmlReporter(reportFolder);
 
             htmlReporter.Config.DocumentTitle = "EDT Data Migration Report";
             htmlReporter.Config.ReportName = $"Data Migration Validation Report (v{Settings.Version}) - Edt Case {Settings.EdtCaseId} Batch Name {Settings.EdtImporterDatasetName}";
             htmlReporter.Config.EnableTimeline = false;
             htmlReporter.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Standard;
-            htmlReporter.Config.CSS = CSS;
+            htmlReporter.Config.CSS = Css;
             
-            Writer = new ExtentReports();
+            Instance = new ExtentReports();
 
-            Writer.AttachReporter(htmlReporter);
-        }
-
-        private void RenameOldFolders()
-        {
-            var renameSuffix = "_old" + DateTime.Now.Ticks;
-
-            if (Directory.Exists(Settings.ReportingDirectory))
-                Directory.Move(Settings.ReportingDirectory, Settings.ReportingDirectory + renameSuffix);           
+            Instance.AttachReporter(htmlReporter);
         }
 
         [OneTimeTearDown]
         public void Teardown()
         {
-            Writer.Flush();
+            Instance.Flush();
         }
 
-        private static string CSS = @"
+        private const string Css = @"
             .description { font-style: italic;}            
             .runtime-table { max-width: 500px; }
-            .runtime-table tbody tr:nth-child(2) { background-color: lightgray;} 
+            .runtime-table tbody { width: 500px; }
+            .runtime-table tbody td { min-width: 50px; }
+            .runtime-table tbody .table-header { background-color: lightgray;} 
         ";
     }
 }
