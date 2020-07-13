@@ -114,7 +114,16 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             _standardMapping = standardMapping;
 
             if (!_standardMapping.IsEmailField())
-                _edtColumnDetails = GetEdtColumnDetailsFromDisplayName(standardMapping.EdtName);
+            {
+                try
+                {
+                    _edtColumnDetails = GetEdtColumnDetailsFromDisplayName(standardMapping.EdtName);
+                }
+                catch (Exception)
+                {
+                }
+            }
+
             _ignoreMissingEdtColumn = ignoreMissingEdtColumn;
         }
 

@@ -37,10 +37,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
                 if (Settings.UseExistingIdxAnalysis)
                 {
                     logger.Debug("Using existing Idx analysis");
-                    if(!IdxDocumentsRepository.Exists())
-                    {
-                        throw new Exception("Idx analysis db not present but config is to use existing analysis");
-                    }
+                    //if(!IdxDocumentsRepository.Exists())
+                   // {
+                     //   throw new Exception("Idx analysis db not present but config is to use existing analysis");
+                    //}
                 }
                 else
                 {

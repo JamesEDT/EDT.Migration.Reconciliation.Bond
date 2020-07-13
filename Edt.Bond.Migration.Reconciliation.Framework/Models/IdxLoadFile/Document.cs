@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Localization.Internal;
 using NUnit.Framework;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
@@ -36,6 +37,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
                 .ToList().ForEach(GenerateFieldAndAddToFields);
 
             DocumentId = GetFileName();
+        }
+
+        public IEnumerable<string> GetValuesForIdolFields(List<string> desiredFields)
+        {
+            return AllFields.Where(x => desiredFields.Contains(x.Key)).Select(x => x.Value);
         }
 
         public string GetFileName()

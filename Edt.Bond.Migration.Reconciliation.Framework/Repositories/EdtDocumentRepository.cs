@@ -1,6 +1,7 @@
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase.Dto;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -19,10 +20,14 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static SqlExecutor SqlExecutor => _sqlExecutor ?? (_sqlExecutor = new SqlExecutor(GetConnectionStringByName()));
 
-        public static IEnumerable<IDictionary<string, object>> GetDocuments(List<string> documentIds)
+        public static Dictionary<string, Dictionary<string, string>> GetDocuments(List<string> documentIds)
         {
-            var sql = $"SELECT * FROM {GetDatabaseName()}.[Document] doc WHERE {GetDocumentIDQuery(documentIds)}";
-           return SqlExecutor.Query(sql).Select(x => (IDictionary<string, object>)x);
+            var sql = $"SELECT * FROM {GetDatabaseName()}.[Document] doc WHERE {GetDocumentIDQuery(documentIds, true)}";
+            return SqlExecutor.Query(sql)
+                .ToDictionary(x => (string) x.DocNumber, x => ((IDictionary<string,object>) x)
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.ToString()));
+
+            //.ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
         }
 
         public static Dictionary<string, string> GetDocumentField(List<string> documentIds, string desiredField)
@@ -37,9 +42,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         }
 
-        public static string GetDocumentIDQuery(List<string> documentIds)
+        public static string GetDocumentIDQuery(List<string> documentIds, bool forceList = false)
         {
-            if (Settings.IdxSampleSize == 0)
+            if (Settings.IdxSampleSize == 0 && !forceList)
             {
                return $@" exists (select d.documentID from  {GetDatabaseName()}.[document] d inner join  
                         {GetDatabaseName()}.[batch] b on b.batchId = d.batchId and b.batchName in {GetBatchInWhereValue()}
