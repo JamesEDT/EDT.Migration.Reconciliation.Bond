@@ -14,6 +14,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
     [TestFixture]
 	[Description(
 		"Comparing high level counts of documents from the source Idx to targets (Edt database and File store)")]
+	//[Parallelizable(ParallelScope.All)]
 	public class HighLevelReconciliation : TestBase
 	{
 		private long _idxDocumentCount;

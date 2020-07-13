@@ -20,6 +20,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase
         public string ExportValueFieldName { get; set; }
         public bool? IsRequired { get; set; }
         public string ExportDisplayName { get; set; }
+        public int? Size { get; set; }
        
 
         public string GetAlphaNumbericOnlyDisplayName()

@@ -66,7 +66,19 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static IEnumerable<ColumnDetails> GetColumnDetails()
         {
-            var columns = SqlExecutor.Query<ColumnDetails>($"SELECT * FROM {GetDatabaseName()}.[ColumnDetails]");
+            var columns = SqlExecutor.Query<ColumnDetails>($@"SELECT d.* FROM {GetDatabaseName()}.[ColumnDetails] d");
+
+            var sizes = SqlExecutor.Query<dynamic>(ConfigurationManager.AppSettings["EdtCaseDatabaseName"], @"SELECT COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH
+from INFORMATION_SCHEMA.COLUMNS c
+where TABLE_NAME = 'Document'");
+
+            columns.ToList().ForEach(c =>
+            {
+                var sizeRecord = sizes.FirstOrDefault(s => s.COLUMN_NAME.Equals(c.ColumnName, StringComparison.InvariantCultureIgnoreCase));
+
+                if (sizeRecord != null)
+                    c.Size = Convert.ToInt32(sizeRecord.CHARACTER_MAXIMUM_LENGTH);
+            });
 
             if (!File.Exists(Path.Combine(Settings.LogDirectory, "edt_db_cols.csv")))
             {

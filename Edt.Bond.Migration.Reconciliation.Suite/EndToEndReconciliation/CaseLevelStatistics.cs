@@ -12,6 +12,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
     [TestFixture]
     [Description("Case level statistics output at time of running the validation tool")]
+    //[Parallelizable(ParallelScope.Children)]
     public class CaseLevelStatistics : TestBase
     {        
 
@@ -30,7 +31,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             tableData.Add(new string[] { "Total", EdtDocumentCounts.Sum(x => x.DocumentCount).ToString()});
 
-            TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(tableData.ToArray()));    
+            Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(tableData.ToArray()));    
         }
 
         [Test]
@@ -51,7 +52,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             tableData.Add(new string[] {"Cfs Size", EdtCfsService.GetCaseSize()});
             tableData.Add(new string[] { "Source Size", $"{GetSizeOfSourceFolder()} Mb" });
 
-            TestLogger.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(tableData.ToArray()));
+            Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(tableData.ToArray()));
         }
 
 

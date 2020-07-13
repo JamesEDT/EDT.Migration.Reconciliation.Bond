@@ -194,16 +194,6 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             {
                 Test.Log(Status.Error, e);
 
-                /*Test.Error(e.Message);
-                Test.Error(e.StackTrace);
-                Test.Error(e.Source);
-                if(e.InnerException != null)
-                {
-                    Test.Error(e.InnerException.Message);
-                    Test.Error(e.InnerException.StackTrace);
-
-                }*/
-
                 Assert.Fail(e.Message);
             }
         }
@@ -219,6 +209,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			long matched = 0;
 			long different = 0;
             List<EmsFolder> observedEmsFolders = new List<EmsFolder>();
+            var textSegment = Settings.LocationIdxFields[3];
 
 
             var allEdtLocations = EdtDocumentRepository.GetDocumentLocations(_idxDocumentIds);

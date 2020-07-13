@@ -33,24 +33,26 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public void Initialise(bool deleteExistingDb = true)
         {
-            var caseId = ConfigurationManager.AppSettings["EdtCaseId"];
-            var idxName = ConfigurationManager.AppSettings["IdxName"]?.Replace(".", string.Empty);
-
-            _dbName = $"{Settings.LogDirectory}\\IdxRepo_{caseId}_{idxName}.db";
-
+            
+            _dbName = GetDbName();
 
             if(deleteExistingDb && File.Exists(DbName))
                 File.Move(DbName, $"{DbName}_{DateTime.Now.Ticks}");
         }
 
-        public static bool Exists()
+        private static string GetDbName()
         {
             var caseId = ConfigurationManager.AppSettings["EdtCaseId"];
-            var idxName = ConfigurationManager.AppSettings["IdxName"]?.Replace(".", string.Empty);
+            var idxPath = ConfigurationManager.AppSettings["IdxFilePath"];
+            var idxName = string.IsNullOrEmpty(idxPath) ? string.Empty : new FileInfo(idxPath).Name.Replace(".", string.Empty);
 
-            var dbName = $"{Settings.LogDirectory}\\IdxRepo_{caseId}_{idxName}.db";
+            return $"{Settings.LogDirectory}\\IdxRepo_{caseId}_{idxName}.db";
+        }
 
-            return File.Exists(dbName);
+        public static bool Exists()
+        {
+
+            return File.Exists(GetDbName());
                
         }
 

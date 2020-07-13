@@ -24,7 +24,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                     {
                         Id = line[0],
                         Level = int.Parse(line[4]),
-                        Name = line[1],
+                        Name = line[1].Trim().Replace(":","."),
                         ParentID = line[8],
                         FullTagHierarchy = new List<string>() { line[8]}
 			        });
@@ -53,9 +53,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
         {
 	        parents.ForEach(c =>
 	        { 
-		        c.FullPath = parent.FullPath + ":" + c.Name.Trim();
+		        c.FullPath = parent.FullPath.Trim() + ":" + c.Name.Trim();
                 c.FullPathCleaned = parent.FullPathCleaned.ReplaceTagChars();
-                c.FullPathOutput = parent.FullPathOutput + @"\\" + c.Name.TrimEnd();                
+                c.FullPathOutput = parent.FullPathOutput + @"\\" + c.Name.Trim();                
                 c.FullTagHierarchy.AddRange(parent.FullTagHierarchy);
                 c.FullTagHierarchy.Add(c.ParentID);
 

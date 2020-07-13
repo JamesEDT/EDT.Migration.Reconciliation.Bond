@@ -4,6 +4,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Exceptions;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -21,7 +22,93 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
         public ColumnDetails EdtColumnDetails => _edtColumnDetails;
 
         public ColumnType? MappedEdtDatabaseColumnType => _edtColumnDetails?.DataType;
-       
+
+        private static Dictionary<string, string> _timeZones = new Dictionary<string, string>() {
+            {"ACDT", "+1030"},
+            {"ACST", "+0930"},
+            {"ADT", "-0300"},
+            {"AEDT", "+1100"},
+            {"AEST", "+1000"},
+            {"AHDT", "-0900"},
+            {"AHST", "-1000"},
+            {"AST", "-0400"},
+            {"AT", "-0200"},
+            {"AWDT", "+0900"},
+            {"AWST", "+0800"},
+            {"BAT", "+0300"},
+            {"BDST", "+0200"},
+            {"BET", "-1100"},
+            {"BST", "-0300"},
+            {"BT", "+0300"},
+            {"BZT2", "-0300"},
+            {"CADT", "+1030"},
+            {"CAST", "+0930"},
+            {"CAT", "-1000"},
+            {"CCT", "+0800"},
+            {"CDT", "-0500"},
+            {"CED", "+0200"},
+            {"CET", "+0100"},
+            {"CEST", "+0200"},
+            {"CST", "-0600"},
+            {"EAST", "+1000"},
+            {"EDT", "-0400"},
+            {"EED", "+0300"},
+            {"EET", "+0200"},
+            {"EEST", "+0300"},
+            {"EST", "-0500"},
+            {"FST", "+0200"},
+            {"FWT", "+0100"},
+            {"GMT", "GMT"},
+            {"GST", "+1000"},
+            {"HDT", "-0900"},
+            {"HST", "-1000"},
+            {"IDLE", "+1200"},
+            {"IDLW", "-1200"},
+            {"IST", "+0530"},
+            {"IT", "+0330"},
+            {"JST", "+0900"},
+            {"JT", "+0700"},
+            {"MDT", "-0600"},
+            {"MED", "+0200"},
+            {"MET", "+0100"},
+            {"MEST", "+0200"},
+            {"MEWT", "+0100"},
+            {"MST", "-0700"},
+            {"MT", "+0800"},
+            {"NDT", "-0230"},
+            {"NFT", "-0330"},
+            {"NT", "-1100"},
+            {"NST", "+0630"},
+            {"NZ", "+1100"},
+            {"NZST", "+1200"},
+            {"NZDT", "+1300"},
+            {"NZT", "+1200"},
+            {"PDT", "-0700"},
+            {"PST", "-0800"},
+            {"ROK", "+0900"},
+            {"SAD", "+1000"},
+            {"SAST", "+0900"},
+            {"SAT", "+0900"},
+            {"SDT", "+1000"},
+            {"SST", "+0200"},
+            {"SWT", "+0100"},
+            {"USZ3", "+0400"},
+            {"USZ4", "+0500"},
+            {"USZ5", "+0600"},
+            {"USZ6", "+0700"},
+            {"UT", "-0000"},
+            {"UTC", "-0000"},
+            {"UZ10", "+1100"},
+            {"WAT", "-0100"},
+            {"WET", "-0000"},
+            {"WST", "+0800"},
+            {"YDT", "-0800"},
+            {"YST", "-0900"},
+            {"ZP4", "+0400"},
+            {"ZP5", "+0500"},
+            {"ZP6", "+0600"}
+        };
+
         public IdxToEdtConversionService(StandardMapping standardMapping, bool ignoreMissingEdtColumn = false)
         {
             _standardMapping = standardMapping;
@@ -35,19 +122,42 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
         {
             try
             {
-                if (_edtColumnDetails?.DataType == ColumnType.Date || (!string.IsNullOrWhiteSpace(_standardMapping.EdtType) && _standardMapping.EdtType.Equals("Date", StringComparison.InvariantCultureIgnoreCase)))
+                if (_edtColumnDetails?.DataType == ColumnType.Date || (!string.IsNullOrWhiteSpace(_standardMapping.EdtType) && _standardMapping.EdtType.Equals("Date", StringComparison.InvariantCultureIgnoreCase))
+                    || _standardMapping.EdtName.ToLower().Contains("date"))
                 {
-                    return GetDateString(value);
+                    try
+                    {
+                        return GetDateString(value);
+                    }
+                    catch(Exception)
+                    {
+                        return string.Empty;
+                    }
                 }
 
                 if (_edtColumnDetails?.DataType == ColumnType.Boolean)
-                    return GetBooleanString(value);               
+                {
+                    try
+                    {
+                        return GetBooleanString(value);
+                    }
+                    catch(Exception)
+                    {
+                        return string.Empty;
+                    }
+                }
             }
             catch (Exception e)
             {
                 DebugLogger.Instance.WriteException(e, $"Convert value {value} to {_edtColumnDetails?.DataType}");
             }
-            
+
+            //trim string
+            if (_edtColumnDetails != null && _edtColumnDetails.Size.HasValue && _edtColumnDetails.Size > 0 && value.Length > _edtColumnDetails.Size)
+            {
+                return value.Substring(0, _edtColumnDetails.Size.Value);
+            }
+
             return value;
         }
 
@@ -84,42 +194,75 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             return matchedDb;
         }
 
+        private static string ReplaceTimeZone(string source)
+        {
+            var matchedTimezone = _timeZones.FirstOrDefault(x => source.Contains(x.Key));
+
+            return matchedTimezone.Key != null ? source.Replace(matchedTimezone.Key, matchedTimezone.Value) : source;
+
+        }
+
         private static string GetDateString(string sourceDateValue)
         {
             DateTime convertedDate;
+            DateTimeOffset convertedDateOffset;
 
-            if (sourceDateValue.Length == 14 && (sourceDateValue[0] == '1' || sourceDateValue[0] == '2'))
+            string[] formats = new string[] {
+                                 "yyyyMMddHHmmss",
+                                 "yyyy.MM.dd.HH.mm.ss",
+                                 "yyyy:MM:dd HH:mm:ss",
+                                 @"ddd, dd MMM yyyy HH:mm:ss zzz",
+                                 @"ddd, dd MMM yyyy HH:mm:ss zzz +0000",
+                                 @"ddd, dd MMM yyyy HH:mm:ss Z"
+            };
+
+
+            if (!sourceDateValue.Trim().Substring(1).All(char.IsNumber) || (sourceDateValue.Length == 14 && (sourceDateValue[0] == '1' || sourceDateValue[0] == '2')))
             {
-                convertedDate = DateTime.ParseExact(sourceDateValue, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-            }
-            else
-            {
-                if (!sourceDateValue.Trim().Substring(1).All(char.IsNumber))
+                if (sourceDateValue.Contains("("))
+                    sourceDateValue = sourceDateValue.Substring(0, sourceDateValue.LastIndexOf('('));
+
+                var success = DateTimeOffset.TryParse(sourceDateValue, out convertedDateOffset);
+                if (!success)
                 {
-                    convertedDate = DateTime.Parse(sourceDateValue);
+
+                    success = DateTimeOffset.TryParseExact(ReplaceTimeZone(sourceDateValue), formats, CultureInfo.InvariantCulture.DateTimeFormat,
+                                      DateTimeStyles.AllowWhiteSpaces, out convertedDateOffset);
+                }
+                if (success)
+                {
+                    return convertedDateOffset.UtcDateTime.ToString("dd/MM/yyyy HH:mm:ss");
                 }
                 else
                 {
-                    try
-                    {
-
-                        convertedDate = (sourceDateValue.Length <= 10 ? DateTimeOffset.FromUnixTimeSeconds(long.Parse(sourceDateValue)) : DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(sourceDateValue))).UtcDateTime;
-                        if (convertedDate.Year == 1970)
-                            throw new ArgumentOutOfRangeException("Suspected Epoch milliseconds");
-
-                    }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        convertedDate = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(sourceDateValue)).UtcDateTime;
-                    }
-                    catch (Exception e)
-                    {
-                        throw new Exception($"Epoch Date Conversion of {sourceDateValue}", e);
-                    }
+                    throw new Exception($"Unsupported Format {sourceDateValue}");
                 }
             }
+            else
+            {
+                try
+                {
+                    convertedDate = (sourceDateValue.Length <= 10 ? DateTimeOffset.FromUnixTimeSeconds(long.Parse(sourceDateValue)) : DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(sourceDateValue))).UtcDateTime;
+                    if (convertedDate.Year == 1970)
+                        throw new ArgumentOutOfRangeException("Suspected Epoch milliseconds");
+
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    convertedDate = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(sourceDateValue)).UtcDateTime;
+                    if (convertedDate.Year == 1970)
+                    {
+                        throw new Exception($"Epoch Date Conversion of {sourceDateValue} failed");
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new Exception($"Epoch Date Conversion of {sourceDateValue}", e);
+                }
+            }
+
             return convertedDate.ToString("dd/MM/yyyy HH:mm:ss");
-        }    
+        }
 
         private static string GetBooleanString(string sourceValue)
         {
@@ -140,5 +283,15 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
         }
 
         private static readonly DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        public string TrimJoinedString(string fullString)
+        {
+            if (_edtColumnDetails != null && _edtColumnDetails.Size.HasValue && _edtColumnDetails.Size > 0 && fullString.Length > _edtColumnDetails.Size)
+            {
+                return fullString.Substring(0, _edtColumnDetails.Size.Value);
+            }
+
+            return fullString;
+        }
     }
 }

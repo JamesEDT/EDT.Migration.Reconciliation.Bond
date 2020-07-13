@@ -62,11 +62,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
             using (var sw = new StreamWriter(filename))
             {
-                sw.WriteLine("DocumentId,Expected Edt value");
+                sw.WriteLine($"Document ID,{mappingName}");
 
                 foreach (var result in ComparisonResults)
                 {
-                    sw.WriteLine($"{result.DocumentId},\"{result.IdxConvertedValue}\"");
+                    sw.WriteLine($"{result.DocumentId},\"{result.IdxConvertedValue.Replace("\"","\"\"")}\"");
                 }
             }
         }

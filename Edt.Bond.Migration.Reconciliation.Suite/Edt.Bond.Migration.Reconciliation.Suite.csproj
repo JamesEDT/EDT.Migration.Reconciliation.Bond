@@ -437,6 +437,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComparisonTest.cs" />
     <Compile Include="EndToEndReconciliation\CaseLevelStatistics.cs" />
     <Compile Include="EndToEndReconciliation\TransformedFieldValidation.cs" />
     <Compile Include="EndToEndReconciliation\IdxFieldByEdtFieldComparison.cs" />
