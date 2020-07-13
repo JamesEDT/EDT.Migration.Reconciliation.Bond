@@ -25,9 +25,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
     public class IdxDocumentByEdtComparison : TestBase
     {
         private Dictionary<StandardMapping,IdxToEdtConversionService> _idxToEdtConversionServices = new Dictionary<StandardMapping, IdxToEdtConversionService>();
+        private Dictionary<StandardMapping, ComparisonTestResult> _comparisonTestResults = new Dictionary<StandardMapping, ComparisonTestResult>();
         private List<StandardMapping> _standardMappings;
-        private NativeFileFinder nativeFileFinder;
-        private int batchSize = 500;
+        private NativeFileFinder _nativeFileFinder;
+        private int _batchSize = 500;
 
         [SetUp]
         public void SetupComp()
@@ -39,25 +40,18 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                             x.IdxNames.Any())
                 .ToList();
 
-            _standardMappings.ForEach(x => _idxToEdtConversionServices.Add(x, new IdxToEdtConversionService(x, true)));
+            _standardMappings.ForEach(x =>
+            {
+                _idxToEdtConversionServices.Add(x, new IdxToEdtConversionService(x, true));
+                _comparisonTestResults.Add(x, new ComparisonTestResult(x.EdtName));
+            });
 
         }
 
         [Test]
         public void ValidateIdxFieldPopulation()
         {
-            var populated = 0;
-            var different = 0;
-            var documentsInIdxButNotInEdt = 0;
-            var documentsInEdtButNotInIdx = 0;
-            var idxNoValue = 0;
-            var unexpectedErrors = 0;
-            var matched = 0;
-            var totalSampled = 0;
-            var emptyField = false;
-            List<Framework.Models.IdxLoadFile.Document> _idxSample;
-
-            ConcurrentDictionary<string, Dictionary<string, string[]>> _expectedValues;
+            ConcurrentDictionary<string, Dictionary<string, string[]>> expectedStandardValues;
 
             try
             {
@@ -74,7 +68,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     {
                         documents = idxProcessingService.GetNextDocumentBatch()?.ToList();
 
-                        _expectedValues = new ConcurrentDictionary<string, Dictionary<string, string[]>>();
+                        expectedStandardValues = new ConcurrentDictionary<string, Dictionary<string, string[]>>();
 
                         if (documents != null)
                         {
@@ -89,7 +83,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                         _idxToEdtConversionServices[mapping].ConvertValueToEdtForm(x)).ToArray());
                                 });
 
-                                _expectedValues.TryAdd(document.DocumentId, convertedValues);
+                                expectedStandardValues.TryAdd(document.DocumentId, convertedValues);
                             });
 
                             //Get Edt Values
@@ -100,70 +94,86 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                             _standardMappings.ForEach(mapping =>
                             {
+                                var currentTestResult = _comparisonTestResults[mapping];
+
                                 using (var expectedLog = new StreamWriter(Path.Combine(Settings.LogDirectory,
-                                    $"{mapping.EdtName}_expected.txt"), true))
+                                    $"{mapping.EdtName}_expected_raw.txt"), true))
                                 {
-                                    using (var diffLog = new StreamWriter(Path.Combine(Settings.LogDirectory,
-                                        $"{mapping.EdtName}_diffs.txt"), true))
+
+                                    documents.ForEach(document =>
                                     {
-                                        documents.ForEach(document =>
+                                        var expectedValues =
+                                            expectedStandardValues[document.DocumentId][mapping.EdtName];
+                                        currentTestResult.TotalSampled++;
+                                        try
                                         {
-                                            var expectedValues = _expectedValues[document.DocumentId][mapping.EdtName];
 
-                                            try
+                                            var actual =
+                                                edtDocs[document.DocumentId]?[
+                                                        _idxToEdtConversionServices[mapping]
+                                                            .MappedEdtDatabaseColumn]
+                                                    ?.Split(";".ToCharArray(),
+                                                        StringSplitOptions.RemoveEmptyEntries);
+
+                                            if (actual != null)
                                             {
+                                                var unmatched = expectedValues.Except(actual).ToList();
+                                                var edtAdditional = actual.Except(expectedValues).ToList();
 
-                                                var actual =
-                                                    edtDocs[document.DocumentId]?[
-                                                            _idxToEdtConversionServices[mapping]
-                                                                .MappedEdtDatabaseColumn]
-                                                        ?.Split(";".ToCharArray(),
-                                                            StringSplitOptions.RemoveEmptyEntries);
-
-                                                if (actual != null)
+                                                if (unmatched.Any() || edtAdditional.Any())
                                                 {
-                                                    var unmatched = expectedValues.Except(actual).ToList();
-                                                    var edtAdditional = actual.Except(expectedValues).ToList();
+                                                    currentTestResult.Different++;
 
-                                                    if (unmatched.Any() || edtAdditional.Any())
-                                                    {
-                                                        expectedLog.WriteLine(
-                                                            $"\"{document.DocumentId}\"\t\"{string.Join(";", expectedValues).Replace("\"", "\"\"")}\"");
-                                                        diffLog.WriteLine(
-                                                            $"\"{document.DocumentId}\"\tAdditional\t\"{string.Join(";", edtAdditional).Replace("\"", "\"\"")}\"");
-                                                        diffLog.WriteLine(
-                                                            $"\"{document.DocumentId}\"\tUnmatched\t\"{string.Join(";", unmatched).Replace("\"", "\"\"")}\"");
-                                                    }
+                                                    if (!expectedValues.Any() && actual.Any())
+                                                        currentTestResult.DocumentsInEdtButNotInIdx++;
+
+
+                                                    expectedLog.WriteLine(
+                                                        $"\"{document.DocumentId}\"\t\"{string.Join(";", expectedValues).Replace("\"", "\"\"")}\"");
+
+                                                    currentTestResult.AddComparisonResult(document.DocumentId,
+                                                        string.Join("; ", actual), string.Join("; ", expectedValues),
+                                                        string.Join("; ",
+                                                            document.GetValuesForIdolFields(mapping.IdxNames)));
                                                 }
                                                 else
                                                 {
-                                                    //no edt values error
-                                                    diffLog.WriteLine(
-                                                        $"\"{document.DocumentId}\"\tUnmatched\t\"Edt Had no values whilst IDX did\"");
+                                                    currentTestResult.Matched++;
+
+                                                    if (actual.Any())
+                                                        currentTestResult.Populated++;
                                                 }
                                             }
-                                            catch (KeyNotFoundException)
+                                            else
                                             {
-                                                //unmigrated doc
-                                                Test.Log(Status.Error, $"Unmigrated doc {document.DocumentId}");
-                                                diffLog.WriteLine(
-                                                    $"\"{document.DocumentId}\"\tUnmigrated doc");
+                                                currentTestResult.AddComparisonError(document.DocumentId,
+                                                    "Edt had no values whilst IDX was populated");
+                                                currentTestResult.DocumentsInIdxButNotInEdt++;
                                             }
-                                        
-                                        });
-                                    }
+                                        }
+                                        catch (KeyNotFoundException)
+                                        {
+                                            //unmigrated doc
+                                            currentTestResult.DocumentsInIdxButNotInEdt++;
+                                            currentTestResult.AddComparisonError(document.DocumentId, $"Unmigrated doc {document.DocumentId}");
+                                        }
+
+                                    });
+
                                 }
                             });
 
                             // multiValues
 
-                            //do comp and output diffs
+                            //tags / locations
 
                             if (documents == null || !documents.Any()) break;
 
                             //do comparison
                         }
                     } while (documents?.Count > 0);
+                    _comparisonTestResults.ForEach(result => result.Value.PrintDifferencesAndResults(Test));
+                    _comparisonTestResults.ForEach(result => result.Value.PrintExpectedOutputFile(result.Key.EdtName));
                 }
             }
             catch (Exception e)
@@ -183,7 +193,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         }
 
 
-        private Dictionary<string, string> GetEdtFieldValues(StandardMapping mappingUnderTest, List<string> idxDocumentIds, IdxToEdtConversionService _idxToEdtConversionService)
+        private Dictionary<string, string> GetEdtFieldValues(StandardMapping mappingUnderTest, List<string> idxDocumentIds, IdxToEdtConversionService idxToEdtConversionService)
         {
             if (mappingUnderTest.IsEmailField())
             {
@@ -192,11 +202,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             if ((!string.IsNullOrEmpty(mappingUnderTest.EdtType) &&
                  mappingUnderTest.EdtType.Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase)) ||
-                (_idxToEdtConversionService.MappedEdtDatabaseColumnType.HasValue &&
-                 _idxToEdtConversionService.MappedEdtDatabaseColumnType.Value == ColumnType.MultiValueList))
+                (idxToEdtConversionService.MappedEdtDatabaseColumnType.HasValue &&
+                 idxToEdtConversionService.MappedEdtDatabaseColumnType.Value == ColumnType.MultiValueList))
             {
                 var allFieldValues = EdtDocumentRepository.GetMultiValueFieldValues(idxDocumentIds,
-                    _idxToEdtConversionService.EdtColumnDetails.DisplayName);
+                    idxToEdtConversionService.EdtColumnDetails.DisplayName);
 
                 var combinedValues = allFieldValues.GroupBy(x => x.DocNumber)
                     .Select(group => new
@@ -211,12 +221,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             }
             else
             {
-                return (_idxToEdtConversionService.MappedEdtDatabaseColumnType.HasValue &&
-                        _idxToEdtConversionService.MappedEdtDatabaseColumnType == ColumnType.Date)
+                return (idxToEdtConversionService.MappedEdtDatabaseColumnType.HasValue &&
+                        idxToEdtConversionService.MappedEdtDatabaseColumnType == ColumnType.Date)
                     ? EdtDocumentRepository.GetDocumentDateField(idxDocumentIds,
-                        _idxToEdtConversionService.MappedEdtDatabaseColumn)
+                        idxToEdtConversionService.MappedEdtDatabaseColumn)
                     : EdtDocumentRepository.GetDocumentField(idxDocumentIds,
-                        _idxToEdtConversionService.MappedEdtDatabaseColumn);
+                        idxToEdtConversionService.MappedEdtDatabaseColumn);
             }
         }
 

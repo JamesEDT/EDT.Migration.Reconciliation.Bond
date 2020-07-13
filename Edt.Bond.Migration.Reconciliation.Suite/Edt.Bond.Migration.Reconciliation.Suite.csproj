@@ -437,6 +437,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComparisonTestResult.cs" />
     <Compile Include="ComparisonTest.cs" />
     <Compile Include="EndToEndReconciliation\CaseLevelStatistics.cs" />
     <Compile Include="EndToEndReconciliation\IdxDocumentByEdtComparison.cs" />
