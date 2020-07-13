@@ -6,6 +6,9 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using MongoDB.Driver;
+using System.Text;
+using MoreLinq;
+using Edt.Bond.Migration.Reconciliation.Framework.Models.CaseConfigXml;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 {
@@ -19,18 +22,19 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
         public static IEnumerable<IDictionary<string, object>> GetDocuments(List<string> documentIds)
         {
             var sql = $"SELECT * FROM {GetDatabaseName()}.[Document] doc WHERE {GetDocumentIDQuery(documentIds)}";
-            return SqlExecutor.Query(sql).Select(x => (IDictionary<string, object>)x);
+           return SqlExecutor.Query(sql).Select(x => (IDictionary<string, object>)x);
         }
 
         public static Dictionary<string, string> GetDocumentField(List<string> documentIds, string desiredField)
         {
             var sql = $@"SELECT DocNumber, {desiredField} as Value 
-                            FROM {GetDatabaseName()}.[Document] doc
-                            LEFT OUTER JOIN {GetDatabaseName()}.[DocumentExtra] docExtra ON doc.DocumentID = docExtra.DocumentID
-                        WHERE {GetDocumentIDQuery(documentIds)}";
+                FROM {GetDatabaseName()}.[Document] doc
+                LEFT OUTER JOIN {GetDatabaseName()}.[DocumentExtra] docExtra ON doc.DocumentID = docExtra.DocumentID
+            WHERE {GetDocumentIDQuery(documentIds)}";
 
             return SqlExecutor.Query(sql)
-                    .ToDictionary(x => (string)x.DocNumber, x => (string)x.Value?.ToString() ?? string.Empty);
+                .ToDictionary(x => (string)x.DocNumber, x => (string)x.Value?.ToString() ?? string.Empty);
+
         }
 
         public static string GetDocumentIDQuery(List<string> documentIds)
@@ -38,7 +42,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             if (Settings.IdxSampleSize == 0)
             {
                return $@" exists (select d.documentID from  {GetDatabaseName()}.[document] d inner join  
-                        {GetDatabaseName()}.[batch] b on b.batchId = d.batchId and b.batchName = '{Settings.EdtImporterDatasetName}'
+                        {GetDatabaseName()}.[batch] b on b.batchId = d.batchId and b.batchName in {GetBatchInWhereValue()}
                             where doc.Documentid = d.documentID)";
             }
             else
@@ -47,15 +51,28 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             }
         }
 
+        private static string GetBatchInWhereValue()
+        {
+            var batches = Settings.EdtImporterDatasetName.Split("|".ToCharArray()).ToList();
+
+            var whereValue = new StringBuilder("(");
+
+            batches.ForEach(x => whereValue.Append($"'{x}',"));
+
+            whereValue.Append(")");
+
+            return whereValue.ToString().Replace(",)", ")"); 
+
+        }
+
         public static Dictionary<string, string> GetDocumentDateField(List<string> documentIds, string desiredField)
         {
-            var sql = $@"SELECT DocNumber, {desiredField} as Value 
+                var sql = $@"SELECT DocNumber, {desiredField} as Value 
                         FROM {GetDatabaseName()}.[Document] doc
                         LEFT OUTER JOIN {GetDatabaseName()}.[DocumentExtra] docExtra ON doc.DocumentID = docExtra.DocumentID
                         WHERE {GetDocumentIDQuery(documentIds)}";
 
-            return SqlExecutor.Query(sql)
-                .ToDictionary(x => (string)x.DocNumber, x => (string)GetDate(x));
+                return SqlExecutor.Query(sql).ToDictionary(x => (string)x.DocNumber, x => (string)GetDate(x));
         }
 
         private static string GetDate(dynamic x)
@@ -100,7 +117,7 @@ where TABLE_NAME = 'Document'");
         {
             var sql = $@"SELECT Count(document.DocumentId) FROM {GetDatabaseName()}.[Batch] batch
                          INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
-                         WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
+                         WHERE batch.BatchName in {GetBatchInWhereValue()}";
 
             return SqlExecutor.QueryFirstOrDefault<long>(sql);
         }
@@ -118,7 +135,7 @@ where TABLE_NAME = 'Document'");
         {
             var sql = $@"SELECT document.DocNumber FROM {GetDatabaseName()}.[Batch] batch
                          INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
-                         WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'
+                         WHERE batch.BatchName in {GetBatchInWhereValue()}
                          AND document.Body IS NOT NULL
                          AND LEN(document.Body) > 0";
 
@@ -129,7 +146,7 @@ where TABLE_NAME = 'Document'");
         {
             var sql = $@"SELECT document.DocNumber FROM {GetDatabaseName()}.[Batch] batch
                          INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
-                         WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
+                         WHERE batch.BatchName in {GetBatchInWhereValue()}";
 
             return SqlExecutor.Query<string>(sql).ToList();
         }
@@ -151,7 +168,7 @@ where TABLE_NAME = 'Document'");
             var sql = $@"SELECT CONCAT(CONVERT(varchar(10), document.DocumentID), '_NATIVE',FileExtOrMsgClass) as FileName, DocumentID as DocumentId
                          FROM {GetDatabaseName()}.[Batch] batch
                          INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
-                         WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
+                         WHERE batch.BatchName in {GetBatchInWhereValue()}";
 
             return SqlExecutor.Query<DerivedFileLocation>(sql);
         }
@@ -189,7 +206,7 @@ where TABLE_NAME = 'Document'");
                 $@"SELECT Count(document.DocumentId) FROM {GetDatabaseName()}.[Batch] batch 
 						INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
 						INNER JOIN {GetDatabaseName()}.[Folder] folder ON folder.FolderId = document.FolderID
-						WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}' AND
+						WHERE batch.BatchName in {GetBatchInWhereValue()} AND
 								folder.folderType = 1 --Quarantine Folder";
 
             return SqlExecutor.QueryFirstOrDefault<int>(sql);
@@ -200,7 +217,7 @@ where TABLE_NAME = 'Document'");
             var sql =
                 $@"SELECT Count(document.DocumentId) FROM {GetDatabaseName()}.[Batch] batch 
 						INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID 
-						WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}' AND
+						WHERE batch.BatchName in {GetBatchInWhereValue()} AND
 								Document.DocNumber LIKE  '%_R'";
 
             return SqlExecutor.QueryFirstOrDefault<int>(sql);
@@ -247,7 +264,7 @@ where TABLE_NAME = 'Document'");
             var sql = $@"SELECT document.DocumentId as DocumentId, document.DocNumber as DocumentNumber
                         FROM {GetDatabaseName()}.[Batch] batch
                         INNER JOIN {GetDatabaseName()}.[Document] document ON batch.BatchID = document.BatchID
-                        WHERE batch.BatchName = '{Settings.EdtImporterDatasetName}'";
+                        WHERE batch.BatchName in {GetBatchInWhereValue()}";
 
             return SqlExecutor.Query<dynamic>(sql);
         }

@@ -203,7 +203,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 		[Description("Validate mapping and conversion of IDX Locations to EDT Locations")]
 		public void Locations()
 		{
-			long idxUnpopulated = 0;
+            EdtFieldUnderTest = "Locations";
+            long idxUnpopulated = 0;
 			long edtUnexpectedlyPopulated = 0;
 			long errors = 0;
 			long matched = 0;

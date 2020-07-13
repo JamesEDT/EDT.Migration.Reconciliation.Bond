@@ -45,28 +45,31 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
                 else
                 {
 
-                    var idxPath = Settings.IdxFilePath;
+                    var idxPaths = Settings.IdxFilePath.Split(new char[] { '|'});
 
                     Document[] documents;
 
                     IdxDocumentsRepository = new IdxDocumentsRepository();
                     IdxDocumentsRepository.Initialise(true);
-                    var idxProcessingService = new IdxReaderByChunk(File.OpenText(idxPath));
 
-                    logger.Debug("Reading Idx chunks");
-                    do
+                    foreach (var idxPath in idxPaths)
                     {
-                        documents = idxProcessingService.GetNextDocumentBatch()?.ToArray();
+                        var idxProcessingService = new IdxReaderByChunk(File.OpenText(idxPath));
 
-                        if (documents == null || !documents.Any()) return;
+                        logger.Debug("Reading Idx chunks");
+                        do
+                        {
+                            documents = idxProcessingService.GetNextDocumentBatch()?.ToArray();
 
-                        IdxDocumentsRepository.AddDocuments(documents);
-                        IdxDocumentsProcessed = +documents.Length;
+                            if (documents == null || !documents.Any()) break;
 
-                    } while (documents.Length > 0);
+                            IdxDocumentsRepository.AddDocuments(documents);
+                            IdxDocumentsProcessed = +documents.Length;
 
-                    logger.Debug("Completed reading Idx");
+                        } while (documents.Length > 0);
 
+                        logger.Debug($"Completed reading Idx {idxPath}");
+                    }
                     
                     IdxDocumentsRepository.CreateDocumentIdIndex();
 

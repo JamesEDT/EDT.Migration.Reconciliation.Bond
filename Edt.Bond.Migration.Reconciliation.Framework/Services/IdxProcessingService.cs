@@ -53,7 +53,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                     tokens.RemoveAt(tokens.Count - 1);
 
                     return tokens
-                        //.AsParallel()
+                        .AsParallel()
                         .Select(x => new Document(x));
 
                 }

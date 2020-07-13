@@ -45,8 +45,10 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
         {
             get
             {
+                var name = EdtImporterDatasetName.Split("|".ToCharArray()).Length > 1 ? "Multi" : EdtImporterDatasetName;
+
                 if (string.IsNullOrWhiteSpace(_reportingDirectory))
-                                    _reportingDirectory = GetDirectory($"ReportV{Version}_Case{EdtCaseId}_{EdtImporterDatasetName.TrimNonAlphaNumerics()}_{DateTime.Now.ToString("ddMMyyyy_HHmm")}");
+                                    _reportingDirectory = GetDirectory($"ReportV{Version}_Case{EdtCaseId}_{name.TrimNonAlphaNumerics()}_{DateTime.Now.ToString("ddMMyyyy_HHmm")}");
 
                 return _reportingDirectory;
             }

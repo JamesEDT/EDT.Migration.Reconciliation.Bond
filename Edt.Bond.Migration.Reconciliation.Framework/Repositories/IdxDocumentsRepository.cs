@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile;
 using LiteDB;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 {
@@ -43,10 +44,15 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
         private static string GetDbName()
         {
             var caseId = ConfigurationManager.AppSettings["EdtCaseId"];
-            var idxPath = ConfigurationManager.AppSettings["IdxFilePath"];
-            var idxName = string.IsNullOrEmpty(idxPath) ? string.Empty : new FileInfo(idxPath).Name.Replace(".", string.Empty);
+            var idxPath = ConfigurationManager.AppSettings["IdxFilePath"].Split(new char[] { '|' });
+            if (idxPath.Length == 1)
+            {
+                var idxName = string.IsNullOrEmpty(idxPath.First()) ? string.Empty : new FileInfo(idxPath.First()).Name.Replace(".", string.Empty);
 
-            return $"{Settings.LogDirectory}\\IdxRepo_{caseId}_{idxName}.db";
+                return $"{Settings.LogDirectory}\\IdxRepo_{caseId}_{idxName}.db";
+            }
+
+            return $"{Settings.LogDirectory}\\IdxRepo_{caseId}_Multi.db";
         }
 
         public static bool Exists()
@@ -71,9 +77,15 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             using (var db = new LiteDatabase(DbName))
             {
                 var documents = db.GetCollection<Document>("Documents");
+                try
+                {
+                    // Index document using a document property
+                    documents.EnsureIndex(x => x.DocumentId);
+                }
+                catch(Exception)
+                {
 
-                // Index document using a document property
-                documents.EnsureIndex(x => x.DocumentId);
+                }
             }
         }
 
@@ -99,14 +111,14 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
             }
         }
 
-        public IEnumerable<Document> GetDocuments(System.Linq.Expressions.Expression<System.Func<Document, bool>> expression)
+        public IEnumerable<Document> GetDocuments(IEnumerable<string> docIds)
         {
             using (var db = new LiteDatabase(DbName))
             {
                 var documents = db.GetCollection<Document>("Documents");
 
                 // Use Linq to query documents
-                return documents.Find(expression);
+                return documents.Find(Query.Where("DocumentId", x => docIds.ToList().Contains(x)));
             }
         }
 
@@ -129,6 +141,17 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 		        return documents.FindAll().Count(x => Enumerable.Any(x.AllFields, c => c.Key == "INTROSPECT_DELETED" && !string.IsNullOrWhiteSpace(c.Value))); 
 	        }
 
+        }
+
+        public IEnumerable<Document> GetSample(int skip = 0, int take = 100)
+        {
+            using (var db = new LiteDatabase(DbName))
+            {
+                var documents = db.GetCollection<Document>("Documents");
+
+                return documents.Find(x => x.DocumentId != null, skip, take);
+                
+            }
         }
 
         public IEnumerable<Document> GetSample()
