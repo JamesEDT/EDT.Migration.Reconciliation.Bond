@@ -96,21 +96,15 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                             var docIDs = documents.Select(x => x.DocumentId).ToList();
 
                             //normal doc
-                            var fake = new List<string>()
-                            {
-                                "396-31505-0-280",
-                                "396-31506-0-1867"
-                            };
-                            var edtDocs = EdtDocumentRepository.GetDocuments(fake);
+                            var edtDocs = EdtDocumentRepository.GetDocuments(docIDs);
 
-                            //normal doc
                             _standardMappings.ForEach(mapping =>
                             {
                                 using (var expectedLog = new StreamWriter(Path.Combine(Settings.LogDirectory,
                                     $"{mapping.EdtName}_expected.txt"), true))
                                 {
                                     using (var diffLog = new StreamWriter(Path.Combine(Settings.LogDirectory,
-                                        $"{mapping.EdtName}_expected.txt"), true))
+                                        $"{mapping.EdtName}_diffs.txt"), true))
                                     {
                                         documents.ForEach(document =>
                                         {
