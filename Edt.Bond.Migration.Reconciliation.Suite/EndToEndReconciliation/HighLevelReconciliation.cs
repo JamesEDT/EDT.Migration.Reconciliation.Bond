@@ -23,7 +23,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 		[OneTimeSetUp]
 		public void GetIdxCount()
 		{			
-            _idxDocumentIds = new IdxDocumentsRepository().GetDocumentIds();
+            _idxDocumentIds =  Settings.UseLiteDb ? new IdxDocumentsRepository().GetDocumentIds() : new IdxReaderByChunk(File.OpenText(Settings.IdxFilePath)).GetDocumentIds();
             _idxDocumentCount = _idxDocumentIds.Count;
         }
 

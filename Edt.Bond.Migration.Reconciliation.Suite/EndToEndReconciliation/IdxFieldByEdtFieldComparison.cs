@@ -18,6 +18,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
     [Category("IdxComparison")]
     [Description(
         "Compare Idx field with Edt Database field to validate implementation of mapping, for a subset of records.")]
+    [Ignore("too slow")]
     public class IdxFieldByEdtFieldComparison : ComparisonTest
     {
         private IdxToEdtConversionService _idxToEdtConversionService;

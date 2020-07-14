@@ -74,5 +74,25 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
         {
             _streamReader?.Close();
         }
+
+        public List<string> GetDocumentIds()
+        {
+            var docIDs = new List<string>();
+            var splitArray = "=".ToCharArray();
+
+            while (!_streamReader.EndOfStream)
+            {
+
+                var line = _streamReader.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(line) || !line.Contains("UUID=")) continue;
+
+                var str = line.Split(splitArray).LastOrDefault()?.Replace("\"", string.Empty);
+
+                docIDs.Add(str);
+            }
+
+            return docIDs;
+        }
     }
 }
