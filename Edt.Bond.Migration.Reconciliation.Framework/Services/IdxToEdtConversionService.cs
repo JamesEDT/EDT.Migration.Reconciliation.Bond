@@ -113,7 +113,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
         {
             _standardMapping = standardMapping;
 
-            if (!_standardMapping.IsEmailField())
+            if (!_standardMapping.IsPartyField())
             {
                 try
                 {
@@ -136,7 +136,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 {
                     try
                     {
-                        return GetDateString(value);
+                        return GetDateString(value, _edtColumnDetails?.DataType != ColumnType.Date);
                     }
                     catch(Exception)
                     {
@@ -211,10 +211,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
         }
 
-        private static string GetDateString(string sourceDateValue)
+        private static string GetDateString(string sourceDateValue, bool isText = false)
         {
             DateTime convertedDate;
             DateTimeOffset convertedDateOffset;
+            var outputFormat = isText ? "dd/MM/yyyy HH:mm:ss" : "M/d/yyyy h:mm:ss tt";
 
             string[] formats = new string[] {
                                  "yyyyMMddHHmmss",
@@ -240,7 +241,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 }
                 if (success)
                 {
-                    return convertedDateOffset.UtcDateTime.ToString("dd/MM/yyyy HH:mm:ss");
+                    return convertedDateOffset.UtcDateTime.ToString(outputFormat);
                 }
                 else
                 {
@@ -270,7 +271,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 }
             }
 
-            return convertedDate.ToString("dd/MM/yyyy HH:mm:ss");
+            return convertedDate.ToString(outputFormat);
         }
 
         private static string GetBooleanString(string sourceValue)

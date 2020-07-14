@@ -28,7 +28,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             Instance = new ExtentReports();
 
             Instance.AttachReporter(htmlReporter);
-        }
+        }       
 
         [OneTimeTearDown]
         public void Teardown()

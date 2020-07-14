@@ -1,5 +1,4 @@
-﻿using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion
 {
@@ -27,9 +26,10 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion
             ImportGroup = importGroup;
         }
 
-        public bool IsEmailField()
+        public bool IsPartyField()
         {
-            return EdtName.StartsWith(Settings.EmailFieldIdentifyingPrefix);
+            return EdtName.StartsWith(Settings.EmailFieldIdentifyingPrefix) //|| EdtName.Equals("Author", System.StringComparison.InvariantCultureIgnoreCase)
+                || EdtName.Equals("From", System.StringComparison.InvariantCultureIgnoreCase);
         }
     }
 }

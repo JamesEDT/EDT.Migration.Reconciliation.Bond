@@ -72,7 +72,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
             else
             {
                 TestSuite.AssignCategory("Failed Test Suite");
-                TestSuite.Fail($"{TestFailures } test(s) failed of {TestTotal}");
+                TestSuite.Fail($"{TestFailures} test(s) failed of {TestTotal}");
             }
         }
 

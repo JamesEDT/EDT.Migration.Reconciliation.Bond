@@ -1,5 +1,6 @@
 ﻿using AventStack.ExtentReports;
 using Edt.Bond.Migration.Reconciliation.Framework;
+using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Reporting;
 using Edt.Bond.Migration.Reconciliation.Framework.Output;
 using System.Collections.Concurrent;
@@ -12,7 +13,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
     {
         public ConcurrentBag<ComparisonError> ComparisonErrors;
         public ConcurrentBag<ComparisonResult> ComparisonResults;
-        public string EdtFieldUnderTest;
+        public StandardMapping EdtFieldUnderTest;
 
         public int Populated = 0;
         public int Different = 0;
@@ -23,30 +24,50 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
         public int Matched = 0;
         public int TotalSampled = 0;
 
-        public ComparisonTestResult(string edtField)
+        public ComparisonTestResult(StandardMapping mapping)
         {
             ComparisonErrors = new ConcurrentBag<ComparisonError>();
             ComparisonResults = new ConcurrentBag<ComparisonResult>();
-            EdtFieldUnderTest = edtField;
+            EdtFieldUnderTest = mapping; ;
         }
 
 
         
-        public void PrintDifferencesAndResults(ExtentTest test)
+        public void PrintDifferencesAndResults(ExtentTest testSuite)
         {
+            var testLog = testSuite.CreateNode($"{EdtFieldUnderTest.EdtName} vs {string.Join("|",EdtFieldUnderTest.IdxNames)}");
+            
+            LogComparisonStatistics(testLog, new string[][]
+            {
+                new string[]{ "Matched", Matched.ToString()},
+                new string[]{ "Different", Different.ToString()},
+                new string[]{ "In Edt but not in IDX", DocumentsInEdtButNotInIdx.ToString()},
+                new string[]{ "In Idx but not in EDT", DocumentsInIdxButNotInEdt.ToString()}
+            });
+
+
             if (!ComparisonErrors.Any() && !ComparisonResults.Any()) return;
 
-            if (string.IsNullOrWhiteSpace(EdtFieldUnderTest))
+            if (string.IsNullOrWhiteSpace(EdtFieldUnderTest.EdtName))
             {
-                test.Log(Status.Error, "Failed to output comparison tables as Mapping under test is null");
+                testLog.Log(Status.Error, "Failed to output comparison tables as Mapping under test is null");
                 return;
             }
 
-            var diffFile = PrintComparisonTables(EdtFieldUnderTest);
+            var diffFile = PrintComparisonTables(EdtFieldUnderTest.EdtName);
 
-            test.Info($"Difference and error details written to: <a href=\"{diffFile}\">{diffFile}</a>");
+            testLog.Info($"Difference and error details written to: <a href=\"{diffFile}\">{diffFile}</a>");
 
-            PrintExpectedOutputFile(EdtFieldUnderTest);
+            PrintExpectedOutputFile(EdtFieldUnderTest.EdtName);
+
+            if(ComparisonResults.Any() || ComparisonErrors.Any())
+            {
+                testLog.Fail("Differences observed");
+            }
+            else
+            {
+                testLog.Pass("No differences seen");
+            }
         }
 
         public void AddComparisonError(string documentId, string comparisonError)
@@ -71,7 +92,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
                 foreach (var result in ComparisonResults)
                 {
-                    sw.WriteLine($"{result.DocumentId},\"{result.IdxConvertedValue.Replace("\"","\"\"")}\"");
+                    sw.WriteLine($"{result.DocumentId},\"{result.IdxConvertedValue?.Replace("\"","\"\"")}\"");
                 }
             }
         }

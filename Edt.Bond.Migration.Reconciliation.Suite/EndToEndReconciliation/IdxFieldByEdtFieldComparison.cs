@@ -189,7 +189,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                                                        }
                                                    }
-                                                   else if (mappingUnderTest.IsEmailField())
+                                                   else if (mappingUnderTest.IsPartyField())
                                                    {
                                                        var emailActual = string.Join(";", trimmedActualEdtValue.Split(new char[] { ';', ',' }).Select(x => x.Trim()).Distinct().OrderBy(x => x.ToLower()));
                                                        var emailExpected = string.Join(";", trimmedExpectedEdtValue.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Distinct().OrderBy(x => x.ToLower()));
@@ -294,7 +294,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             }
 
-            var delimiter = (mappingUnderTest.EdtType.ToLower().Contains("list") || mappingUnderTest.IsEmailField())
+            var delimiter = (mappingUnderTest.EdtType.ToLower().Contains("list") || mappingUnderTest.IsPartyField())
                 ? ";"
                 : "; ";
 
@@ -329,7 +329,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
         private Dictionary<string, string> GetEdtFieldValues(StandardMapping mappingUnderTest, List<string> idxDocumentIds)
         {
-            if (mappingUnderTest.IsEmailField())
+            if (mappingUnderTest.IsPartyField())
             {
                 return GetEmailFieldValues(idxDocumentIds, mappingUnderTest.EdtName);
             }

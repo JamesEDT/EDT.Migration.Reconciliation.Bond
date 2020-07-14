@@ -1,15 +1,13 @@
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase.Dto;
+using MongoDB.Driver;
+using MoreLinq;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using MongoDB.Driver;
 using System.Text;
-using MoreLinq;
-using Edt.Bond.Migration.Reconciliation.Framework.Models.CaseConfigXml;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 {
@@ -22,12 +20,30 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static Dictionary<string, Dictionary<string, string>> GetDocuments(List<string> documentIds)
         {
-            var sql = $"SELECT * FROM {GetDatabaseName()}.[Document] doc WHERE {GetDocumentIDQuery(documentIds, true)}";
-            return SqlExecutor.Query(sql)
-                .ToDictionary(x => (string) x.DocNumber, x => ((IDictionary<string,object>) x)
-                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.ToString()));
+            var sql = $@"SELECT * FROM {GetDatabaseName()}.[Document] doc 
+                   WHERE {GetDocumentIDQuery(documentIds, true)}";
 
-            //.ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
+            var docdictionary = SqlExecutor.Query(sql)
+                .ToDictionary(x => (string)x.DocNumber, x => ((IDictionary<string, object>)x)
+                   .ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.ToString()));
+
+            sql = $@"SELECT extra.* FROM {GetDatabaseName()}.[DocumentExtra] extra
+                    INNER JOIN {GetDatabaseName()}.[Document] doc on doc.DocumentID = extra.DocumentID
+                   WHERE doc.{GetDocumentIDQuery(documentIds, true)}";
+
+            var docExtradictionary = SqlExecutor.Query(sql)
+                .Where(x => !string.IsNullOrWhiteSpace(x.DocNumber))
+                .ToDictionary(x => (string)x.DocNumber, x => ((IDictionary<string, object>)x)
+                   .ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.ToString()));
+
+            docdictionary.ForEach(doc => {
+                if (docExtradictionary.TryGetValue(doc.Key, out var matchingExtras))
+                {
+                    docdictionary[doc.Key] =  doc.Value.Concat(matchingExtras.Where(kvp => !doc.Value.ContainsKey(kvp.Key))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                }
+            });
+
+            return docdictionary;
         }
 
         public static Dictionary<string, string> GetDocumentField(List<string> documentIds, string desiredField)
@@ -42,11 +58,23 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         }
 
+        public static Dictionary<string, string[]> GetDocumentFieldAsArray(List<string> documentIds, string desiredField)
+        {
+            var sql = $@"SELECT DocNumber, {desiredField} as Value 
+                FROM {GetDatabaseName()}.[Document] doc
+                LEFT OUTER JOIN {GetDatabaseName()}.[DocumentExtra] docExtra ON doc.DocumentID = docExtra.DocumentID
+            WHERE {GetDocumentIDQuery(documentIds)}";
+
+            return SqlExecutor.Query(sql)
+                .ToDictionary(x => (string)x.DocNumber, x => new string[] { (string)x.Value?.ToString() ?? string.Empty });
+
+        }
+
         public static string GetDocumentIDQuery(List<string> documentIds, bool forceList = false)
         {
             if (Settings.IdxSampleSize == 0 && !forceList)
             {
-               return $@" exists (select d.documentID from  {GetDatabaseName()}.[document] d inner join  
+               return $@"DocNumber exists (select d.documentID from  {GetDatabaseName()}.[document] d inner join  
                         {GetDatabaseName()}.[batch] b on b.batchId = d.batchId and b.batchName in {GetBatchInWhereValue()}
                             where doc.Documentid = d.documentID)";
             }
@@ -78,6 +106,16 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
                         WHERE {GetDocumentIDQuery(documentIds)}";
 
                 return SqlExecutor.Query(sql).ToDictionary(x => (string)x.DocNumber, x => (string)GetDate(x));
+        }
+
+        public static Dictionary<string, string[]> GetDocumentDateFieldAsArray(List<string> documentIds, string desiredField)
+        {
+            var sql = $@"SELECT DocNumber, {desiredField} as Value 
+                        FROM {GetDatabaseName()}.[Document] doc
+                        LEFT OUTER JOIN {GetDatabaseName()}.[DocumentExtra] docExtra ON doc.DocumentID = docExtra.DocumentID
+                        WHERE {GetDocumentIDQuery(documentIds)}";
+
+            return SqlExecutor.Query(sql).ToDictionary(x => (string)x.DocNumber, x => new string[] { (string)GetDate(x) });
         }
 
         private static string GetDate(dynamic x)
@@ -163,7 +201,7 @@ where TABLE_NAME = 'Document'");
                 + $" INNER JOIN {GetDatabaseName()}.[DocumentParty] docParty ON doc.DocumentID = docParty.DocumentID"
                 + $" INNER JOIN {GetDatabaseName()}.[Party] party ON docParty.PartyID = party.PartyID"
                 + $" INNER JOIN {GetDatabaseName()}.[CorrespondenceType] correspondenceType ON docParty.CorrespondenceTypeID = correspondenceType.CorrespondenceTypeID"
-                + $" WHERE {GetDocumentIDQuery(documentIds)}";
+                + $" WHERE doc.{GetDocumentIDQuery(documentIds, true)}";
 
             return SqlExecutor.Query<DocumentCorrespondant>(sql).ToList();
         }
@@ -247,7 +285,7 @@ where TABLE_NAME = 'Document'");
 	                        WHERE mvField.ParentID = 0
                           ) as Field on mvField.ParentID = Field.Id
                             And Field.Name = @fieldName
-                        WHERE {GetDocumentIDQuery(documentIds)}";
+                        WHERE doc.{GetDocumentIDQuery(documentIds, true)}";
 
             var multiValueListResults = SqlExecutor.Query(sql, new { fieldName });
 
