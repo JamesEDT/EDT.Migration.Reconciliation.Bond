@@ -39,11 +39,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
                 var emsFolder = new EmsFolder()
                 {
                     Group = (idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[0])) ?? idxDocument.AllFields.SingleOrDefault(x =>
-                    x.Key.Equals("EMS DocLibrary Group", StringComparison.InvariantCultureIgnoreCase)))?.Value,
+                    x.Key.Equals("EMS DocLibrary Group", StringComparison.InvariantCultureIgnoreCase)))?.Value.Trim(),
                     Custodian = (idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[1])) ?? idxDocument.AllFields.SingleOrDefault(x =>
-                    x.Key.Equals("EMS DocLibrary Custodian", StringComparison.InvariantCultureIgnoreCase)))?.Value,
+                    x.Key.Equals("EMS DocLibrary Custodian", StringComparison.InvariantCultureIgnoreCase)))?.Value.Trim(),
                     Source = (idxDocument.AllFields.FirstOrDefault(x => x.Key.Equals(Settings.LocationIdxFields[2])) ?? idxDocument.AllFields.SingleOrDefault(x =>
-                    x.Key.Equals("EMS DocLibrary Source", StringComparison.InvariantCultureIgnoreCase)))?.Value
+                    x.Key.Equals("EMS DocLibrary Source", StringComparison.InvariantCultureIgnoreCase)))?.Value.Trim()
                 };
 
                 for (var i = 1; i < 30; i++)
@@ -55,7 +55,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 
                     if (!string.IsNullOrWhiteSpace(segment) && !segment.Contains(".msg:"))
                     {
-                        emsFolder.VIRTUAL_PATH_SEGMENTs.Add(segment.Replace(":", "-"));
+                        emsFolder.VIRTUAL_PATH_SEGMENTs.Add(segment.Replace(":", "-").Trim());
                     }
                     //       });
                 }

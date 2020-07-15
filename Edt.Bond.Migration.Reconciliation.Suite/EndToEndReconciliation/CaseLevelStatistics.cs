@@ -38,21 +38,30 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         [Description("Snapshot of case size within EDT")]
         public void CaseLevelSizes()
         {
-            var EdtDocumentCounts = EdtDocumentRepository.GetDocumentCountPerBatch();
+            var counterTokens = Settings.EdtImporterDatasetName.Split("_".ToCharArray()).Last().ToLower().Split("of".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
-            var tableData = new List<string[]>()
+            if (counterTokens.First() != counterTokens.Last())
+            {
+                Test.Log(AventStack.ExtentReports.Status.Info, "Statistics only generated in report for last idx of case.");
+            }
+            else
+            {
+                var EdtDocumentCounts = EdtDocumentRepository.GetDocumentCountPerBatch();
+
+                var tableData = new List<string[]>()
             {
                 new string[]{ "Item", "Size"}
             };
 
-            var databaseStats = EdtDocumentRepository.GetDatabaseStats();
+                var databaseStats = EdtDocumentRepository.GetDatabaseStats();
 
-            tableData.AddRange(databaseStats.Select(stat => new string[] {stat.physical_name, $"{Math.Round(stat.size_kb / 1024, 1)} Mb"}));
+                tableData.AddRange(databaseStats.Select(stat => new string[] { stat.physical_name, $"{Math.Round(stat.size_kb / 1024, 1)} Mb" }));
 
-            tableData.Add(new string[] {"Cfs Size", EdtCfsService.GetCaseSize()});
-            tableData.Add(new string[] { "Source Size", $"{GetSizeOfSourceFolder()} Mb" });
+                tableData.Add(new string[] { "Cfs Size", EdtCfsService.GetCaseSize() });
+                tableData.Add(new string[] { "Source Size", $"{GetSizeOfSourceFolder()} Mb" });
 
-            Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(tableData.ToArray()));
+                Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(tableData.ToArray()));
+            }
         }
 
 

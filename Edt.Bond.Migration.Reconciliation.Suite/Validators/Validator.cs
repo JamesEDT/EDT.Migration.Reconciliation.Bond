@@ -18,9 +18,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 
         public void PrintStats(ExtentTest transformedTestsReporter)
         {
-            var testReporter = transformedTestsReporter.CreateNode(_edtName, $"Compares conversion of {_idxFields} to {_edtName}");
-
-            TestResult.PrintDifferencesAndResults(testReporter);
+            TestResult.PrintDifferencesAndResults(transformedTestsReporter);
         }
     }
 }

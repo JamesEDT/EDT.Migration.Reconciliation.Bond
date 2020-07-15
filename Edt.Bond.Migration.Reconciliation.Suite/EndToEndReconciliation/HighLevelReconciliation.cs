@@ -22,8 +22,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
 		[OneTimeSetUp]
 		public void GetIdxCount()
-		{			
-            _idxDocumentIds =  Settings.UseLiteDb ? new IdxDocumentsRepository().GetDocumentIds() : new IdxReaderByChunk(File.OpenText(Settings.IdxFilePath)).GetDocumentIds();
+		{
+			var cfsDocsForBatch = EdtCfsService.GetDocumentsForBatch();
+
+			_idxDocumentIds =  Settings.UseLiteDb ? new IdxDocumentsRepository().GetDocumentIds() : new IdxReaderByChunk(File.OpenText(Settings.IdxFilePath)).GetDocumentIds();
             _idxDocumentCount = _idxDocumentIds.Count;
         }
 
@@ -83,8 +85,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 		[Description(
 			"Comparing the count of documents detailed in the Idx to the Edt Central File Store, thus validating all natives are imported to EDT.")]
 		public void NativeCountsAreEqualBetweenIdxAndEdtFileStore()
-		{
-            var cfsDocsForBatch = EdtCfsService.GetDocumentsForBatch();
+		{			
+
+			var cfsDocsForBatch = EdtCfsService.GetDocumentsForBatch();
 
             var cfsCount = cfsDocsForBatch.Count();
 

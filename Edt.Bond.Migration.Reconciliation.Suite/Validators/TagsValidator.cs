@@ -125,7 +125,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
                             else
                             {
                                 TestResult.AddComparisonError(idxRecord.DocumentId,
-                                    $"Couldnt convert aun workbook id {aunWorkbookId} to name");
+                                    $"Couldnt convert aun workbook id {aunWorkbookId.Value} to name");
                             }
                         }
 

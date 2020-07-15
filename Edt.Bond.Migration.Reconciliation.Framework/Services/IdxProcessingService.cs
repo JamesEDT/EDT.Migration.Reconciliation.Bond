@@ -107,7 +107,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
                 var line = _streamReader.ReadLine();
 
-                if (string.IsNullOrWhiteSpace(line) || !line.Contains("UUID=") || !line.Contains("INTROSPECT_DELETED=\"")) continue;
+                if (string.IsNullOrWhiteSpace(line) || !line.Contains("UUID=") && !line.Contains("INTROSPECT_DELETED=\"")) continue;
 
                 if (line.Contains("UUID"))
                 {

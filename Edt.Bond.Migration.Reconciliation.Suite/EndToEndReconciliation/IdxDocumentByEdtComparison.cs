@@ -125,7 +125,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                         try
                                         {
                                             var expectedValues = expectedStandardValues[document.DocumentId][mapping.EdtName];
-                                            var expectedString = string.Join(";", expectedValues.Select(x => x.Trim()).OrderBy(x => x).Distinct()).Replace("\n\n", "\n").Replace("; ", ";");
+
+                                            
+                                            var expectedString = (mapping.EdtType.Equals("Date")) && expectedValues.Any() ?  expectedValues?.OrderBy(x => x).FirstOrDefault()
+                                            : string.Join(";", expectedValues.Select(x => x.Trim()).OrderBy(x => x).Distinct()).Replace("\n\n", "\n").Replace("; ", ";");
                                                                                         
                                             currentTestResult.TotalSampled++;
                                             try

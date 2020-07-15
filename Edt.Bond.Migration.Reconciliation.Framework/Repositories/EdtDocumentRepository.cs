@@ -221,7 +221,7 @@ where TABLE_NAME = 'Document'");
             var sql = $@"SELECT doc.DocNumber as DocumentNumber, tag.FullName as Tag FROM {GetDatabaseName()}.[Document] doc
                           INNER JOIN {GetDatabaseName()}.[DocumentTag] documentTag ON doc.DocumentID = documentTag.DocumentID
                           INNER JOIN {GetDatabaseName()}.[Tag] tag ON documentTag.TagID = tag.TagID
-                          WHERE {GetDocumentIDQuery(documentIds)}";
+                          WHERE doc.{GetDocumentIDQuery(documentIds, true)}";
 
             var rawTags = SqlExecutor.Query(sql);
 
@@ -236,7 +236,7 @@ where TABLE_NAME = 'Document'");
         {
             var sql = $@"SELECT doc.DocNumber as DocumentNumber, l.Path as Location FROM {GetDatabaseName()}.[Document] doc
 	                    INNER JOIN {GetDatabaseName()}.[Location] l ON l.LocationID = doc.LocationID
-	                    WHERE {GetDocumentIDQuery(documentIds)}";
+	                    WHERE doc.{GetDocumentIDQuery(documentIds, true)}";
 
             var rawLocations = SqlExecutor.Query(sql);
 

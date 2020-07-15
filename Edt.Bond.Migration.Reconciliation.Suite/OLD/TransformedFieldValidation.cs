@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
+namespace Edt.Bond.Migration.Reconciliation.Suite.Old
 {
     [TestFixture]
     [Category("Transformed")]

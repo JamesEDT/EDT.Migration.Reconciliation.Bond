@@ -441,8 +441,8 @@
     <Compile Include="ComparisonTest.cs" />
     <Compile Include="EndToEndReconciliation\CaseLevelStatistics.cs" />
     <Compile Include="EndToEndReconciliation\IdxDocumentByEdtComparison.cs" />
-    <Compile Include="EndToEndReconciliation\TransformedFieldValidation.cs" />
-    <Compile Include="EndToEndReconciliation\IdxFieldByEdtFieldComparison.cs" />
+    <Compile Include="OLD\TransformedFieldValidation.cs" />
+    <Compile Include="OLD\IdxFieldByEdtFieldComparison.cs" />
     <Compile Include="EndToEndReconciliation\HighLevelReconciliation.cs" />
     <Compile Include="HtmlReport.cs" />
     <Compile Include="RunSettingsLogger.cs" />
