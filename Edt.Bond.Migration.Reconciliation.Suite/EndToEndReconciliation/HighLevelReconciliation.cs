@@ -115,22 +115,30 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			"Comparing the count of documents detailed in the Idx as LPP documents that have been moved to the quarantine Folder.")]
 		public void NativeCountsAreEqualBetweenIdxAndQuarantineFolder()
 		{
-			int lppDocCount = EdtDocumentRepository.GetDocumentQuarantineDocumentCount();
-			int idxLppDocCount = new IdxDocumentsRepository().GetNumberOfLppDocs();
-
-            //DebugLogger.Instance.WriteLine("Determine Counts between idx and quarantine - starting scan files");
-
-            string[][] data =
+			if (Settings.MicroFocusStagingDirectoryNativePath.ToUpper().Contains("NON-LPP") ||
+				Settings.MicroFocusStagingDirectoryNativePath.ToUpper().Contains("NONLPP"))
 			{
+				Assert.Pass("Not Required for NON-LPP data");
+			}
+			else
+			{
+				int lppDocCount = EdtDocumentRepository.GetDocumentQuarantineDocumentCount();
+				int idxLppDocCount = Settings.UseLiteDb ? new IdxDocumentsRepository().GetNumberOfLppDocs() : new IdxReaderByChunk(File.OpenText(Settings.IdxFilePath)).GetQuarantinedDocs().Count;
+
+				//DebugLogger.Instance.WriteLine("Determine Counts between idx and quarantine - starting scan files");
+
+				string[][] data =
+				{
 				new[] {"Item Evaluated", "Count of LPP Documents"},
 				new[] {"Idx file", idxLppDocCount.ToString()},
 				new[] {"Quarantine Folder", lppDocCount.ToString()}
 			};
 
-			Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
+				Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
-			Assert.AreEqual(lppDocCount, idxLppDocCount,
-				"File counts should be equal between IDX and EDT Quarantine folder");
+				Assert.AreEqual(lppDocCount, idxLppDocCount,
+					"File counts should be equal between IDX and EDT Quarantine folder");
+			}
 		}
 
 

@@ -94,5 +94,32 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
             return docIDs;
         }
+
+        public List<string> GetQuarantinedDocs()
+        {
+            var docIDs = new List<string>();
+            var splitArray = "=".ToCharArray();
+
+            var currentId = "";
+
+            while (!_streamReader.EndOfStream)
+            {
+
+                var line = _streamReader.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(line) || !line.Contains("UUID=") || !line.Contains("INTROSPECT_DELETED=\"")) continue;
+
+                if (line.Contains("UUID"))
+                {
+                    currentId = line.Split(splitArray).LastOrDefault()?.Replace("\"", string.Empty);
+                }
+                else 
+                {
+                    docIDs.Add(currentId);
+                }                
+            }
+
+            return docIDs;
+        }
     }
 }
