@@ -1,10 +1,10 @@
-﻿using AventStack.ExtentReports;
-using Edt.Bond.Migration.Reconciliation.Framework;
+﻿using Edt.Bond.Migration.Reconciliation.Framework;
+using Edt.Bond.Migration.Reconciliation.Framework.Logging;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using Edt.Bond.Migration.Reconciliation.Framework.Services;
-using HtmlTags.Reflection;
+using Edt.Bond.Migration.Reconciliation.Suite.Validators;
 using MoreLinq;
 using NUnit.Framework;
 using System;
@@ -12,7 +12,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Document = Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile.Document;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
@@ -24,13 +23,15 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         "Compare Idx field with Edt Database field to validate implementation of mapping, for a subset of records.")]
     public class IdxDocumentByEdtComparison
     {
-        private Dictionary<StandardMapping,IdxToEdtConversionService> _idxToEdtConversionServices = new Dictionary<StandardMapping, IdxToEdtConversionService>();
-        private Dictionary<StandardMapping, ComparisonTestResult> _comparisonTestResults = new Dictionary<StandardMapping, ComparisonTestResult>();
+        private readonly Dictionary<StandardMapping,IdxToEdtConversionService> _idxToEdtConversionServices = new Dictionary<StandardMapping, IdxToEdtConversionService>();
+        private readonly Dictionary<StandardMapping, ComparisonTestResult> _comparisonTestResults = new Dictionary<StandardMapping, ComparisonTestResult>();
+    
         private List<StandardMapping> _standardMappings;
         private NativeFileFinder _nativeFileFinder;
-        private int _batchSize = 500;
-        private NativeFileFinder nativeFileFinder;
-        
+        private TagsValidator _tagsValidator;
+        private LocationValidator _locationValidator;
+        private NonMigratedEmsFolderValidator _nonMigratedEmsFolderValidator;
+
 
         [SetUp]
         public void SetupComp()
@@ -47,6 +48,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 _idxToEdtConversionServices.Add(x, new IdxToEdtConversionService(x, true));
                 _comparisonTestResults.Add(x, new ComparisonTestResult(x));
             });
+
+            _tagsValidator = new TagsValidator();
+            _locationValidator = new LocationValidator();
+            _nonMigratedEmsFolderValidator = new NonMigratedEmsFolderValidator();
 
         }
 
@@ -298,8 +303,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                             });
 
                             //tags / locations
+                            _tagsValidator.Validate(documents);
+                            _locationValidator.Validate(documents);
+                            _nonMigratedEmsFolderValidator.Validate(documents);
 
-                            if (documents == null || !documents.Any()) break;
+                            if (!documents.Any()) break;
 
                             //do comparison
                         }
@@ -320,18 +328,38 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
         private void OutputIntoReport()
         {
-            var outputBatch = 1;
+            try
+            {
+                var outputBatch = 1;
 
-            _comparisonTestResults
-                .OrderBy(x => x.Value.Different + x.Value.ComparisonErrors.Count)
-                .Batch(30)
-                .ForEach(batch =>
-                {
-                    var testOutput = HtmlReport.Instance.CreateTest($"Idx vs Edt Field ({outputBatch})");
+                _comparisonTestResults
+                    .OrderBy(x => x.Value.Different + x.Value.ComparisonErrors.Count)
+                    .Batch(30)
+                    .ForEach(batch =>
+                    {
+                        var testOutput = HtmlReport.Instance.CreateTest($"Idx vs Edt Field ({outputBatch})");
 
-                    batch.ForEach(resultSet => resultSet.Value.PrintDifferencesAndResults(testOutput));
-                    outputBatch++;
-                });
+                        batch.ForEach(resultSet => resultSet.Value.PrintDifferencesAndResults(testOutput));
+                        outputBatch++;
+                    });
+            }
+            catch (Exception e)
+            {
+                DebugLogger.Instance.WriteLine($"{e.Message} - {e.StackTrace}");
+            }
+
+            try
+            {
+                var transformedTestsReporter = HtmlReport.Instance.CreateTest("Transformed Field validation", "Compare Idx field with Edt Database field to validate implementation of EDTs customised value generation.");
+
+                _tagsValidator.PrintStats(transformedTestsReporter);
+                _locationValidator.PrintStats(transformedTestsReporter);
+                
+            }
+            catch (Exception e)
+            {
+                DebugLogger.Instance.WriteLine($"{e.Message} - {e.StackTrace}");
+            }
         }
 
         private Dictionary<string, string> GetEdtFieldValues(StandardMapping mappingUnderTest, List<string> idxDocumentIds, IdxToEdtConversionService idxToEdtConversionService)
@@ -415,8 +443,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
             dictionaryValue.AsParallel().ForEach(x =>
             {
-                var valueDictionary = new Dictionary<string, string>();
-                valueDictionary.Add(mapping, x.Value);
+                var valueDictionary = new Dictionary<string, string> {{mapping, x.Value}};
                 concurrentDic.Add(x.Key, valueDictionary);
             });
 

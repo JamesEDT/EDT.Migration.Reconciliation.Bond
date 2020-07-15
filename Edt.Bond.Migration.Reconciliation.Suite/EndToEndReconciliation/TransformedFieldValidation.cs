@@ -1,24 +1,23 @@
-﻿using System;
-using AventStack.ExtentReports.MarkupUtils;
-using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
-using Edt.Bond.Migration.Reconciliation.Framework.Services;
-using NUnit.Framework;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using AventStack.ExtentReports;
+﻿using AventStack.ExtentReports;
 using Edt.Bond.Migration.Reconciliation.Framework;
-using Edt.Bond.Migration.Reconciliation.Framework.Output;
 using Edt.Bond.Migration.Reconciliation.Framework.Extensions;
 using Edt.Bond.Migration.Reconciliation.Framework.Logging;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile;
+using Edt.Bond.Migration.Reconciliation.Framework.Output;
+using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
+using Edt.Bond.Migration.Reconciliation.Framework.Services;
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
     [TestFixture]
     [Category("Transformed")]
     [Description("Compare Idx field with Edt Database field to validate implementation of EDTs customised value generation.")]
-
+    [Ignore("replaced within inline")]
     public class TransformedFieldValidation : ComparisonTest
     {
         private List<Framework.Models.IdxLoadFile.Document> _idxSample;
