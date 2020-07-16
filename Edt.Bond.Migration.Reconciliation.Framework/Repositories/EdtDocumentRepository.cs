@@ -58,6 +58,18 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         }
 
+        public static IEnumerable<dynamic> GetDocumentContentInfo(string documentId)
+        {
+            var sql = $@"SELECT con.*
+                FROM {GetDatabaseName()}.[Document] doc
+                JOIN {GetDatabaseName()}.[DocumentContent] con ON doc.DocumentID = con.DocumentID
+            WHERE doc.DocNumber = '{documentId}'";
+
+            return SqlExecutor.Query(sql);
+        }
+
+
+
         public static Dictionary<string, string[]> GetDocumentFieldAsArray(List<string> documentIds, string desiredField)
         {
             var sql = $@"SELECT DocNumber, {desiredField} as Value 

@@ -16,14 +16,12 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
             var allNativeFilesInEdt = Directory
                 .GetFiles(Path.Combine(Settings.EdtCfsDirectory, $"Site01_Case{Settings.EdtCaseId.ToString().PadLeft(4, '0')}\\Docs"), "*.*", SearchOption.AllDirectories)
-                .Select(x => Path.GetFileName(x));
-
-            var blah = allNativeFilesInEdt
+                .Select(x => Path.GetFileName(x))
                 .Select(x => x.Substring(0, x.IndexOf('_')))
                 .Distinct()
-                .ToList();
+                .ToList();            
 
-            var presentDocuments = allDocumentIds.Where(x => blah.Contains( x.DocumentId.ToString()));
+            var presentDocuments = allDocumentIds.Where(x => allNativeFilesInEdt.Contains( x.DocumentId.ToString()));
 
             return presentDocuments.ToList().Select(x => (string) x.DocumentNumber);
         }

@@ -23,6 +23,14 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             return matches?.SingleOrDefault().Value?.Extension;
         }
 
+        public IEnumerable<FileInfo> GetFiles(string documentId)
+        {
+            var pattern = $"{documentId.ToLowerInvariant()}.";
+            var matches = _nativeFiles.Where(x => x.Key.StartsWith(pattern));
+
+            return matches.Select(x => x.Value);
+        }
+
 
         private IDictionary<string, FileInfo> GetAvailableFileList()
         {

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.902
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edt.Bond.Migration.Reconciliation.Suite", "Edt.Bond.Migration.Reconciliation.Suite\Edt.Bond.Migration.Reconciliation.Suite.csproj", "{7A6265D7-ABC3-494D-BC5A-F83908DF217D}"
 EndProject
@@ -13,6 +13,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edt.Bond.Migration.Reconciliation.Framework", "Edt.Bond.Migration.Reconciliation.Framework\Edt.Bond.Migration.Reconciliation.Framework.csproj", "{4FF0F1FF-FFFE-4546-836B-D9C16350B707}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edt.Bond.Migration.LocationBuilder", "Edt.Bond.Migration.LocationBuilder\Edt.Bond.Migration.LocationBuilder.csproj", "{50182977-BBC0-4BF0-B1AF-7C126B514997}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{F1EEDABF-FAA7-41DD-8ECA-3E7F6B307250}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NativeFileCopier", "NativeFileCopier\NativeFileCopier.csproj", "{338A778B-ACE1-4FD3-9D96-4471B9A36425}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,9 +36,16 @@ Global
 		{50182977-BBC0-4BF0-B1AF-7C126B514997}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50182977-BBC0-4BF0-B1AF-7C126B514997}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50182977-BBC0-4BF0-B1AF-7C126B514997}.Release|Any CPU.Build.0 = Release|Any CPU
+		{338A778B-ACE1-4FD3-9D96-4471B9A36425}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{338A778B-ACE1-4FD3-9D96-4471B9A36425}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{338A778B-ACE1-4FD3-9D96-4471B9A36425}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{338A778B-ACE1-4FD3-9D96-4471B9A36425}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{338A778B-ACE1-4FD3-9D96-4471B9A36425} = {F1EEDABF-FAA7-41DD-8ECA-3E7F6B307250}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6C92D3DD-64D9-40FD-A328-2FFAD07AA559}
