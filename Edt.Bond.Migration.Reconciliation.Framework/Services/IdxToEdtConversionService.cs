@@ -140,7 +140,14 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                     }
                     catch(Exception)
                     {
-                        return string.Empty;
+                        if (_standardMapping.EdtType.Equals("date", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            return string.Empty;
+                        }
+                        else
+                        {
+                            return value;
+                        }
                     }
                 }
 
