@@ -14,7 +14,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 {
     public class TagsValidator : Validator, IDisposable
     {
-        private readonly string[] _unmigratedTags = new string[] { "Ems Folders:Deleted Items", "Ems Folders:15. LPP/Protected Review (and Subfolders)" };
+        private readonly string[] _unmigratedTags = new string[] { "Ems Folders:Deleted Items", ". LPP/Protected Review" };
         private readonly List<Tag> _workbookRecords;
         private readonly StreamWriter _writer;
 
@@ -78,7 +78,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 
                             if (tag != null)
                             {
-                                if (_unmigratedTags.Contains(tag.FullPath))
+                                if (_unmigratedTags.Any(x => x.Contains(tag.FullPath)))
                                 {
                                     if (foundEdtValue && relatedEdTags != null && relatedEdTags.Any(x => x != null && x.Equals(tag.FullPath,
                                                                                     System.StringComparison
