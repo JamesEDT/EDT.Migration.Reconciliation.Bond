@@ -78,7 +78,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 
                             if (tag != null)
                             {
-                                if (_unmigratedTags.Any(x => x.Contains(tag.FullPath)))
+                                if (_unmigratedTags.Any(x => tag.FullPath.Contains(x)))
                                 {
                                     if (foundEdtValue && relatedEdTags != null && relatedEdTags.Any(x => x != null && x.Equals(tag.FullPath,
                                                                                     System.StringComparison
