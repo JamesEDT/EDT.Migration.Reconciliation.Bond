@@ -489,6 +489,7 @@
     <Compile Include="Repositories\ConversionLoadFileRepository.cs" />
     <Compile Include="Repositories\IdxDocumentsRepository.cs" />
     <Compile Include="Repositories\SqlExecutor.cs" />
+    <Compile Include="Services\7ZipService.cs" />
     <Compile Include="Services\AunWorkbookReader.cs" />
     <Compile Include="Services\ConversionToolLoadFileReader.cs" />
     <Compile Include="Services\EdtCfsService.cs" />

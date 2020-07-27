@@ -19,6 +19,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 	{
 		private long _idxDocumentCount;
         private List<string> _idxDocumentIds;
+		private Dictionary<string, string> _extractContents;
 
 		[OneTimeSetUp]
 		public void GetIdxCount()
@@ -27,6 +28,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
 			_idxDocumentIds =  Settings.UseLiteDb ? new IdxDocumentsRepository().GetDocumentIds() : new IdxReaderByChunk(File.OpenText(Settings.IdxFilePath)).GetDocumentIds();
             _idxDocumentCount = _idxDocumentIds.Count;
+			_extractContents = new _7ZipService().GetFiles(Settings.MfZipLocation);
         }
 
 		[Test]
@@ -88,29 +90,31 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 		{			
 
 			var cfsDocsForBatch = EdtCfsService.GetDocumentsForBatch();
-
             var cfsCount = cfsDocsForBatch.Count();
+
+			var nativesInZipAndIdx = _idxDocumentIds.Where(x => _extractContents.ContainsKey(x)).ToList();
 
 			string[][] data = new string[][]
 			{
 				new string[] {"Item Evaluated", "Count of Documents"},
 				new string[] {"Idx file", _idxDocumentCount.ToString()},
+				new string[] {"Natives In Zip Extract For Idx docs", nativesInZipAndIdx.Count.ToString()},
 				new string[] {"Edt Central file store", cfsCount.ToString()}
 			};
 
 			Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
-            if (_idxDocumentCount != cfsCount)
+            if (nativesInZipAndIdx.Count != cfsCount)
             {
   
-                ListExtensions.DifferencesToFile(cfsDocsForBatch.ToList(), _idxDocumentIds, Path.Combine(Settings.ReportingDirectory, "NativesMissing_InCfsOnly.csv"));
-                ListExtensions.DifferencesToFile(_idxDocumentIds, cfsDocsForBatch.ToList(), Path.Combine(Settings.ReportingDirectory,  "NativesMissing_InIdxOnly.csv"));
+                ListExtensions.DifferencesToFile(cfsDocsForBatch.ToList(), nativesInZipAndIdx, Path.Combine(Settings.ReportingDirectory, "NativesMissing_InCfsOnly.csv"));
+                ListExtensions.DifferencesToFile(nativesInZipAndIdx, cfsDocsForBatch.ToList(), Path.Combine(Settings.ReportingDirectory,  "NativesMissing_InIdxOnly.csv"));
 
                 Test.Info($"List of Ids without body output to reporting directory (NativeMissing_)");
                 
             }
 
-            Assert.AreEqual(_idxDocumentCount, cfsCount, "File counts should be equal for Idx and Load file");
+            Assert.AreEqual(nativesInZipAndIdx.Count, cfsCount, "File counts should be equal for Idx/Zip Content vs Load file");
 		}
 
 		[Test]
@@ -144,6 +148,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			}
 		}
 
+
+		//natie count test
 
 		[Test]
 		[Description(
