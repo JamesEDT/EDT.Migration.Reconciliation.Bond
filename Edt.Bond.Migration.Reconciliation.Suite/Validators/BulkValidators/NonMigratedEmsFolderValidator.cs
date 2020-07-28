@@ -11,7 +11,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Services;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 {
-    public class NonMigratedEmsFolderValidator : Validator, IDisposable
+    public class NonMigratedEmsFolderValidator : BulkValidator, IDisposable
     {
         private List<Tag> workbookRecords;
         private List<string> workbookIds;

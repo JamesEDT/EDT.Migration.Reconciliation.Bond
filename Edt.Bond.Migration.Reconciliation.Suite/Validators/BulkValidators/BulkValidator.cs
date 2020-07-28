@@ -3,13 +3,13 @@ using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 {
-    public abstract class Validator
+    public abstract class BulkValidator
     {
         public ComparisonTestResult TestResult;
         private readonly string _edtName;
         private readonly string _idxFields;
 
-        public Validator(string edtName, string sourceFields)
+        public BulkValidator(string edtName, string sourceFields)
         {
             TestResult = new ComparisonTestResult(new StandardMapping(edtName, sourceFields, "Text", "Standard"));
             _edtName = edtName;

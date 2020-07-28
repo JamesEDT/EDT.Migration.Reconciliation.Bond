@@ -93,7 +93,6 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                     convertedValues.Add(mapping.EdtName,
                                         idxValues
                                         .Select(x => _idxToEdtConversionServices[mapping].ConvertValueToEdtForm(x).Trim())
-                                        //.Distinct()
                                         .ToArray());
                                 });
 
@@ -109,6 +108,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                             _standardMappings.ForEach(mapping =>
                             {
                                 var currentTestResult = _comparisonTestResults[mapping];
+
                                 var edtDbLookUpName = mapping.EdtType.Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase) ?
                                 mapping.EdtName
                                 : (_idxToEdtConversionServices[mapping].MappedEdtDatabaseColumn ?? mapping.EdtName);

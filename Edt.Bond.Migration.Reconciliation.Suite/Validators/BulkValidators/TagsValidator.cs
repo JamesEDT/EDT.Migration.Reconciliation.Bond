@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 {
-    public class TagsValidator : Validator, IDisposable
+    public class TagsValidator : BulkValidator, IDisposable
     {
         private readonly string[] _unmigratedTags = new string[] { "Ems Folders:Deleted Items", ". LPP/Protected Review" };
         private readonly List<Tag> _workbookRecords;

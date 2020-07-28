@@ -11,7 +11,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Logging;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 {
-    public class LocationValidator : Validator, IDisposable
+    public class LocationValidator : BulkValidator, IDisposable
     {
         readonly List<EmsFolder> _observedEmsFolders = new List<EmsFolder>();
         private readonly string _textSegment = Settings.LocationIdxFields[3];

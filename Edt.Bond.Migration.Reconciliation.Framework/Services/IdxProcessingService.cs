@@ -85,7 +85,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
                 var line = _streamReader.ReadLine();
 
-                if (string.IsNullOrWhiteSpace(line) || !line.Contains("UUID=")) continue;
+                if (string.IsNullOrWhiteSpace(line) || !line.StartsWith("#DREFIELD UUID=")) continue;
 
                 var str = line.Split(splitArray).LastOrDefault()?.Replace("\"", string.Empty);
 

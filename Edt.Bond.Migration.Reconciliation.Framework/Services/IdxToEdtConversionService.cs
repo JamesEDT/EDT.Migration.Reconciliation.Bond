@@ -245,18 +245,16 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 if (sourceDateValue.Contains(";"))
                     sourceDateValue = sourceDateValue.Replace(";", string.Empty);
 
-                sourceDateValue = ReplaceTimeZone(sourceDateValue);
-                var success = DateTimeOffset.TryParseExact(sourceDateValue, formats, CultureInfo.InvariantCulture.DateTimeFormat,
-
-                                    DateTimeStyles.AllowWhiteSpaces, out convertedDateOffset);
-
+                var success = DateTimeOffset.TryParse(sourceDateValue, out convertedDateOffset);
                 if (!success)
                 {
-                    success = DateTimeOffset.TryParse(sourceDateValue, out convertedDateOffset);
+
+                    success = DateTimeOffset.TryParseExact(ReplaceTimeZone(sourceDateValue), formats, CultureInfo.InvariantCulture.DateTimeFormat,
+                                      DateTimeStyles.AllowWhiteSpaces, out convertedDateOffset);
                 }
                 if (success)
                 {
-                    return convertedDateOffset.UtcDateTime.ToString("dd/MM/yyyy HH:mm:ss");
+                    return convertedDateOffset.UtcDateTime.ToString(outputFormat);
                 }
                 else
                 {

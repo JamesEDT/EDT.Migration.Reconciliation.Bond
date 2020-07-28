@@ -449,10 +449,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestAgainstIdxSource.cs" />
     <Compile Include="TestBase.cs" />
-    <Compile Include="Validators\LocationValidator.cs" />
-    <Compile Include="Validators\NonMigratedEmsFolderValidator.cs" />
-    <Compile Include="Validators\Validator.cs" />
-    <Compile Include="Validators\TagsValidator.cs" />
+    <Compile Include="Validators\BulkValidators\LocationValidator.cs" />
+    <Compile Include="Validators\BulkValidators\NonMigratedEmsFolderValidator.cs" />
+    <Compile Include="Validators\BulkValidators\BulkValidator.cs" />
+    <Compile Include="Validators\BulkValidators\TagsValidator.cs" />
+    <Compile Include="Validators\FieldValidators\IFieldValiator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
