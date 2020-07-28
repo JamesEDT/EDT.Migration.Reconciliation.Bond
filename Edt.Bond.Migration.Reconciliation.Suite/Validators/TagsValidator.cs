@@ -32,7 +32,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 
             documents.ForEach(idxRecord =>
             {
-                var aunWorkbookIds = idxRecord.AllFields.Where(x => x.Key.Equals("AUN_WORKBOOK_NUMERIC", StringComparison.InvariantCultureIgnoreCase)).ToList();
+                var aunWorkbookIds = idxRecord.AllFields.Where(x => x.Key.Equals("AUN_WORKBOOK_NUMERIC", StringComparison.InvariantCultureIgnoreCase) && !string.IsNullOrWhiteSpace(x.Value) && x.Value != "0").ToList();
                 var foundEdtValue = allEdtTags.TryGetValue(idxRecord.DocumentId, out var relatedEdTags);
 
                 var cleanedEdTags = foundEdtValue ? relatedEdTags?.Select(x => x?.ReplaceTagChars()).ToList() : new List<string>();

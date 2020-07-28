@@ -230,7 +230,10 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                                  "yyyy:MM:dd HH:mm:ss",
                                  @"ddd, dd MMM yyyy HH:mm:ss zzz",
                                  @"ddd, dd MMM yyyy HH:mm:ss zzz +0000",
-                                 @"ddd, dd MMM yyyy HH:mm:ss Z"
+                                 @"yyyy-MM-dd HH:mm:ss Z",
+                                 @"yyyy-MM-dd HH:mm:ss zzz",
+                                 @"ddd, dd MMM yyyy HH:mm:ss Z",
+                                 "dd/MM/yyyy HH:mm",
             };
 
 
@@ -239,16 +242,21 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 if (sourceDateValue.Contains("("))
                     sourceDateValue = sourceDateValue.Substring(0, sourceDateValue.LastIndexOf('('));
 
-                var success = DateTimeOffset.TryParse(sourceDateValue, out convertedDateOffset);
+                if (sourceDateValue.Contains(";"))
+                    sourceDateValue = sourceDateValue.Replace(";", string.Empty);
+
+                sourceDateValue = ReplaceTimeZone(sourceDateValue);
+                var success = DateTimeOffset.TryParseExact(sourceDateValue, formats, CultureInfo.InvariantCulture.DateTimeFormat,
+
+                                    DateTimeStyles.AllowWhiteSpaces, out convertedDateOffset);
+
                 if (!success)
                 {
-
-                    success = DateTimeOffset.TryParseExact(ReplaceTimeZone(sourceDateValue), formats, CultureInfo.InvariantCulture.DateTimeFormat,
-                                      DateTimeStyles.AllowWhiteSpaces, out convertedDateOffset);
+                    success = DateTimeOffset.TryParse(sourceDateValue, out convertedDateOffset);
                 }
                 if (success)
                 {
-                    return convertedDateOffset.UtcDateTime.ToString(outputFormat);
+                    return convertedDateOffset.UtcDateTime.ToString("dd/MM/yyyy HH:mm:ss");
                 }
                 else
                 {
