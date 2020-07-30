@@ -245,12 +245,13 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 if (sourceDateValue.Contains(";"))
                     sourceDateValue = sourceDateValue.Replace(";", string.Empty);
 
-                var success = DateTimeOffset.TryParse(sourceDateValue, out convertedDateOffset);
+                var success =  DateTimeOffset.TryParseExact(ReplaceTimeZone(sourceDateValue), formats, CultureInfo.InvariantCulture.DateTimeFormat,
+                                      DateTimeStyles.None, out convertedDateOffset);
+
                 if (!success)
                 {
 
-                    success = DateTimeOffset.TryParseExact(ReplaceTimeZone(sourceDateValue), formats, CultureInfo.InvariantCulture.DateTimeFormat,
-                                      DateTimeStyles.AllowWhiteSpaces, out convertedDateOffset);
+                    success = DateTimeOffset.TryParse(sourceDateValue, out convertedDateOffset);
                 }
                 if (success)
                 {
