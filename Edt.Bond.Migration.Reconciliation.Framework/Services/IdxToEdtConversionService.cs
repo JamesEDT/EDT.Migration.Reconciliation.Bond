@@ -162,6 +162,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                         return string.Empty;
                     }
                 }
+
+                if (_edtColumnDetails?.DataType == ColumnType.MultiValueList)
+                {
+                    return value.Replace(",", ";");
+                }
             }
             catch (Exception e)
             {

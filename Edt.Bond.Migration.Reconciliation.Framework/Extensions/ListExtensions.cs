@@ -21,7 +21,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Extensions
 
         public static void DifferencesToFile(List<string> input, List<string> toCompare, string filePath)
         {
-            var except = input.Except(toCompare).ToList();
+            var except = input.Select(x => x.ToLower()).Except(toCompare.Select(x => x.ToLower())).ToList();
 
             WriteToFile(except, filePath);
         }

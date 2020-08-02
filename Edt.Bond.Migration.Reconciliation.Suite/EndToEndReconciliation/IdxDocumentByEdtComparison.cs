@@ -5,6 +5,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using Edt.Bond.Migration.Reconciliation.Framework.Services;
 using Edt.Bond.Migration.Reconciliation.Suite.Validators;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MoreLinq;
 using NUnit.Framework;
 using System;
@@ -41,7 +42,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 .Where(x => !string.IsNullOrEmpty(x.EdtName) &&
                             !x.EdtName.Equals("UNMAPPED", StringComparison.InvariantCultureIgnoreCase) &&
                             x.IdxNames.Any())
-                //.Where(x => x.EdtName.Equals("Corrected Date Request"))
+               //.Where(x => x.EdtName.Equals("EMS Recipients"))
                 .ToList();
                 
 
@@ -109,7 +110,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                             {
                                 var currentTestResult = _comparisonTestResults[mapping];
 
-                                var edtDbLookUpName = mapping.EdtType.Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase) ?
+                                var edtDbLookUpName = mapping.EdtType.Trim().Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase) ?
                                 mapping.EdtName
                                 : (_idxToEdtConversionServices[mapping].MappedEdtDatabaseColumn ?? mapping.EdtName);
 
@@ -223,9 +224,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                 }
                                                 else if (mapping.EdtType.Equals("Date", StringComparison.InvariantCultureIgnoreCase))
                                                 {
+                                                    
                                                     var gotActualDate = DateTime.TryParse(actual, out var actualDate);
 
-                                                    var gotExpectedDate = DateTime.TryParse(expectedValues.First(), out var expectedDate);
+                                                    var gotExpectedDate = DateTime.TryParse(expectedValues?.FirstOrDefault(), out var expectedDate);
 
                                                     if (gotActualDate && gotExpectedDate && actualDate.Equals(expectedDate) || (!gotActualDate && !gotExpectedDate))
                                                     {
@@ -241,6 +243,45 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                                 document.GetValuesForIdolFields(mapping.IdxNames)));
                                                     }
 
+                                                }
+                                                else if (mapping.EdtType.Trim().Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    var edtValues = actual.Split(new char[] { ';' });
+                                                    var expectedListValues = expectedValues.SelectMany(x => x.Split(";".ToCharArray())).ToList();
+
+                                                    if(edtValues.Except(expectedListValues).Any() || expectedListValues.Except(edtValues).Any())
+                                                    {
+                                                        currentTestResult.Different++;
+
+                                                        currentTestResult.AddComparisonResult(document.DocumentId,
+                                                            string.Join("; ", actual), string.Join("; ", expectedValues),
+                                                            string.Join("; ",
+                                                                document.GetValuesForIdolFields(mapping.IdxNames)));
+                                                    }
+                                                    else
+                                                    {
+                                                        currentTestResult.Matched++;
+                                                    }
+
+                                                }
+                                                else if(mapping.EdtName == "EMS Recipients" || mapping.EdtName.Equals("All Email Addresses", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    var actualList = actual.Split(";".ToCharArray()).Select(x => x.Trim()).Distinct();
+                                                    var expectedDistinct = expectedValues.Select(x => x.Trim()).Distinct();
+
+                                                    if (actualList.Except(expectedDistinct).Any() || expectedDistinct.Except(actualList).Any())
+                                                    {
+                                                        currentTestResult.Different++;
+
+                                                        currentTestResult.AddComparisonResult(document.DocumentId,
+                                                            string.Join("; ", actual), string.Join("; ", expectedValues),
+                                                            string.Join("; ",
+                                                                document.GetValuesForIdolFields(mapping.IdxNames)));
+                                                    }
+                                                    else
+                                                    {
+                                                        currentTestResult.Matched++;
+                                                    }
                                                 }
                                                 else
                                                 {

@@ -46,7 +46,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
                     TestResult.AddComparisonError(idxRecord.DocumentId,
                         "Warning - AUN_WORKBOOK_NUMERIC field was not present for idx record");
 
-                    if (relatedEdTags != null && relatedEdTags.Any()) //subject issues
+                    if (relatedEdTags != null && relatedEdTags.Any(x => !x.StartsWith("Subjects") && !x.StartsWith("Issues"))) //subject issues
                     {
 
                         DebugLogger.Instance.WriteLine("aunWorkbookIds2");
