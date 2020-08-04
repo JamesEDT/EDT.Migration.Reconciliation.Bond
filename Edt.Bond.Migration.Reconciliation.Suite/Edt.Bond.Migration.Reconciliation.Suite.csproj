@@ -452,6 +452,7 @@
     <Compile Include="Validators\BulkValidators\LocationValidator.cs" />
     <Compile Include="Validators\BulkValidators\NonMigratedEmsFolderValidator.cs" />
     <Compile Include="Validators\BulkValidators\BulkValidator.cs" />
+    <Compile Include="Validators\BulkValidators\ServeredParentFieldsValidator.cs" />
     <Compile Include="Validators\BulkValidators\TagsValidator.cs" />
     <Compile Include="Validators\FieldValidators\IFieldValiator.cs" />
   </ItemGroup>
