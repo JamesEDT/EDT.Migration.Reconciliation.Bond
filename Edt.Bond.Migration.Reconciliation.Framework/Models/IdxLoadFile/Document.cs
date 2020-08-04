@@ -46,7 +46,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
 
         public string GetFileName()
         {
-            var filename = AllFields.FirstOrDefault(x => x.Key.ToUpper() == "UUID")?.Value;
+            var filename = AllFields.FirstOrDefault(x => x.Key.ToUpper() == "UUID")?.Value.Trim();
 
             if (string.IsNullOrEmpty(filename))
                 TestContext.Out.WriteLine($"Warning: File found with no uuid with reference {AllFields.FirstOrDefault(x => x.Key.ToUpper() == "REFERENCE")?.Value}");

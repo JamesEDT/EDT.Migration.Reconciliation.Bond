@@ -359,7 +359,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                             //do comparison
                         }
-                    } while (documents?.Count > 0 && !idxProcessingService.EndOfFile);
+                    } while (documents?.Count > 0 || !idxProcessingService.EndOfFile);
                 }
             }
             catch (Exception e)
