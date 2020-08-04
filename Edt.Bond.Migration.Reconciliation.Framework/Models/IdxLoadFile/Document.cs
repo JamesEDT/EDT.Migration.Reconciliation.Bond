@@ -74,7 +74,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
 
         private void GenerateFieldAndAddToFields(string rawItem)
         {
-            var delimiter = rawItem.Contains("=") ? "=" : " ";
+            var delimiter = rawItem.StartsWith("FIELD") ? "=" : " ";
             var field = GenerateField(rawItem, delimiter);
 
             if(!string.IsNullOrWhiteSpace(field.Value))
