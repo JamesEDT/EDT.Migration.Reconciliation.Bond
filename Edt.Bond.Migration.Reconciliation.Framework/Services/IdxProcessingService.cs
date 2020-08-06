@@ -30,6 +30,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
             if (bytesRead > 0)
             {
+                EndOfFile = bytesRead < _chunkSize;
                 var str = new string(buffer);
 
                 if (str.Contains(_documentEndTag[0]))
@@ -62,11 +63,14 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                     _lastTokenFromPreviousBatch = $"{_lastTokenFromPreviousBatch}{str}";
 
                 }
+            }
+            else
+            {
 
-                EndOfFile = bytesRead < _chunkSize;
+                EndOfFile = true;
             }
 
-            return null;
+            return null;            
         }
 
 
