@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Mail;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 {
@@ -41,7 +42,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 				// do something with line
 			}
 
-            var typeSpecifc = files.Where(f => f.Contains(GettingNatives ? "NATIVE" : "TEXT"));
+            var typeSpecifc = files.Where(f => f.Contains(GettingNatives ? "NATIVE" : "TEXT")).ToList();
+
+            PrintFileList(typeSpecifc, GettingNatives);
 
             var dictionaryOfFiles = new Dictionary<string, string>();
 
@@ -54,5 +57,13 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
            return dictionaryOfFiles;
 		}
+
+        private void PrintFileList(List<string> files, bool isNatives)
+        {
+            using (var writer = new StreamWriter(Path.Combine(Settings.ReportingDirectory, $"zipContents{(isNatives ? "NATIVE" : "TEXT")}.csv")))
+            {
+                files.ForEach(writer.WriteLine);
+            }
+        }
     }
 }

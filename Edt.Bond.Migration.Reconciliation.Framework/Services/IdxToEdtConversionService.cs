@@ -1,4 +1,5 @@
-﻿using Edt.Bond.Migration.Reconciliation.Framework.Logging;
+﻿using Edt.Bond.Migration.Reconciliation.Framework.Extensions;
+using Edt.Bond.Migration.Reconciliation.Framework.Logging;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Exceptions;
@@ -140,7 +141,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                     }
                     catch(Exception)
                     {
-                        if (_standardMapping.EdtType.Equals("date", StringComparison.InvariantCultureIgnoreCase))
+                        if (_edtColumnDetails?.DataType == ColumnType.Date)
                         {
                             return string.Empty;
                         }
@@ -167,6 +168,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 {
                     return value.Replace(",", ";");
                 }
+
+                if(_edtColumnDetails?.DataType == ColumnType.Number || _edtColumnDetails?.DataType == ColumnType.Float)
+                {
+                    return GetNumberString(value);
+                }
             }
             catch (Exception e)
             {
@@ -180,6 +186,15 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             }
 
             return value;
+        }
+
+        private string GetNumberString(string number)
+        {
+            if (int.TryParse(number.TrimNonAlphaNumerics(), out var numberParsed))
+            {
+                return numberParsed.ToString();
+            }
+            return string.Empty;
         }
 
         private ColumnDetails GetEdtColumnDetailsFromDisplayName(string displayName)
@@ -235,6 +250,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                                  "yyyy:MM:dd HH:mm:ss",
                                  @"ddd, dd MMM yyyy HH:mm:ss zzz",
                                  @"ddd, dd MMM yyyy HH:mm:ss zzz +0000",
+                                 @"ddd, dd MMM yyyy HH:mm:ss -0000",
                                  @"yyyy-MM-dd HH:mm:ss Z",
                                  @"yyyy-MM-dd HH:mm:ss zzz",
                                  @"ddd, dd MMM yyyy HH:mm:ss Z",
@@ -250,13 +266,13 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 if (sourceDateValue.Contains(";"))
                     sourceDateValue = sourceDateValue.Replace(";", string.Empty);
 
-                var success =  DateTimeOffset.TryParseExact(ReplaceTimeZone(sourceDateValue), formats, CultureInfo.InvariantCulture.DateTimeFormat,
-                                      DateTimeStyles.None, out convertedDateOffset);
+                var replacedTimezone = ReplaceTimeZone(sourceDateValue);
+                var success =  DateTimeOffset.TryParseExact(replacedTimezone, formats, CultureInfo.InvariantCulture.DateTimeFormat,
+                                      DateTimeStyles.AllowWhiteSpaces, out convertedDateOffset);
 
                 if (!success)
                 {
-
-                    success = DateTimeOffset.TryParse(sourceDateValue, out convertedDateOffset);
+                    success = DateTimeOffset.TryParse(replacedTimezone, out convertedDateOffset);
                 }
                 if (success)
                 {

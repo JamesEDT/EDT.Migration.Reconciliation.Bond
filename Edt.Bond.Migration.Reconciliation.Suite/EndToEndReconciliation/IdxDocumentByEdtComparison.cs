@@ -8,6 +8,7 @@ using Edt.Bond.Migration.Reconciliation.Suite.Validators;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MoreLinq;
 using NUnit.Framework;
+using NUnit.Framework.Constraints;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -42,7 +43,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 .Where(x => !string.IsNullOrEmpty(x.EdtName) &&
                             !x.EdtName.Equals("UNMAPPED", StringComparison.InvariantCultureIgnoreCase) &&
                             x.IdxNames.Any())
-               //.Where(x => x.EdtName.Equals("EMS Recipients"))
+              // .Where(x => x.EdtName.Equals("EMS Sent Date"))
                 .ToList();
                 
 
@@ -83,7 +84,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         if (documents != null)
                         {
                             documents
-                                .AsParallel()
+                               .AsParallel()
                                 .ForEach(document =>
                             { 
                                 var convertedValues = new Dictionary<string, string[]>();
@@ -110,13 +111,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                             {
                                 var currentTestResult = _comparisonTestResults[mapping];
 
-                                var edtDbLookUpName = mapping.EdtType.Trim().Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase) ?
-                                mapping.EdtName
-                                : (_idxToEdtConversionServices[mapping].MappedEdtDatabaseColumn ?? mapping.EdtName);
+                                var edtDbLookUpName = GetEdtFieldDictionaryKey(mapping);
 
                                 bool isFieldAutoPopulatedIfNull = Settings.AutoPopulatedNullFields.Contains(mapping.EdtName);
 
-                                var edtValuesForMapping = mapping.IsPartyField() || mapping.EdtType.Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase)
+                                var edtValuesForMapping = mapping.IsPartyField() || mapping.EdtType.Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase) || mapping.EdtName.Equals("Document Type", StringComparison.InvariantCultureIgnoreCase) || mapping.EdtName.Equals("Custodian", StringComparison.InvariantCultureIgnoreCase)
                                 ? ConvertDictionaryToMappingDictionary(mapping.EdtName, GetEdtFieldValues(mapping, docIDs, _idxToEdtConversionServices[mapping]))
                                 : edtDocs;
 
@@ -164,7 +163,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                             document.DocumentId, string.Join(";", actual),
                                                             string.Join(";", expectedValues), string.Join(";", document.GetValuesForIdolFields(mapping.IdxNames))));
                                                     }
-                                                }
+                                                }                                                
                                                 else if (mapping.EdtName.Equals("End Time", StringComparison.InvariantCultureIgnoreCase) && !string.IsNullOrWhiteSpace(expectedString))
                                                 {
                                                 }
@@ -229,6 +228,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                                                     var gotExpectedDate = DateTime.TryParse(expectedValues?.FirstOrDefault(), out var expectedDate);
 
+
+                                                    if (mapping.EdtName.Equals("Date") && !gotExpectedDate)
+                                                    {
+                                                        gotExpectedDate =  DateTime.TryParse(document.GetValuesForIdolFields(new List<string>() { "FILEMODIFIEDTIME" })?.FirstOrDefault(), out expectedDate);
+                                                    }
+
                                                     if (gotActualDate && gotExpectedDate && actualDate.Equals(expectedDate) || (!gotActualDate && !gotExpectedDate))
                                                     {
                                                         currentTestResult.Matched++;
@@ -281,6 +286,31 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                     else
                                                     {
                                                         currentTestResult.Matched++;
+                                                    }
+                                                }
+                                                else if (mapping.EdtName == "Page Count")
+                                                {
+                                                    if(int.TryParse(expectedString, out var expecedInt))
+                                                    {
+                                                        expectedString = expecedInt.ToString();
+                                                    }
+                                                    else
+                                                    {
+                                                        expectedString = string.Empty;
+                                                    }
+
+                                                    if(expectedString.Equals(actual))
+                                                    {
+                                                        currentTestResult.Matched++;
+                                                    }
+                                                    else
+                                                    {
+                                                        currentTestResult.Different++;
+
+                                                        currentTestResult.AddComparisonResult(document.DocumentId,
+                                                            string.Join("; ", actual), string.Join("; ", expectedValues),
+                                                            string.Join("; ",
+                                                                document.GetValuesForIdolFields(mapping.IdxNames)));
                                                     }
                                                 }
                                                 else
@@ -371,6 +401,26 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             {
                 OutputIntoReport();
                 _comparisonTestResults.ForEach(result => result.Value.PrintExpectedOutputFile(result.Key.EdtName));
+            }
+        }
+
+        private string GetEdtFieldDictionaryKey(StandardMapping mapping)
+        {
+            if (mapping.EdtType.Trim().Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return mapping.EdtName;
+            }
+            else if (mapping.EdtName.Trim().Equals("Custodian", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return "Custodian";
+            }
+            else if (mapping.EdtName.Trim().Equals("Document Type", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return "Document Type";
+            }
+            else
+            {
+                return _idxToEdtConversionServices[mapping].MappedEdtDatabaseColumn ?? mapping.EdtName;
             }
         }
 

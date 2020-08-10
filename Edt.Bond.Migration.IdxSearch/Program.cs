@@ -23,7 +23,7 @@ namespace Edt.Bond.Migration.IdxSearch
 
                 var docNumber = Console.ReadLine().Trim();
 
-                var idxProcessingService = new IdxReaderByChunk(File.OpenText(idxPath));
+                var idxProcessingService = new IdxReaderByChunk(File.OpenText(idxPath.Replace("\"", string.Empty)));
 
                 List<Document> documents;
                 bool found = false;

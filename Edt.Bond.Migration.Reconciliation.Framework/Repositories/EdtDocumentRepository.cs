@@ -48,10 +48,21 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static Dictionary<string, string> GetDocumentField(List<string> documentIds, string desiredField)
         {
+            if(desiredField.Equals("CustodianID"))
+            {
+                desiredField = "CustodianName";
+            } else if (desiredField.Equals("DocumentTypeID"))
+            {
+                desiredField = "DocumentTypeName";
+            }
+
+
             var sql = $@"SELECT DocNumber, {desiredField} as Value 
                 FROM {GetDatabaseName()}.[Document] doc
+                LEFT OUTER JOIN {GetDatabaseName()}.[Custodian] cus on doc.CustodianID = cus.CustodianID
                 LEFT OUTER JOIN {GetDatabaseName()}.[DocumentExtra] docExtra ON doc.DocumentID = docExtra.DocumentID
-            WHERE {GetDocumentIDQuery(documentIds)}";
+                LEFT OUTER JOIN {GetDatabaseName()}.[DocumentType] docType ON doc.DocumentTypeID = docType.DocumentTypeID
+            WHERE {GetDocumentIDQuery(documentIds, forceList: true)}";
 
             return SqlExecutor.Query(sql)
                 .ToDictionary(x => (string)x.DocNumber, x => (string)x.Value?.ToString() ?? string.Empty);

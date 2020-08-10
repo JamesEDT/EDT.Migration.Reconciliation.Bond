@@ -9,7 +9,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 {
     public class IdxReaderByChunk : IDisposable
     {
-        private readonly int _chunkSize = 10000000;
+        private readonly int _chunkSize = 12000000;
         private readonly StreamReader _streamReader;
         private readonly string[] _documentEndTag = new string[] { "#DREENDDOC" };
         private const string DocumentStartTag = "#DREREFERENCE";
