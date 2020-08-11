@@ -6,6 +6,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Models.Exceptions;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -184,6 +185,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             {
                 return value.Substring(0, _edtColumnDetails.Size.Value);
             }
+
+            if (_edtColumnDetails?.DisplayName == "Author" && !string.IsNullOrWhiteSpace(value))
+                return value.Replace(">, ", ">;");
 
             return value;
         }
