@@ -48,16 +48,20 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 
                 for (var i = 1; i < 30; i++)
                 {
-                    //idxDocument.AllFields.Where(c => c.Key.StartsWith(Settings.LocationIdxFields[3])).OrderBy(c => c.Key).ToList().ForEach(
-                    //    c =>
-                    //     {
                     var segment = idxDocument.AllFields.SingleOrDefault(c => c.Key.Equals($"{_textSegment}{i}"))?.Value;
 
-                    if (!string.IsNullOrWhiteSpace(segment) && !segment.Contains(".msg:"))
+                    if (!string.IsNullOrWhiteSpace(segment))
                     {
-                        emsFolder.VIRTUAL_PATH_SEGMENTs.Add(segment.Replace(":", "-").Trim());
+                        if (segment.EndsWith(".msg"))
+                        {
+                            break;
+                        }
+
+                        if (!segment.Contains(".msg:"))
+                        {
+                            emsFolder.VIRTUAL_PATH_SEGMENTs.Add(segment.Replace(":", "-").Trim());
+                        }
                     }
-                    //       });
                 }
 
                 _observedEmsFolders.Add(emsFolder);

@@ -15,15 +15,16 @@ namespace Edt.Bond.Migration.FolderSearch
     {
         static void Main(string[] args)
         {
-            var dir = @"C:\EDT\Batch 2\RE01069_1150\Extract\1727\IDX\NON-LPP";
+            var dir = @"C:\EDT\Batch 4\RE00979_DEN\Extract\1425\IDX\NON-LPP";
 
             var idxPaths = Directory.GetFiles(dir, "*.idx", SearchOption.AllDirectories);
 
-            var wantedValue = "235180002";
+            var wantedValue = "Dinesh Karnuadhara";
 
             var folderHits = 0;
             var idolField = new List<string>() {
-                "AUN_WORKBOOK_NUMERIC"
+                "TAG_SUBJECTS_MATCH",
+                "TAG_CIV_SUBJECTS_MATCH"
                 
             };
 
@@ -63,6 +64,8 @@ namespace Edt.Bond.Migration.FolderSearch
                    
                 }
             }
+
+            Console.ReadLine();
         }
     }
 }

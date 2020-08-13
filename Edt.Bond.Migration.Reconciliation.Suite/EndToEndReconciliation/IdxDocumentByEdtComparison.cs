@@ -25,9 +25,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
         "Compare Idx field with Edt Database field to validate implementation of mapping, for a subset of records.")]
     public class IdxDocumentByEdtComparison
     {
-        private readonly Dictionary<StandardMapping,IdxToEdtConversionService> _idxToEdtConversionServices = new Dictionary<StandardMapping, IdxToEdtConversionService>();
+        private readonly Dictionary<StandardMapping, IdxToEdtConversionService> _idxToEdtConversionServices = new Dictionary<StandardMapping, IdxToEdtConversionService>();
         private readonly Dictionary<StandardMapping, ComparisonTestResult> _comparisonTestResults = new Dictionary<StandardMapping, ComparisonTestResult>();
-    
+
         private List<StandardMapping> _standardMappings;
         private NativeFileFinder _nativeFileFinder;
         private TagsValidator _tagsValidator;
@@ -43,7 +43,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 .Where(x => !string.IsNullOrEmpty(x.EdtName) &&
                             !x.EdtName.Equals("UNMAPPED", StringComparison.InvariantCultureIgnoreCase) &&
                             x.IdxNames.Any())
-              // .Where(x => x.EdtName.Equals("EMS Sent Date"))
+              //.Where(x => x.EdtName.Equals("Title"))
                 .ToList();
                 
 
@@ -84,7 +84,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         if (documents != null)
                         {
                             documents
-                               .AsParallel()
+                              // .AsParallel()
                                 .ForEach(document =>
                             { 
                                 var convertedValues = new Dictionary<string, string[]>();
@@ -92,9 +92,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                 _standardMappings.ForEach(mapping =>
                                 {
                                     var idxValues = document.GetValuesForIdolFields(mapping.IdxNames);
+
                                     convertedValues.Add(mapping.EdtName,
                                         idxValues
-                                        .Select(x => _idxToEdtConversionServices[mapping].ConvertValueToEdtForm(x).Trim())
+                                        .Select(x => _idxToEdtConversionServices[mapping].ConvertValueToEdtForm(x)?.Trim())
+                                        .Where(x => !string.IsNullOrWhiteSpace(x))
                                         .ToArray());
                                 });
 
@@ -312,7 +314,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                             string.Join("; ",
                                                                 document.GetValuesForIdolFields(mapping.IdxNames)));
                                                     }
-                                                }
+                                                }                                                
                                                 else
                                                 {
                                                     expectedString = string.Join(";", expectedValues.Select(x => x.Trim()).Distinct()).Replace("\n\n", "\n").Replace("; ", ";");

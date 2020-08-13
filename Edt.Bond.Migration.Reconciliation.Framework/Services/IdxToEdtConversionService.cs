@@ -167,6 +167,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
                 if (_edtColumnDetails?.DataType == ColumnType.MultiValueList)
                 {
+                    if(value.Trim() == "0")
+                    {
+                        return null;
+                    }
+
                     return value.Replace(",", ";");
                 }
 

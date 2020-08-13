@@ -35,20 +35,13 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
                 if (str.Contains(_documentEndTag[0]))
                 {
-                    var tokens = str.Split(_documentEndTag, StringSplitOptions.RemoveEmptyEntries).ToList();
-
                     if (_lastTokenFromPreviousBatch != null)
                     {
-                        if (tokens[0].StartsWith(DocumentStartTag))
-                        {
-                            tokens.Add(_lastTokenFromPreviousBatch);
-                        }
-                        else
-                        {
-                            tokens[0] = $"{_lastTokenFromPreviousBatch}{tokens[0]}";
-                        }
+                        str = $"{_lastTokenFromPreviousBatch}{str}";
                     }
 
+                    var tokens = str.Split(_documentEndTag, StringSplitOptions.RemoveEmptyEntries).ToList();
+                   
                     _lastTokenFromPreviousBatch = tokens.Last();
 
                     tokens.RemoveAt(tokens.Count - 1);
