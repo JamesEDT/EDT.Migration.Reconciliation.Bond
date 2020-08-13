@@ -48,13 +48,13 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 
                 for (var i = 1; i < 30; i++)
                 {
-                    var segment = idxDocument.AllFields.SingleOrDefault(c => c.Key.Equals($"{_textSegment}{i}"))?.Value;
+                    var segment = idxDocument.AllFields.SingleOrDefault(c => c.Key.Equals($"{_textSegment}{i}"))?.Value?.Trim();
 
                     if (!string.IsNullOrWhiteSpace(segment))
                     {
-                        if (segment.EndsWith(".msg"))
+                        if (segment.EndsWith(".msg") || segment.EndsWith(".zip:Tasks") || segment.EndsWith(".zip:Emails"))
                         {
-                            break;
+                                break;                            
                         }
 
                         if (!segment.Contains(".msg:"))
@@ -67,7 +67,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
                 _observedEmsFolders.Add(emsFolder);
                 _locationFileWriter.OutputRecord(idxDocument.DocumentId, emsFolder.ConvertedEdtLocation);
 
-                if (!emsFolder.ConvertedEdtLocation.ReplaceTagChars().Equals(edtLocation.ReplaceTagChars(), StringComparison.InvariantCultureIgnoreCase))
+                if (!emsFolder.ConvertedEdtLocation.ReplaceTagChars().Equals(edtLocation.ReplaceTagChars(), StringComparison.InvariantCultureIgnoreCase)  
+                && !edtLocation.StartsWith(emsFolder.LocationStem))
                 {
                     TestResult.Different++;
                     TestResult.AddComparisonResult(idxDocument.DocumentId, edtLocation, emsFolder.ConvertedEdtLocation, emsFolder.ConvertedEdtLocation);

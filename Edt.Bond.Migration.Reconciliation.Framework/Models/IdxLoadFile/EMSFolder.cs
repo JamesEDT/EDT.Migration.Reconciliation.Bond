@@ -36,6 +36,14 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
             }
         }
 
+        public string LocationStem
+        {
+            get
+            {
+                return  $@"{Group ?? string.Empty}\{Custodian ?? string.Empty}\{Source ?? string.Empty}";
+            }
+        }
+
         public string VirtualPathSegements
         {
             get
