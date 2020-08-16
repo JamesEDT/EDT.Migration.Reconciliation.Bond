@@ -28,6 +28,10 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile
 
         public Document(string raw, bool removeEncapsulation = false)
         {
+            if(!string.IsNullOrWhiteSpace(raw) && raw.Contains("#DRECONTENT"))
+                raw = raw.Substring(0, raw.IndexOf("#DRECONTENT"));
+
+
             AllFields = new ConcurrentBag<Field>();
 
             var tokens = raw.Split(new string[]{"#DRE"}, StringSplitOptions.RemoveEmptyEntries);
