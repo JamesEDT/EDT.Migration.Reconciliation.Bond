@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Edt.Bond.Migration.Reconciliation.Framework.Extensions;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile;
+using HtmlTags;
 
 namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 {
@@ -40,7 +42,18 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                         str = $"{_lastTokenFromPreviousBatch}{str}";
                     }
 
-                    var tokens = str.Split(_documentEndTag, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    List<string> tokens;
+                    try
+                    {
+                        tokens = str.Split(_documentEndTag, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    }
+
+                    catch(OutOfMemoryException)
+                    {
+                        //remove content and try split again
+                        tokens = str.LowMemSplit(_documentEndTag.First());
+
+                    }
                    
                     _lastTokenFromPreviousBatch = tokens.Last();
 
