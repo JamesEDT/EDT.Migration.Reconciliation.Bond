@@ -67,6 +67,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             try
             {
                 var idxPaths = Settings.IdxFilePath.Split(new char[] { '|' });
+                var edtDocColumns = EdtDocumentRepository.GetDocumentColumnNames().Where(X => !X.Equals("Body")).ToList();
 
                 List<Document> allDocuments;
 
@@ -82,8 +83,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         if (allDocuments != null)
                         {
                             allDocuments
-                                .Where(x => x.DocumentId != "RE00894-82702-002496")
-                               .Batch(250)
+                               // .Where(x => x.DocumentId != "RE00894-82702-002496")
+                               .Batch(100)
                                
                                .ForEach(ieDocuments =>
                                {
@@ -119,7 +120,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                        var docIDs = documents.Select(x => x.DocumentId).ToList();
 
                                        //normal doc
-                                       Dictionary<string,Dictionary<string, string>> edtDocs = EdtDocumentRepository.GetDocuments(docIDs);
+                                       Dictionary<string,Dictionary<string, string>> edtDocs = EdtDocumentRepository.GetDocuments(docIDs, edtDocColumns);
 
                                        _standardMappings.ForEach(mapping =>
                                        {

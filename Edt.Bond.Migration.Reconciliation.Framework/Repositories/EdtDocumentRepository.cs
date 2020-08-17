@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using MoreLinq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -18,11 +19,14 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Repositories
 
         public static SqlExecutor SqlExecutor => _sqlExecutor ?? (_sqlExecutor = new SqlExecutor(GetConnectionStringByName()));
 
-        public static Dictionary<string, Dictionary<string, string>> GetDocuments(List<string> documentIds)
+
+        public static Dictionary<string, Dictionary<string, string>> GetDocuments(List<string> documentIds, List<string> columns = null)
         {
             try
             {
-                var sql = $@"SELECT * FROM {GetDatabaseName()}.[Document] doc 
+                var docColumns = columns == null ? "*" : string.Join(", ", columns);
+
+                var sql = $@"SELECT {docColumns} FROM {GetDatabaseName()}.[Document] doc 
                    WHERE {GetDocumentIDQuery(documentIds, true)}";
 
                 var docdictionary = SqlExecutor.Query(sql)
@@ -347,6 +351,15 @@ where TABLE_NAME = 'Document'");
         {
             var sql = "SELECT physical_name, size * 8.0 as size_kb from sys.database_files";
             return SqlExecutor.Query<dynamic>(ConfigurationManager.AppSettings["EdtCaseDatabaseName"], sql);
+        }
+
+        public static IEnumerable<string> GetDocumentColumnNames()
+        {
+            var sql = @"SELECT COLUMN_NAME
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = N'Document'";
+
+            return SqlExecutor.Query<string>(ConfigurationManager.AppSettings["EdtCaseDatabaseName"], sql);
         }
     }
 }
