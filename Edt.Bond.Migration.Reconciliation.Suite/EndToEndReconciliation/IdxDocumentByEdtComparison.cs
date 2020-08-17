@@ -43,9 +43,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 .Where(x => !string.IsNullOrEmpty(x.EdtName) &&
                             !x.EdtName.Equals("UNMAPPED", StringComparison.InvariantCultureIgnoreCase) &&
                             x.IdxNames.Any())
-              //.Where(x => x.EdtName.Equals("Author"))
+                //.Take(25)
                 .ToList();
-                
+
 
             _standardMappings.ForEach(x =>
             {
@@ -82,7 +82,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         if (allDocuments != null)
                         {
                             allDocuments
-                               .Batch(5)
+                                .Where(x => x.DocumentId != "RE00894-82702-002496")
+                               .Batch(250)
+                               
                                .ForEach(ieDocuments =>
                                {
                                    var documents = ieDocuments.ToList();
@@ -91,6 +93,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                                    if (documents != null)
                                    {
+
+                                       //make expected values from IDX values
                                        documents
                                          .AsParallel()
                                            .ForEach(document =>
@@ -111,11 +115,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                            expectedStandardValues.TryAdd(document.DocumentId, convertedValues);
                                        });
 
-                                   //Get Edt Values
-                                   var docIDs = documents.Select(x => x.DocumentId).ToList();
+                                       //Get Edt Values
+                                       var docIDs = documents.Select(x => x.DocumentId).ToList();
 
-                                   //normal doc
-                                   var edtDocs = EdtDocumentRepository.GetDocuments(docIDs);
+                                       //normal doc
+                                       Dictionary<string,Dictionary<string, string>> edtDocs = EdtDocumentRepository.GetDocuments(docIDs);
 
                                        _standardMappings.ForEach(mapping =>
                                        {
@@ -158,10 +162,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                        {
 
                                                            if (mapping.EdtName.Equals("Host Document Id",
-                                                         StringComparison.InvariantCultureIgnoreCase))
+                                                           StringComparison.InvariantCultureIgnoreCase))
                                                            {
-                                                           //if .pst, check that null
-                                                           var fileType = document.AllFields.FirstOrDefault(x => x.Key.Equals("FILETYPE_PARAMETRIC", StringComparison.InvariantCultureIgnoreCase));
+                                                            //if .pst, check that null
+                                                            var fileType = document.AllFields.FirstOrDefault(x => x.Key.Equals("FILETYPE_PARAMETRIC", StringComparison.InvariantCultureIgnoreCase));
                                                                if (fileType.Value.Equals(".pst", StringComparison.InvariantCultureIgnoreCase))
                                                                {
                                                                    currentTestResult.Matched++;
@@ -206,8 +210,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                            }
                                                            else if (mapping.IsPartyField())
                                                            {
-                                                           //get party record
-                                                           var emailActual = string.Join(";", actual.Split(new char[] { ';', ',' }).Select(x => x.Trim()).Distinct().OrderBy(x => x.ToLower()));
+                                                            //get party record
+                                                            var emailActual = string.Join(";", actual.Split(new char[] { ';', ',' }).Select(x => x.Trim()).Distinct().OrderBy(x => x.ToLower()));
                                                                var emailExpected = string.Join(";", expectedString.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Distinct(StringComparer.CurrentCultureIgnoreCase).OrderBy(x => x.ToLower()));
 
                                                                if (emailActual.Equals(emailExpected, StringComparison.InvariantCultureIgnoreCase))
@@ -377,8 +381,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                        }
                                                        else
                                                        {
-                                                       //unmigrated doc
-                                                       currentTestResult.DocumentsInIdxButNotInEdt++;
+                                                        //unmigrated doc
+                                                        currentTestResult.DocumentsInIdxButNotInEdt++;
                                                            currentTestResult.AddComparisonResult(document.DocumentId, string.Empty, expectedString, string.Join(";", document.GetValuesForIdolFields(mapping.IdxNames)));
                                                        }
                                                    }
@@ -392,15 +396,15 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                                        });
 
-                                   //tags / locations
-                                   _tagsValidator.Validate(documents);
+                                       //tags / locations
+                                       _tagsValidator.Validate(documents);
                                        _locationValidator.Validate(documents);
                                        _nonMigratedEmsFolderValidator.Validate(documents);
 
                                        if (!documents.Any()) return;
 
-                                   //do comparison
-                               }
+                                       //do comparison
+                                   }
                                });
                         }
                     } while (allDocuments?.Count > 0 || !idxProcessingService.EndOfFile);
@@ -466,7 +470,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                 _tagsValidator.PrintStats(transformedTestsReporter);
                 _locationValidator.PrintStats(transformedTestsReporter);
-                
+
             }
             catch (Exception e)
             {
@@ -497,7 +501,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                     });
 
                 var dictionaryValues =
-                    combinedValues.ToDictionary(x => (string) x.DocNumber, x => string.Join(";", x.Values));
+                    combinedValues.ToDictionary(x => (string)x.DocNumber, x => string.Join(";", x.Values));
                 return dictionaryValues;
             }
             else
@@ -530,8 +534,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 var combinedValues = allFieldValues.GroupBy(x => x.DocNumber)
                     .Select(group => new
                     {
-                        DocNumber = (string) group.Key,
-                        Values = group.Select(x => (string) x.FieldValue).OrderBy(x => x)
+                        DocNumber = (string)group.Key,
+                        Values = group.Select(x => (string)x.FieldValue).OrderBy(x => x)
                     });
 
                 var dictionaryValues =
@@ -549,13 +553,13 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             }
         }
 
-        private Dictionary<string, Dictionary<string,string>> ConvertDictionaryToMappingDictionary(string mapping, Dictionary<string,string> dictionaryValue)
+        private Dictionary<string, Dictionary<string, string>> ConvertDictionaryToMappingDictionary(string mapping, Dictionary<string, string> dictionaryValue)
         {
             var concurrentDic = new Dictionary<string, Dictionary<string, string>>();
 
             dictionaryValue.AsParallel().ForEach(x =>
             {
-                var valueDictionary = new Dictionary<string, string> {{mapping, x.Value}};
+                var valueDictionary = new Dictionary<string, string> { { mapping, x.Value } };
                 concurrentDic.Add(x.Key, valueDictionary);
             });
 
@@ -571,14 +575,15 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 .Where(x => x.CorrespondanceType.Equals(type, StringComparison.InvariantCultureIgnoreCase));
 
             var desiredParties = from field in allFields
-                group field.PartyName by field.DocumentNumber
+                                 group field.PartyName by field.DocumentNumber
                 into correspondants
-                select new
-                {
-                    DocumentId = correspondants.Key, Value = string.Join(";", correspondants.ToList().OrderBy(x => x))
-                };
+                                 select new
+                                 {
+                                     DocumentId = correspondants.Key,
+                                     Value = string.Join(";", correspondants.ToList().OrderBy(x => x))
+                                 };
 
-            return desiredParties.ToDictionary(x => (string) x.DocumentId, x => x.Value);
+            return desiredParties.ToDictionary(x => (string)x.DocumentId, x => x.Value);
         }
 
         private Dictionary<string, string[]> GetEmailFieldValuesAsArray(List<string> documentIds, string fieldType)
