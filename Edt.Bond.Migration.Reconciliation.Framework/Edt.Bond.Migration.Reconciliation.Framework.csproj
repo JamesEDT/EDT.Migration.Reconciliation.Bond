@@ -487,6 +487,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\EdtDocumentRepository.cs" />
     <Compile Include="Repositories\ConversionLoadFileRepository.cs" />
+    <Compile Include="Repositories\EdtRepository\PartyRepository.cs" />
     <Compile Include="Repositories\IdxDocumentsRepository.cs" />
     <Compile Include="Repositories\SqlExecutor.cs" />
     <Compile Include="Services\7ZipService.cs" />
