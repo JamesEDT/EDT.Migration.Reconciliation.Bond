@@ -68,7 +68,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
                 _locationFileWriter.OutputRecord(idxDocument.DocumentId, emsFolder.ConvertedEdtLocation);
 
                 if (!emsFolder.ConvertedEdtLocation.ReplaceTagChars().Equals(edtLocation.ReplaceTagChars(), StringComparison.InvariantCultureIgnoreCase)  
-                && !edtLocation.StartsWith(emsFolder.LocationStem))
+                && !edtLocation.ReplaceTagChars().StartsWith(emsFolder.LocationStem.ReplaceTagChars()))
                 {
                     TestResult.Different++;
                     TestResult.AddComparisonResult(idxDocument.DocumentId, edtLocation, emsFolder.ConvertedEdtLocation, emsFolder.ConvertedEdtLocation);
