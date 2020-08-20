@@ -270,7 +270,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             if (!sourceDateValue.Trim().Substring(1).All(char.IsNumber) || (sourceDateValue.Length == 14 && (sourceDateValue[0] == '1' || sourceDateValue[0] == '2')))
             {
                 if (sourceDateValue.Contains("("))
-                    sourceDateValue = sourceDateValue.Substring(0, sourceDateValue.LastIndexOf('('));
+                    sourceDateValue = sourceDateValue.Replace("(", string.Empty).Replace(")", string.Empty);
 
                 if (sourceDateValue.Contains(";"))
                     sourceDateValue = sourceDateValue.Replace(";", string.Empty);

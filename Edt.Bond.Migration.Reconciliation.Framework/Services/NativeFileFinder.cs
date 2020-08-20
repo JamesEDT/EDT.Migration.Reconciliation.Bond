@@ -43,7 +43,11 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
             var allFiles = Directory.GetFiles(sourceLocation, "*.*", SearchOption.AllDirectories);
 
-            var allFileInfos = allFiles.Select(x => new FileInfo(x)).Where(x => !x.Name.Equals("thumbs.db", StringComparison.InvariantCultureIgnoreCase)).ToList();
+            var allFileInfos = allFiles
+                .Select(x => new FileInfo(x))
+                .Where(x => !x.Name.Equals("thumbs.db", StringComparison.InvariantCultureIgnoreCase))
+                .Where(x => x.DirectoryName != null && x.DirectoryName.Contains($"\\NATIVE"))
+                .ToList();
 
             return allFileInfos.ToDictionary(y => y.Name.ToLower());
         }

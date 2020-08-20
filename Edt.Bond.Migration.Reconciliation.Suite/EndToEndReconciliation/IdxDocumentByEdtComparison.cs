@@ -5,6 +5,8 @@ using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using Edt.Bond.Migration.Reconciliation.Framework.Services;
 using Edt.Bond.Migration.Reconciliation.Suite.Validators;
+using Edt.Bond.Migration.Reconciliation.Suite.Validators.FieldValidators;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MoreLinq;
 using NUnit.Framework;
@@ -84,7 +86,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         {
                             allDocuments
                                // .Where(x => x.DocumentId != "RE00894-82702-002496")
-                               .Batch(100)
+                               .Batch(250)
                                
                                .ForEach(ieDocuments =>
                                {
@@ -144,10 +146,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                {
                                                    var expectedValues = expectedStandardValues[document.DocumentId][mapping.EdtName];
 
-
-                                                   var expectedString = (mapping.EdtType.Equals("Date")) && expectedValues.Any() ?
-                                                   expectedValues?.OrderBy(x => x).FirstOrDefault() :
-                                                   string.Join(";", expectedValues.Select(x => x.Trim()).OrderBy(x => x).Distinct()).Replace("\n\n", "\n").Replace("; ", ";");
+                                                   var expectedString = (mapping.EdtType.Equals("Date")) && expectedValues.Any() 
+                                                   ? expectedValues?.OrderBy(x => x).FirstOrDefault()
+                                                   : string.Join(";", expectedValues.Select(x => x.Trim()).OrderBy(x => x).Distinct()).Replace("\n\n", "\n").Replace("; ", ";");
 
                                                    currentTestResult.TotalSampled++;
                                                    try
@@ -161,177 +162,57 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                        if (!actual.Equals(expectedString, StringComparison.InvariantCultureIgnoreCase)
                                                        && !(string.IsNullOrWhiteSpace(expectedString) && !string.IsNullOrWhiteSpace(actual) && isFieldAutoPopulatedIfNull))
                                                        {
+                                                           ValidationResult validationResult;
 
-                                                           if (mapping.EdtName.Equals("Host Document Id",
-                                                           StringComparison.InvariantCultureIgnoreCase))
+                                                           if (mapping.EdtName.Equals("Host Document Id", StringComparison.InvariantCultureIgnoreCase))
                                                            {
-                                                            //if .pst, check that null
-                                                            var fileType = document.AllFields.FirstOrDefault(x => x.Key.Equals("FILETYPE_PARAMETRIC", StringComparison.InvariantCultureIgnoreCase));
-                                                               if (fileType.Value.Equals(".pst", StringComparison.InvariantCultureIgnoreCase))
-                                                               {
-                                                                   currentTestResult.Matched++;
-                                                                   currentTestResult.ComparisonErrors.Add(new Framework.Models.Reporting.ComparisonError(document.DocumentId, "Host document id null due to being .pst"));
-                                                               }
-                                                               else
-                                                               {
-                                                                   currentTestResult.Different++;
-                                                                   currentTestResult.ComparisonResults.Add(
-                                                                   new Framework.Models.Reporting.ComparisonResult(
-                                                                       document.DocumentId, string.Join(";", actual),
-                                                                       string.Join(";", expectedValues), string.Join(";", document.GetValuesForIdolFields(mapping.IdxNames))));
-                                                               }
+                                                               validationResult = HostDocumentIdValidator.Validate(document);
                                                            }
                                                            else if (mapping.EdtName.Equals("End Time", StringComparison.InvariantCultureIgnoreCase) && !string.IsNullOrWhiteSpace(expectedString))
                                                            {
+                                                               validationResult = new ValidationResult()
+                                                               {
+                                                                   Matched = true
+                                                               };
                                                            }
                                                            else if (mapping.EdtName.Equals("Start Time", StringComparison.InvariantCultureIgnoreCase) && !string.IsNullOrWhiteSpace(expectedString))
                                                            {
+                                                               validationResult = new ValidationResult()
+                                                               {
+                                                                   Matched = true
+                                                               };
                                                            }
                                                            else if (mapping.EdtName.Equals("File Extension", StringComparison.InvariantCultureIgnoreCase))
                                                            {
-                                                               if (_nativeFileFinder == null)
-                                                                   _nativeFileFinder = new NativeFileFinder();
-
-                                                               var actualFileExtension = _nativeFileFinder.GetExtension(document.DocumentId) ?? ".txt";
-
-                                                               if (actualFileExtension != null && actualFileExtension.Equals(".tif", StringComparison.InvariantCultureIgnoreCase))
-                                                                   actualFileExtension = ".txt";
-
-                                                               if (actualFileExtension != null && actualFileExtension.Equals(actual, StringComparison.InvariantCultureIgnoreCase))
-                                                               {
-                                                                   currentTestResult.Matched++;
-                                                               }
-                                                               else
-                                                               {
-                                                                   currentTestResult.Different++;
-                                                                   currentTestResult.ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(document.DocumentId, actual, expectedValues.FirstOrDefault(), string.Join("; ",
-                                                                       document.GetValuesForIdolFields(mapping.IdxNames))));
-
-                                                               }
+                                                               validationResult = FileExtensionValidator.Validate(document, actual);
                                                            }
                                                            else if (mapping.IsPartyField())
                                                            {
-                                                            //get party record
-                                                            var emailActual = string.Join(";", actual.Split(new char[] { ';', ',' }).Select(x => x.Trim()).Distinct().OrderBy(x => x.ToLower()));
-                                                               var emailExpected = string.Join(";", expectedString.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Distinct(StringComparer.CurrentCultureIgnoreCase).OrderBy(x => x.ToLower()));
-
-                                                               if (emailActual.Equals(emailExpected, StringComparison.InvariantCultureIgnoreCase))
-                                                               {
-                                                                   currentTestResult.Matched++;
-                                                               }
-                                                               else
-                                                               {
-                                                                   currentTestResult.Different++;
-                                                                   currentTestResult.ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(document.DocumentId, emailActual, emailExpected, string.Join("; ",
-                                                                       document.GetValuesForIdolFields(mapping.IdxNames))));
-
-                                                               }
+                                                               validationResult = PartyFieldValidator.Validate(document, expectedString, actual);
                                                            }
                                                            else if (mapping.EdtName.Equals("Recipient Email Domain", StringComparison.InvariantCultureIgnoreCase))
                                                            {
-                                                               if (expectedString.Length > 500)
-                                                               {
-                                                                   currentTestResult.Matched++;
-                                                               }
-                                                               else
-                                                               {
-                                                               }
-
+                                                               validationResult = RecipientEmailDomanValidator.Validate(document, expectedString, actual);
                                                            }
                                                            else if (mapping.EdtType.Equals("Date", StringComparison.InvariantCultureIgnoreCase))
                                                            {
-
-                                                               var gotActualDate = DateTime.TryParse(actual, out var actualDate);
-
-                                                               var gotExpectedDate = DateTime.TryParse(expectedValues?.FirstOrDefault(), out var expectedDate);
-
-
-                                                               if (mapping.EdtName.Equals("Date") && !gotExpectedDate)
-                                                               {
-                                                                   gotExpectedDate = DateTime.TryParse(document.GetValuesForIdolFields(new List<string>() { "FILEMODIFIEDTIME" })?.FirstOrDefault(), out expectedDate);
-                                                               }
-
-                                                               if (gotActualDate && gotExpectedDate && actualDate.Equals(expectedDate) || (!gotActualDate && !gotExpectedDate))
-                                                               {
-                                                                   currentTestResult.Matched++;
-                                                               }
-                                                               else
-                                                               {
-                                                                   currentTestResult.Different++;
-
-                                                                   currentTestResult.AddComparisonResult(document.DocumentId,
-                                                                       string.Join("; ", actual), string.Join("; ", expectedValues),
-                                                                       string.Join("; ",
-                                                                           document.GetValuesForIdolFields(mapping.IdxNames)));
-                                                               }
-
+                                                               validationResult = DateFieldValidator.Validate(document, mapping, expectedValues, actual);
                                                            }
                                                            else if (mapping.EdtType.Trim().Equals("MultiValueList", StringComparison.InvariantCultureIgnoreCase))
                                                            {
-                                                               var edtValues = actual.Split(new char[] { ';' });
-                                                               var expectedListValues = expectedValues.SelectMany(x => x.Replace("(", string.Empty).Replace(")", string.Empty).Split(";".ToCharArray())).ToList();
-
-                                                               if (edtValues.Except(expectedListValues).Any() || expectedListValues.Except(edtValues).Any())
-                                                               {
-                                                                   currentTestResult.Different++;
-
-                                                                   currentTestResult.AddComparisonResult(document.DocumentId,
-                                                                       string.Join("; ", actual), string.Join("; ", expectedValues),
-                                                                       string.Join("; ",
-                                                                           document.GetValuesForIdolFields(mapping.IdxNames)));
-                                                               }
-                                                               else
-                                                               {
-                                                                   currentTestResult.Matched++;
-                                                               }
-
+                                                               validationResult = MultiValueListFieldValidator.Validate(document, expectedValues, actual);
                                                            }
                                                            else if (mapping.EdtName == "EMS Recipients" || mapping.EdtName.Equals("All Email Addresses", StringComparison.InvariantCultureIgnoreCase))
                                                            {
-                                                               var actualList = actual.Split(";".ToCharArray()).Select(x => x.Trim()).Distinct();
-                                                               var expectedDistinct = expectedValues.Select(x => x.Trim()).Distinct();
-
-                                                               if (actualList.Except(expectedDistinct).Any() || expectedDistinct.Except(actualList).Any())
-                                                               {
-                                                                   currentTestResult.Different++;
-
-                                                                   currentTestResult.AddComparisonResult(document.DocumentId,
-                                                                       string.Join("; ", actual), string.Join("; ", expectedValues),
-                                                                       string.Join("; ",
-                                                                           document.GetValuesForIdolFields(mapping.IdxNames)));
-                                                               }
-                                                               else
-                                                               {
-                                                                   currentTestResult.Matched++;
-                                                               }
+                                                               validationResult = CustomEmailFieldValidator.Validate(document, expectedValues, actual);
                                                            }
                                                            else if (mapping.EdtName == "Page Count")
                                                            {
-                                                               if (int.TryParse(expectedString, out var expecedInt))
-                                                               {
-                                                                   expectedString = expecedInt.ToString();
-                                                               }
-                                                               else
-                                                               {
-                                                                   expectedString = string.Empty;
-                                                               }
-
-                                                               if (expectedString.Equals(actual))
-                                                               {
-                                                                   currentTestResult.Matched++;
-                                                               }
-                                                               else
-                                                               {
-                                                                   currentTestResult.Different++;
-
-                                                                   currentTestResult.AddComparisonResult(document.DocumentId,
-                                                                       string.Join("; ", actual), string.Join("; ", expectedValues),
-                                                                       string.Join("; ",
-                                                                           document.GetValuesForIdolFields(mapping.IdxNames)));
-                                                               }
+                                                               validationResult = PageCountValidator.Validate(document, expectedString, actual);
                                                            }
                                                            else
                                                            {
+                                                               //generic comparison
                                                                expectedString = string.Join(";", expectedValues.Select(x => x.Trim()).Distinct()).Replace("\n\n", "\n").Replace("; ", ";");
                                                                var orderedExpectedString = string.Join(";", expectedValues.Select(x => x.Trim()).OrderBy(x => x).Distinct()).Replace("\n\n", "\n").Replace("; ", ";");
 
@@ -345,25 +226,29 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                                    }
                                                                    catch (Exception)
                                                                    {
-                                                                       System.Console.WriteLine("");
                                                                    }
                                                                }
 
-                                                               if (!actual.Equals(expectedString, StringComparison.InvariantCultureIgnoreCase) && !actual.Equals(orderedExpectedString, StringComparison.InvariantCultureIgnoreCase))
+                                                               validationResult = new ValidationResult()
                                                                {
-                                                                   currentTestResult.Different++;
-
-                                                                   currentTestResult.AddComparisonResult(document.DocumentId,
-                                                                       string.Join("; ", actual), string.Join("; ", expectedValues),
-                                                                       string.Join("; ",
-                                                                           document.GetValuesForIdolFields(mapping.IdxNames)));
-                                                               }
-                                                               else
-                                                               {
-                                                                   currentTestResult.Matched++;
-                                                               }
+                                                                   Matched = !(!actual.Equals(expectedString, StringComparison.InvariantCultureIgnoreCase) && !actual.Equals(orderedExpectedString, StringComparison.InvariantCultureIgnoreCase)),
+                                                                   ExpectedComparisonValue = orderedExpectedString,
+                                                                   EdtComparisonValue = actual
+                                                               };                                                               
                                                            }
 
+                                                           if (validationResult != null && validationResult.Matched)
+                                                           {
+                                                               currentTestResult.Matched++;
+                                                           }
+                                                           else
+                                                           {
+                                                               currentTestResult.Different++;
+                                                               currentTestResult.AddComparisonResult(document.DocumentId, validationResult.EdtComparisonValue, validationResult.ExpectedComparisonValue, string.Join(";", document.GetValuesForIdolFields(mapping.IdxNames)));
+                                                           }
+
+                                                           if (validationResult.IsError)
+                                                               currentTestResult.AddComparisonError(document.DocumentId, validationResult.ErrorMessage);
                                                        }
                                                        else
                                                        {
@@ -372,7 +257,6 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                            if (!string.IsNullOrWhiteSpace(actual))
                                                                currentTestResult.Populated++;
                                                        }
-
                                                    }
                                                    catch (KeyNotFoundException)
                                                    {

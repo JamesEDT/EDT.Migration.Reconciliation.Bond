@@ -1,7 +1,7 @@
 ﻿namespace Edt.Bond.Migration.Reconciliation.Suite.Validators.FieldValidators
 {
-    interface IFieldValiator
+    interface IFieldValidator
     {
-        bool Validate(string IdxValue, string EdtValue, out string expectedValue);
+        ValidationResult Validate(string IdxValue, string EdtValue, out string expectedValue);
     }
 }
