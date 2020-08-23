@@ -45,7 +45,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 .Where(x => !string.IsNullOrEmpty(x.EdtName) &&
                             !x.EdtName.Equals("UNMAPPED", StringComparison.InvariantCultureIgnoreCase) &&
                             x.IdxNames.Any())
-                .Where(x => x.EdtName.Equals("File Extension", StringComparison.InvariantCultureIgnoreCase))
+                //.Where(x => x.EdtName.Equals("File Extension", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
 
