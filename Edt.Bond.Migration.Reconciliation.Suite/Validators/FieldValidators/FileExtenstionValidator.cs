@@ -14,10 +14,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators.FieldValidators
                 _nativeFileFinder = new NativeFileFinder();
 
             var actualFileExtension = _nativeFileFinder.GetExtension(idxDocument.DocumentId) ?? ".txt";
-
-            if (actualFileExtension != null && actualFileExtension.Equals(".tif", StringComparison.InvariantCultureIgnoreCase))
-                actualFileExtension = ".txt";
-
+   
             return new ValidationResult()
             {
                 Matched = actualFileExtension != null && actualFileExtension.Equals(edtFileExtension, StringComparison.InvariantCultureIgnoreCase),
