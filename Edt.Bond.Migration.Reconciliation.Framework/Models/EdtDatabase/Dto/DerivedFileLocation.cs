@@ -20,6 +20,6 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase.Dto
             var filePath = Path.Combine(caseStoreLocation, $"{FolderId}\\{DocumentId}\\{Filename}");
 
             return filePath;            
-        }
+        }       
     }
 }

@@ -44,6 +44,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework
 
         public static string[] LocationIdxFields => GetSetting("LocationIdxFields").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
+        public static string ExtractLocation => GetSetting("ExtractFolder");
+
         public static string ReportingDirectory
         {
             get

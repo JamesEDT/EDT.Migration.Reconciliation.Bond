@@ -8,10 +8,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Edt.Bond.Migration.Reconciliation.Framework.Extensions;
+using System.Security.Cryptography.X509Certificates;
+using System.Collections.Concurrent;
+using MoreLinq;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
     [TestFixture]
+	[Category("HighLevel")]
 	[Description(
 		"Comparing high level counts of documents from the source Idx to targets (Edt database and File store)")]
 	//[Parallelizable(ParallelScope.All)]
@@ -83,39 +87,80 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 				$"Document Id differences output to <a href=\"DocumentCountDifferences_IdLists.csv\"> DocumentCountDifferences_IdLists.csv</a>");
 		}
 
+		//[Test]
+		//[Ignore("Too Slow")]
+		//[Description(
+		//	"Comparing the count of documents detailed in the Idx to the Edt Central File Store, thus validating all natives are imported to EDT.")]
+		//public void NativeCountsAreEqualBetweenIdxAndEdtFileStore()
+		//{			
+
+		//	var cfsDocsForBatch = EdtCfsService.GetDocumentsForBatch();
+  //          var cfsCount = cfsDocsForBatch.Count();
+
+		//	var nativesInZipAndIdx = _idxDocumentIds.Where(x => _extractContents.ContainsKey(x)).ToList();
+
+		//	string[][] data = new string[][]
+		//	{
+		//		new string[] {"Item Evaluated", "Count of Documents"},
+		//		new string[] {"Idx file", _idxDocumentCount.ToString()},
+		//		new string[] {"Natives In Zip Extract For Idx docs", nativesInZipAndIdx.Count.ToString()},
+		//		new string[] {"Edt Central file store", cfsCount.ToString()}
+		//	};
+
+		//	Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
+
+  //          if (nativesInZipAndIdx.Count != cfsCount)
+  //          {
+  
+  //              ListExtensions.DifferencesToFile(cfsDocsForBatch.ToList(), nativesInZipAndIdx, Path.Combine(Settings.ReportingDirectory, "NativesMissing_InCfsOnly.csv"));
+  //              ListExtensions.DifferencesToFile(nativesInZipAndIdx, cfsDocsForBatch.ToList(), Path.Combine(Settings.ReportingDirectory,  "NativesMissing_InIdxOnly.csv"));
+
+  //              Test.Info($"List of Ids without body output to reporting directory (NativeMissing_)");
+                
+  //          }
+
+  //          Assert.AreEqual(nativesInZipAndIdx.Count, cfsCount, "File counts should be equal for Idx/Zip Content vs Load file");
+		//}
+
 		[Test]
 		[Description(
 			"Comparing the count of documents detailed in the Idx to the Edt Central File Store, thus validating all natives are imported to EDT.")]
 		public void NativeCountsAreEqualBetweenIdxAndEdtFileStore()
-		{			
-
-			var cfsDocsForBatch = EdtCfsService.GetDocumentsForBatch();
-            var cfsCount = cfsDocsForBatch.Count();
-
+		{
 			var nativesInZipAndIdx = _idxDocumentIds.Where(x => _extractContents.ContainsKey(x)).ToList();
+
+			var missing = new ConcurrentBag<string>();
+
+			var edtDocumentIds = EdtDocumentRepository.GetAllDocumentIds().ToDictionary(x => (string) x.DocumentNumber, x => (int) x.DocumentId);
+
+			nativesInZipAndIdx
+				.AsParallel().ForEach(native =>
+				{
+					var edtId = edtDocumentIds[native];
+
+					if (!NativeExtension.IsNativePresent(edtId))
+					{
+						missing.Add(native);
+					}
+				});
+
+			
+
+			ListExtensions.WriteToFile(missing.ToList(), "MissingNativeFromCFS.csv");
 
 			string[][] data = new string[][]
 			{
 				new string[] {"Item Evaluated", "Count of Documents"},
 				new string[] {"Idx file", _idxDocumentCount.ToString()},
 				new string[] {"Natives In Zip Extract For Idx docs", nativesInZipAndIdx.Count.ToString()},
-				new string[] {"Edt Central file store", cfsCount.ToString()}
+				new string[] {"Edt Central file store", (nativesInZipAndIdx.Count - missing.Count()).ToString()}
 			};
 
 			Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
-            if (nativesInZipAndIdx.Count != cfsCount)
-            {
-  
-                ListExtensions.DifferencesToFile(cfsDocsForBatch.ToList(), nativesInZipAndIdx, Path.Combine(Settings.ReportingDirectory, "NativesMissing_InCfsOnly.csv"));
-                ListExtensions.DifferencesToFile(nativesInZipAndIdx, cfsDocsForBatch.ToList(), Path.Combine(Settings.ReportingDirectory,  "NativesMissing_InIdxOnly.csv"));
-
-                Test.Info($"List of Ids without body output to reporting directory (NativeMissing_)");
-                
-            }
-
-            Assert.AreEqual(nativesInZipAndIdx.Count, cfsCount, "File counts should be equal for Idx/Zip Content vs Load file");
+			Assert.Zero(missing.Count(), "Missing natives should be 0");
 		}
+
 
 		[Test]
 		[Description(
@@ -183,48 +228,49 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			"Comparing the text document counts in the Idx to the Edt Document.Body, thus validating all text fies are imported to EDT.")]
 		public void TextCountsAreEqualBetweenIdxAndEdtFileStore()
 		{
-            //For each Document in Batch, Count where Body is not null
-            var edtDocsWithBody = EdtDocumentRepository.GetDocumentNumbersWithABody();
+			//zip text files
+			var emsZipTextFiles = new _7ZipService().GetFiles(Settings.MfZipLocation, false);
 
-			//compare against Text count in microfocus dir
-			var documentIdsWithinEdt = EdtDocumentRepository.GetDocumentNumbers();
+			//For each Document in Batch, Count where Body is not null
+			var edtDocsWithBody = EdtDocumentRepository.GetDocumentNumbersWithABody();
+			
+			
+			//filter empty to give idx only ids
+			var missingIdxTexts = _idxDocumentIds.Except(edtDocsWithBody);
 
-            var microFocusExportDocuments = Directory
-                .GetFiles(Settings.MicroFocusStagingDirectoryTextPath, "*.txt", SearchOption.AllDirectories)
-                .Select(x => new FileInfo(x))
-                .Where(x => x.Length > 3)
-                .Select(x => GetDocumentIdFromFilePath(x))
-                .Where(x => documentIdsWithinEdt.Contains(x))
-                .ToList();
+			var missingIdxWithSize = missingIdxTexts.Where(x => emsZipTextFiles.ContainsKey(x) && new FileInfo(Path.Combine(Settings.ExtractLocation,emsZipTextFiles[x]))?.Length > 3).ToList();
 
-			var mircoFocusDocCount = microFocusExportDocuments.Count();
 
 			//output counts
 			string[][] data =
 			{
 				new[] {"Item Evaluated", "Count of Documents"},
-				new[] {"MicroFocus Export text(s)", mircoFocusDocCount.ToString()},
+				new[] {"MicroFocus Export text(s)", (_idxDocumentIds.Count() - missingIdxTexts.Count() + missingIdxWithSize.Count()).ToString()},
 				new[] {"Edt Document.Body", edtDocsWithBody.Count().ToString()}
 			};
 
 			Test.Log(AventStack.ExtentReports.Status.Info, MarkupHelper.CreateTable(data));
 
-            if (mircoFocusDocCount != edtDocsWithBody.Count())
-            {
-                ListExtensions.DifferencesToFile(microFocusExportDocuments, edtDocsWithBody, Path.Combine(Settings.ReportingDirectory, "TextContent_MicrofocusOnly.csv"));
-                ListExtensions.DifferencesToFile(edtDocsWithBody, microFocusExportDocuments, Path.Combine(Settings.ReportingDirectory, "TextContent_EdtOnly.csv"));
+			if (missingIdxWithSize.Any())
+			{
+				ListExtensions.WriteToFile(missingIdxWithSize, Path.Combine(Settings.ReportingDirectory, "TextContent_MicrofocusOnly.csv"));
 
-                Test.Info($"List of Ids without body output to reporting directory (TextContent_)");
+				Test.Info($"List of Ids without body output to reporting directory (TextContent_)");
+			}
 
-            }
-
-			Assert.AreEqual(mircoFocusDocCount, edtDocsWithBody.Count(),
-				"File counts should be equal for Microfocus load and EDT");
+			Assert.Zero(missingIdxWithSize.Count, "Missing text content identified");
 		}
 
 		private string GetDocumentIdFromFilePath(FileInfo fileInfo)
 		{
 			var fileName = fileInfo.Name.Split(new char[] {'.'}).First();
+
+			return fileName;
+		}
+
+		private string GetDocumentIdFromFilePath(string filePath)
+		{
+			var fileName = Path.GetFileNameWithoutExtension(filePath);
 
 			return fileName;
 		}

@@ -11,6 +11,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Services;
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
     [TestFixture]
+    [Category("HighLevel")]
     [Description("Case level statistics output at time of running the validation tool")]
     //[Parallelizable(ParallelScope.Children)]
     public class CaseLevelStatistics : TestBase

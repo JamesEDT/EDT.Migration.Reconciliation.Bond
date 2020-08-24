@@ -7,10 +7,8 @@ using Edt.Bond.Migration.Reconciliation.Framework.Services;
 using Edt.Bond.Migration.Reconciliation.Suite.Validators;
 using Edt.Bond.Migration.Reconciliation.Suite.Validators.FieldValidators;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MoreLinq;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -45,7 +43,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 .Where(x => !string.IsNullOrEmpty(x.EdtName) &&
                             !x.EdtName.Equals("UNMAPPED", StringComparison.InvariantCultureIgnoreCase) &&
                             x.IdxNames.Any())
-                //.Where(x => x.EdtName.Equals("File Extension", StringComparison.InvariantCultureIgnoreCase))
+                .Where(x => x.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
 
@@ -188,6 +186,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                                {
                                                                    validationResult = FileExtensionValidator.Validate(document, actual);
                                                                }
+                                                               else if (mapping.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase))
+                                                               {
+                                                                   validationResult = PartyFieldValidator.Validate(document, expectedString, actual);
+                                                               }
                                                                else if (mapping.IsPartyField())
                                                                {
                                                                    validationResult = PartyFieldValidator.Validate(document, expectedString, actual);
@@ -195,6 +197,15 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                                else if (mapping.EdtName.Equals("Recipient Email Domain", StringComparison.InvariantCultureIgnoreCase))
                                                                {
                                                                    validationResult = RecipientEmailDomanValidator.Validate(document, expectedString, actual);
+                                                               }
+                                                               else if (mapping.EdtName.Equals("Ems Sent Date", StringComparison.InvariantCultureIgnoreCase))
+                                                               {
+                                                                   validationResult = new ValidationResult()
+                                                                   {
+                                                                       Matched = actual.Equals(expectedString, StringComparison.InvariantCultureIgnoreCase),
+                                                                       ExpectedComparisonValue = expectedString,
+                                                                       EdtComparisonValue = actual
+                                                                   };
                                                                }
                                                                else if (mapping.EdtType.Equals("Date", StringComparison.InvariantCultureIgnoreCase))
                                                                {
