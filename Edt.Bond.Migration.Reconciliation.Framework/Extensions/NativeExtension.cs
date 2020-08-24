@@ -20,7 +20,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Extensions
 
             try
             {
-                return Directory.GetFiles(folderPath, $"{edtId}_NATIVE.*").Any();
+                return Directory.GetFiles(folderPath, $"{edtId}_NATIVE*").Any();
             }
             catch (Exception)
             {

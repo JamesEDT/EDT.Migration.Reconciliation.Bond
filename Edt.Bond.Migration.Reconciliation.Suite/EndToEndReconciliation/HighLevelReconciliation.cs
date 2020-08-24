@@ -146,7 +146,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
 			
 
-			ListExtensions.WriteToFile(missing.ToList(), "MissingNativeFromCFS.csv");
+			ListExtensions.WriteToFile(missing.ToList(), Path.Combine(Settings.ReportingDirectory,"MissingNativeFromCFS.csv"));
 
 			string[][] data = new string[][]
 			{

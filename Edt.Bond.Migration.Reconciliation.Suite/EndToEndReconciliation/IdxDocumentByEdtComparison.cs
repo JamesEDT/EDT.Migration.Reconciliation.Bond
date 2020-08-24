@@ -43,7 +43,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 .Where(x => !string.IsNullOrEmpty(x.EdtName) &&
                             !x.EdtName.Equals("UNMAPPED", StringComparison.InvariantCultureIgnoreCase) &&
                             x.IdxNames.Any())
-                .Where(x => x.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase))
+                //.Where(x => x.EdtName.Equals("Recipients-To", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
 
@@ -84,7 +84,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         {
                             allDocuments
                                // .Where(x => x.DocumentId != "RE00894-82702-002496")
-                               .Batch(250)
+                               .Batch(200)
                                
                                .ForEach(ieDocuments =>
                                {
@@ -195,7 +195,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                                    validationResult = PartyFieldValidator.Validate(document, expectedString, actual);
                                                                }
                                                                else if (mapping.EdtName.Equals("Recipient Email Domain", StringComparison.InvariantCultureIgnoreCase))
-                                                               {
+                                                               {                                                                  
                                                                    validationResult = RecipientEmailDomanValidator.Validate(document, expectedString, actual);
                                                                }
                                                                else if (mapping.EdtName.Equals("Ems Sent Date", StringComparison.InvariantCultureIgnoreCase))
@@ -287,7 +287,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                    }
                                                    catch (Exception e)
                                                    {
-                                                       currentTestResult.AddComparisonError(document.DocumentId, $"Failed processing document {e.Message} {e.StackTrace}");
+                                                       currentTestResult.AddComparisonError(document.DocumentId, $"Failed processing document {e.Message}, {e.StackTrace}");
                                                    }
                                                });
 
