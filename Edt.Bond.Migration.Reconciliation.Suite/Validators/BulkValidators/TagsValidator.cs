@@ -5,6 +5,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using Edt.Bond.Migration.Reconciliation.Framework.Services;
+using MoreLinq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,7 +33,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 
             documents.ForEach(idxRecord =>
             {
-                var aunWorkbookIds = idxRecord.AllFields.Where(x => x.Key.Equals("AUN_WORKBOOK_NUMERIC", StringComparison.InvariantCultureIgnoreCase) && !string.IsNullOrWhiteSpace(x.Value) && x.Value != "0").ToList();
+                var aunWorkbookIds = idxRecord.AllFields.Where(x => x.Key.Equals("AUN_WORKBOOK_NUMERIC", StringComparison.InvariantCultureIgnoreCase) && !string.IsNullOrWhiteSpace(x.Value) && x.Value != "0")
+                .SelectMany(x => x.Value.Split(",".ToCharArray()))
+                .ToList();
+
                 var foundEdtValue = allEdtTags.TryGetValue(idxRecord.DocumentId, out var relatedEdTags);
 
                 var cleanedEdTags = foundEdtValue ? relatedEdTags?.Select(x => x?.ReplaceTagChars()).ToList() : new List<string>();
@@ -60,7 +64,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
                 {
                     
                     var outputTags = aunWorkbookIds
-                        .Select(x => _workbookRecords.SingleOrDefault(c => c.Id == x.Value)?.FullPathOutput).ToList();
+                        .Select(x => _workbookRecords.SingleOrDefault(c => c.Id == x)?.FullPathOutput).ToList();
 
                     DebugLogger.Instance.WriteLine("outputTags");
 
@@ -74,7 +78,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 
                             DebugLogger.Instance.WriteLine("aunWorkbookId2");
 
-                            var tag = _workbookRecords.SingleOrDefault(c => c.Id == aunWorkbookId.Value);
+                            var tag = _workbookRecords.SingleOrDefault(c => c.Id == aunWorkbookId);
 
                             if (tag != null)
                             {
@@ -92,7 +96,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
                                         TestResult.ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(
                                             idxRecord.DocumentId,
                                             edtLogValue, $"{tag.FullPath} not to be migrated",
-                                            aunWorkbookId.Value.ToString()));
+                                            aunWorkbookId.ToString()));
 
                                     }
                                     else
@@ -114,7 +118,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 
                                         TestResult.ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(
                                             idxRecord.DocumentId,
-                                            edtLogValue, tag.FullPath, aunWorkbookId.Value.ToString()));
+                                            edtLogValue, tag.FullPath, aunWorkbookId.ToString()));
                                     }
                                     else
                                     {
@@ -125,7 +129,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
                             else
                             {
                                 TestResult.AddComparisonError(idxRecord.DocumentId,
-                                    $"Couldnt convert aun workbook id {aunWorkbookId.Value} to name");
+                                    $"Couldnt convert aun workbook id {aunWorkbookId} to name");
                             }
                         }
 
