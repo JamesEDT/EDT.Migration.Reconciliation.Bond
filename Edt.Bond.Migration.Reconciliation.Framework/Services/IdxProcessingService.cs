@@ -11,13 +11,17 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 {
     public class IdxReaderByChunk : IDisposable
     {
-        private readonly int _chunkSize = 12000000;
+        private readonly int _chunkSize = 600000;
+        private readonly int _lineSize = 2000;
         private readonly StreamReader _streamReader;
         private readonly string[] _documentEndTag = new string[] { "#DREENDDOC" };
         private const string DocumentStartTag = "#DREREFERENCE";
-        private string _lastTokenFromPreviousBatch = null;
+        private StringBuilder _lastTokenFromPreviousBatch = null;
 
         public bool EndOfFile;
+        private bool _readInChunks = false;
+        
+        
 
         public IdxReaderByChunk(StreamReader streamReaderReader)
         {
@@ -25,6 +29,10 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
         }
 
         public IEnumerable<Document> GetNextDocumentBatch()
+        {
+            return _readInChunks ? GetNextDocumentBatchByChunk() : GetNextDocumentBatchByLine();
+        }
+        public IEnumerable<Document> GetNextDocumentBatchByChunk()
         {
             var buffer = new char[_chunkSize];
 
@@ -55,7 +63,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
                     }
                    
-                    _lastTokenFromPreviousBatch = tokens.Last();
+                    _lastTokenFromPreviousBatch = new StringBuilder(tokens.Last());
 
                     tokens.RemoveAt(tokens.Count - 1);
 
@@ -66,7 +74,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 }
                 else
                 {
-                    _lastTokenFromPreviousBatch = $"{_lastTokenFromPreviousBatch}{str}";
+                    _lastTokenFromPreviousBatch = _lastTokenFromPreviousBatch.Append(str);
 
                 }
             }
@@ -77,6 +85,49 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             }
 
             return null;            
+        }
+
+        public IEnumerable<Document> GetNextDocumentBatchByLine()
+        {
+            var stringBuilder = new StringBuilder();
+            var docsSeen = 1;
+            var docsToReturn = new List<Document>();
+            var seenDreContent = false;
+
+            while (!_streamReader.EndOfStream && docsSeen <= _lineSize)
+            {
+                var line = _streamReader.ReadLine();
+                if (line != null)
+                {
+                    if (!seenDreContent && line.StartsWith("#DRECONTENT"))
+                    {
+                        seenDreContent = true;
+                    }
+                    else
+                    {
+                        if (seenDreContent && line.StartsWith("#DRE"))
+                        {
+                            seenDreContent = false;
+                        }
+
+                        if (!seenDreContent)
+                        {
+                            
+                            stringBuilder.Append(line.StartsWith("#DRE") ? line : $"\r\n{line}");
+                            if (line.StartsWith(_documentEndTag[0]))
+                            {
+                                docsSeen++;
+                                docsToReturn.Add(new Document(stringBuilder.ToString()));
+                                stringBuilder = new StringBuilder();
+                            }
+                        }
+                    }
+                }
+            }
+
+            EndOfFile = _streamReader.EndOfStream;
+
+            return docsToReturn;
         }
 
 

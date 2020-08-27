@@ -43,7 +43,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 .Where(x => !string.IsNullOrEmpty(x.EdtName) &&
                             !x.EdtName.Equals("UNMAPPED", StringComparison.InvariantCultureIgnoreCase) &&
                             x.IdxNames.Any())
-                //.Where(x => x.EdtName.Equals("Recipients-To", StringComparison.InvariantCultureIgnoreCase))
+                //.Where(x => x.EdtName.Equals("InternetHeaders", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
 
@@ -84,7 +84,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                         {
                             allDocuments
                                // .Where(x => x.DocumentId != "RE00894-82702-002496")
-                               .Batch(200)
+                               .Batch(2000)
                                
                                .ForEach(ieDocuments =>
                                {
@@ -188,11 +188,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                                }
                                                                else if (mapping.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase))
                                                                {
-                                                                   validationResult = PartyFieldValidator.Validate(document, expectedString, actual);
+                                                                   validationResult = PartyFieldValidator.Validate(mapping, document, expectedString, actual);
                                                                }
                                                                else if (mapping.IsPartyField())
                                                                {
-                                                                   validationResult = PartyFieldValidator.Validate(document, expectedString, actual);
+                                                                   validationResult = PartyFieldValidator.Validate(mapping, document, expectedString, actual);
                                                                }
                                                                else if (mapping.EdtName.Equals("Recipient Email Domain", StringComparison.InvariantCultureIgnoreCase))
                                                                {                                                                  
@@ -225,9 +225,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                                }
                                                                else
                                                                {
-                                                               //generic comparison
-                                                               expectedString = string.Join(";", expectedValues.Select(x => x.Trim()).Distinct()).Replace("\n\n", "\n").Replace("; ", ";");
-                                                                   var orderedExpectedString = string.Join(";", expectedValues.Select(x => x.Trim()).OrderBy(x => x).Distinct()).Replace("\n\n", "\n").Replace("; ", ";");
+                                                                   //generic comparison
+                                                                   actual = actual.Replace("\r\n", "\n");
+                                                               expectedString = string.Join(";", expectedValues.Select(x => x.Trim()).Distinct()).Replace("\r\n","\n").Replace("\n\n", "\n").Replace("; ", ";");
+                                                                   var orderedExpectedString = string.Join(";", expectedValues.Select(x => x.Trim()).OrderBy(x => x).Distinct()).Replace("\r\n", "\n").Replace("\n\n", "\n").Replace("; ", ";");
 
                                                                    if (_idxToEdtConversionServices[mapping].EdtColumnDetails.Size.HasValue
                                                                    && _idxToEdtConversionServices[mapping].EdtColumnDetails.Size > 100
