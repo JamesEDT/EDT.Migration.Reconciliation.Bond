@@ -24,7 +24,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                     {
                         Id = line[0],
                         Level = int.Parse(line[4]),
-                        Name = line[1].Trim().Replace(":",".").Replace("\"",string.Empty).Replace("+","Plus"),
+                        Name = line[1].Trim().Replace(":",".").Replace("\"",string.Empty).Replace("+","Plus").Replace(";",","),
                         ParentID = line[8],
                         FullTagHierarchy = new List<string>() { line[8]}
 			        });

@@ -13,13 +13,13 @@ using System.Linq;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 {
-    public class TagsValidator : BulkValidator, IDisposable
+    public class AunWorkbookTagsValidator : BulkValidator, IDisposable
     {
         private readonly string[] _unmigratedTags = new string[] { "Ems Folders:Deleted Items", " LPP/Protected Review" };
         private readonly List<Tag> _workbookRecords;
         private readonly StreamWriter _writer;
 
-        public TagsValidator() : base("Tags", "AUN_WORKBOOK_NUMERIC")
+        public AunWorkbookTagsValidator() : base("Tags", "AUN_WORKBOOK_NUMERIC")
         {
             _workbookRecords = AunWorkbookReader.Read();
 

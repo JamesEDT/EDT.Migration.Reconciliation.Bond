@@ -175,7 +175,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			else
 			{
 				int lppDocCount = EdtDocumentRepository.GetDocumentQuarantineDocumentCount();
-				int idxLppDocCount = Settings.UseLiteDb ? new IdxDocumentsRepository().GetNumberOfLppDocs() : new IdxReaderByChunk(File.OpenText(Settings.IdxFilePath)).GetQuarantinedDocs().Count;
+				int idxLppDocCount = Settings.UseLiteDb ? new IdxDocumentsRepository().GetNumberOfLppDocs() : new IdxReaderByChunk(File.OpenText(Settings.IdxFilePath)).GetDocumentIds().Count;
 
 				//DebugLogger.Instance.WriteLine("Determine Counts between idx and quarantine - starting scan files");
 
@@ -197,6 +197,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 		//natie count test
 
 		[Test]
+		[Ignore("Not needed")]
 		[Description(
 			"Comparing the count of documents detailed in the Redaction Load File and those redacted documents in EDT.")]
 		public void RedactedCountsAreEqualBetweenRedactionLoadFile()

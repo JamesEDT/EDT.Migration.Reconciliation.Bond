@@ -30,9 +30,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
         private List<StandardMapping> _standardMappings;
         private NativeFileFinder _nativeFileFinder;
-        private TagsValidator _tagsValidator;
+        private AunWorkbookTagsValidator _tagsValidator;
         private LocationValidator _locationValidator;
         private NonMigratedEmsFolderValidator _nonMigratedEmsFolderValidator;
+        private SubjectIssuesTagsValidator _subjectIssuesTagsValidator;
 
 
         [SetUp]
@@ -53,9 +54,11 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 _comparisonTestResults.Add(x, new ComparisonTestResult(x));
             });
 
-            _tagsValidator = new TagsValidator();
+            _tagsValidator = new AunWorkbookTagsValidator();
             _locationValidator = new LocationValidator();
             _nonMigratedEmsFolderValidator = new NonMigratedEmsFolderValidator();
+            _subjectIssuesTagsValidator = new SubjectIssuesTagsValidator();
+            
 
         }
 
@@ -228,7 +231,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                                    //generic comparison
                                                                    actual = actual.Replace("\r\n", "\n");
                                                                expectedString = string.Join(";", expectedValues.Select(x => x.Trim()).Distinct()).Replace("\r\n","\n").Replace("\n\n", "\n").Replace("; ", ";");
-                                                                   var orderedExpectedString = string.Join(";", expectedValues.Select(x => x.Trim()).OrderBy(x => x).Distinct()).Replace("\r\n", "\n").Replace("\n\n", "\n").Replace("; ", ";");
+                                                                   var orderedExpectedString = string.Join(";", expectedValues.Select(x => x.Trim()).OrderBy(x => x).Distinct()).Replace("\r\n", "\n").Replace("\n\n", "\n").Replace("\n\n", "\n").Replace("; ", ";");
 
                                                                    if (_idxToEdtConversionServices[mapping].EdtColumnDetails.Size.HasValue
                                                                    && _idxToEdtConversionServices[mapping].EdtColumnDetails.Size > 100
@@ -297,6 +300,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 
                                            //tags / locations
                                            _tagsValidator.Validate(documents);
+                                           _subjectIssuesTagsValidator.Validate(documents);
                                            _locationValidator.Validate(documents);
                                            _nonMigratedEmsFolderValidator.Validate(documents);
 
