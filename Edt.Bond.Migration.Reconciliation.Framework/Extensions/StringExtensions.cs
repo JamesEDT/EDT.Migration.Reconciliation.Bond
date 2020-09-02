@@ -64,7 +64,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Extensions
                 }
 
                 string tmp = s.Substring(lastPos, pos - lastPos);
-                if (tmp.Trim().Length > 0)
+                if (!string.IsNullOrWhiteSpace(tmp))
                     list.Add(tmp);
                 lastPos = pos + seperator.Length;
                 pos = s.IndexOf(seperator, lastPos);
@@ -73,7 +73,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Extensions
             if (lastPos < s.Length)
             {
                 string tmp = s.Substring(lastPos, s.Length - lastPos);
-                if (tmp.Trim().Length > 0)
+                if (!string.IsNullOrWhiteSpace(tmp))
                     list.Add(tmp);
             }
 

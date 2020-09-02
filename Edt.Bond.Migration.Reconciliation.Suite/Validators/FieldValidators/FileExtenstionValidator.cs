@@ -7,7 +7,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators.FieldValidators
     class FileExtensionValidator
     {
         public static NativeFileFinder _nativeFileFinder;
-        public static ValidationResult Validate(Document idxDocument, string edtFileExtension)
+        public static ValidationResult Validate(Document idxDocument, string expected, string edtFileExtension)
         {
            
             if (_nativeFileFinder == null)

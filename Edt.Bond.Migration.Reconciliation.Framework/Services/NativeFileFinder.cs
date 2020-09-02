@@ -17,8 +17,8 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
 
         public string GetExtension(string documentId)
         {
-            var pattern = $"{documentId.ToLowerInvariant()}.";
-            var matches =_nativeFiles.Where(x => x.Key.StartsWith(pattern));
+            var patternWithExtension = $"{documentId.ToLowerInvariant()}.";
+            var matches =_nativeFiles.Where(x => x.Key.Equals(documentId.ToLowerInvariant()) || x.Key.StartsWith(patternWithExtension));
 
             return matches?.SingleOrDefault().Value?.Extension;
         }

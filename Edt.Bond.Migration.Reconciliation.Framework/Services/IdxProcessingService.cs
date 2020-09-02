@@ -47,7 +47,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 {
                     if (_lastTokenFromPreviousBatch != null)
                     {
-                        str = $"{_lastTokenFromPreviousBatch}{str}";
+                        str = _lastTokenFromPreviousBatch.Append(str).ToString();
                     }
 
                     List<string> tokens;
@@ -74,7 +74,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 }
                 else
                 {
-                    _lastTokenFromPreviousBatch = _lastTokenFromPreviousBatch.Append(str);
+                    _lastTokenFromPreviousBatch = _lastTokenFromPreviousBatch != null ? _lastTokenFromPreviousBatch.Append(str) : new StringBuilder(str);
 
                 }
             }

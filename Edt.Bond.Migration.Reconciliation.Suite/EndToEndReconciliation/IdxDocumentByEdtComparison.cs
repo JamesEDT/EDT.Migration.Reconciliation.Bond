@@ -44,7 +44,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 .Where(x => !string.IsNullOrEmpty(x.EdtName) &&
                             !x.EdtName.Equals("UNMAPPED", StringComparison.InvariantCultureIgnoreCase) &&
                             x.IdxNames.Any())
-                //.Where(x => x.EdtName.Equals("InternetHeaders", StringComparison.InvariantCultureIgnoreCase))
+                .Where(x => x.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase) || x.EdtName.StartsWith("Recip", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
 
@@ -187,7 +187,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                                }
                                                                else if (mapping.EdtName.Equals("File Extension", StringComparison.InvariantCultureIgnoreCase))
                                                                {
-                                                                   validationResult = FileExtensionValidator.Validate(document, actual);
+                                                                   validationResult = FileExtensionValidator.Validate(document, expectedString, actual);
                                                                }
                                                                else if (mapping.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase))
                                                                {
