@@ -44,7 +44,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 .Where(x => !string.IsNullOrEmpty(x.EdtName) &&
                             !x.EdtName.Equals("UNMAPPED", StringComparison.InvariantCultureIgnoreCase) &&
                             x.IdxNames.Any())
-                .Where(x => x.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase) || x.EdtName.StartsWith("Recip", StringComparison.InvariantCultureIgnoreCase))
+                //.Where(x => x.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase) || x.EdtName.StartsWith("Recip", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
 
