@@ -376,7 +376,10 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 var transformedTestsReporter = HtmlReport.Instance.CreateTest("Transformed Field validation", "Compare Idx field with Edt Database field to validate implementation of EDTs customised value generation.");
 
                 _tagsValidator.PrintStats(transformedTestsReporter);
+                _subjectIssuesTagsValidator.PrintStats(transformedTestsReporter);
                 _locationValidator.PrintStats(transformedTestsReporter);
+                _nonMigratedEmsFolderValidator.PrintStats(transformedTestsReporter);
+
 
             }
             catch (Exception e)
