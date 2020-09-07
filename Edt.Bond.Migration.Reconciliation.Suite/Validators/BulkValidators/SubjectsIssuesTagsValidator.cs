@@ -48,12 +48,12 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 
                     foreach (var expected in expectedTags)
                     {
-                        if (!relatedEdTags.Any(x => x.Equals(expected, StringComparison.InvariantCultureIgnoreCase)))
+                        if (!mvTags.Any(x => x.Equals(expected, StringComparison.InvariantCultureIgnoreCase)))
                         {  
 
                             TestResult.Different++;
-                            var edtLogValue = relatedEdTags.Any()
-                                ? string.Join(";", relatedEdTags)
+                            var edtLogValue = mvTags.Any()
+                                ? string.Join(";", mvTags)
                                 : "none found";
 
                             TestResult.ComparisonResults.Add(new Framework.Models.Reporting.ComparisonResult(

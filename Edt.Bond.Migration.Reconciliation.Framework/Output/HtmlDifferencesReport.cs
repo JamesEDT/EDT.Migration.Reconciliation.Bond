@@ -60,13 +60,13 @@ td{
 
             report.Append(reportContent);
 
-            var filePath = Path.Combine(directory, $"{name}.html");
+            var filePath = Path.Combine(directory, $"{name.Replace("/", "_")}.html");
             using (var sw = new StreamWriter(filePath))
             {
                 sw.Write(report.ToHtmlString());
             }
 
-            return $"{name}.html";
+            return $"{name.Replace("/","_")}.html";
         }
 
         private static HtmlTag BuildSummary(int diffCount, int errorCount)

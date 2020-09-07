@@ -58,7 +58,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite
 
             testLog.Info($"Difference and error details written to: <a href=\"{diffFile}\">{diffFile}</a>");
 
-            PrintExpectedOutputFile(EdtFieldUnderTest.EdtName);
+            PrintExpectedOutputFile(EdtFieldUnderTest.EdtName.Replace("/","_"));
 
             if(ComparisonResults.Any() || ComparisonErrors.Any())
             {
