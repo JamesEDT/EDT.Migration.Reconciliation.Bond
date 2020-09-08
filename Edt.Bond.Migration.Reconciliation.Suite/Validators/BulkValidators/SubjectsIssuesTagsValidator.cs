@@ -48,7 +48,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
 
                     foreach (var expected in expectedTags)
                     {
-                        if (!mvTags.Any(x => x.Equals(expected, StringComparison.InvariantCultureIgnoreCase)))
+                        if (mvTags!=null && !mvTags.Any(x => x != null && x.Equals(expected, StringComparison.InvariantCultureIgnoreCase)))
                         {  
 
                             TestResult.Different++;
