@@ -1,13 +1,12 @@
-﻿using Edt.Bond.Migration.Reconciliation.Framework.Models.CaseConfigXml;
+﻿using Edt.Bond.Migration.Reconciliation.Framework;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.IdxLoadFile;
+using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using Edt.Bond.Migration.Reconciliation.Framework.Services;
 using MoreLinq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Edt.Bond.Migration.FolderSearch
 {
@@ -15,57 +14,69 @@ namespace Edt.Bond.Migration.FolderSearch
     {
         static void Main(string[] args)
         {
-            var dir = @"C:\EDT\Batch 4\RE00979_DEN\Extract\1425\IDX\NON-LPP";
+            var dir = Settings.IdxFilePath;
 
             var idxPaths = Directory.GetFiles(dir, "*.idx", SearchOption.AllDirectories);
 
-            var wantedValue = "Dinesh Karnuadhara";
-
-            var folderHits = 0;
-            var idolField = new List<string>() {
-                "TAG_SUBJECTS_MATCH",
-                "TAG_CIV_SUBJECTS_MATCH"
-                
-            };
-
-            using (var writer = new StreamWriter(@"C:\EDT\clayon_docId.csv"))
+            var updateField = "cc_emsdeduplicated";
+            List<string> _docIds = new List<string>();
+            long counter = 0;
+            for (var i = 0; i < idxPaths.Length; i++)
             {
-                for (var i = 0; i < idxPaths.Length; i++)
+
+                var idxProcessingService = new IdxReaderByChunk(File.OpenText(idxPaths[i]));
+                Console.WriteLine($"New Idx {i}");
+                List<Document> documents;
+                long updated = 0;
+
+                do
                 {
+                    documents = idxProcessingService.GetNextDocumentBatch()?.ToList();
 
-                    var idxProcessingService = new IdxReaderByChunk(File.OpenText(idxPaths[i]));
-                    Console.WriteLine($"New Idx {i}");
-                    List<Document> documents;
-                    long sampled = 0;
-
-                    do
+                    if (documents != null)
                     {
-                        documents = idxProcessingService.GetNextDocumentBatch()?.ToList();
+                        documents
+                            .AsParallel()
+                            .ForEach(x =>
+                            {
+                                var drdbame = x.GetValuesForIdolFields(new List<string>() { "DREDBNAME" }).FirstOrDefault();
 
-                        if (documents != null)
-                        {
-                            documents
-                                .AsParallel()
-                                .ForEach(x =>
+                                //var aunIsDuplicated = x.GetValuesForIdolFields(new List<string>() { "AUN_IS_DEDUPLICATED_NUMERIC" }).FirstOrDefault();
+
+                                if (drdbame.ToLowerInvariant().StartsWith("deduplicated_"))
                                 {
-                                    if (//x.GetValuesForIdolFields(idolField).Any(v => v.Equals(folderId, StringComparison.InvariantCultureIgnoreCase))
-                                           x.DocumentId.Equals(wantedValue, StringComparison.InvariantCultureIgnoreCase))
-                                    {
-                                        folderHits++;
-                                        writer.WriteLine(x.DocumentId);
-                                    }
-                                });
-
-                            sampled += documents.Count();
-                            Console.Write($"\rSampled {sampled} - Found {folderHits}");
-                        }
-                    } while (!idxProcessingService.EndOfFile);
+                                    //_docIds.Add(x.DocumentId);
+                                    EdtDocumentRepository.UpdateDocumentField(x.DocumentId, updateField, "1");
+                                }
+                            });
+                        updated += documents.Count();
+                        Console.WriteLine($"updated {updated}");
+                    }
+                } while (!idxProcessingService.EndOfFile);
 
                    
-                }
             }
 
+            Console.WriteLine("Counter:" + counter);
+            //_docIds.ForEach(x => Console.WriteLine(x));
+            Console.WriteLine("Complete. Press key to exit");
             Console.ReadLine();
+        }
+
+
+        private static string GetHostReference(Document document)
+        {
+            var rootFamily = document.GetValuesForIdolFields(new List<string>() { "DREROOTFAMILYREFERENCE_ID" })?.FirstOrDefault();
+
+            if ($"{document.DocumentId}_FUID".Equals(rootFamily, StringComparison.InvariantCultureIgnoreCase) || document.DocumentId.Equals(rootFamily, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return string.Empty;
+            }
+            else
+            {
+                return document.GetValuesForIdolFields(new List<string>() { "DREPARENTREFERENCE_ID" })?.FirstOrDefault();
+
+            }
         }
     }
 }
