@@ -44,7 +44,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 .Where(x => !string.IsNullOrEmpty(x.EdtName) &&
                             !x.EdtName.Equals("UNMAPPED", StringComparison.InvariantCultureIgnoreCase) &&
                             x.IdxNames.Any())
-                //.Where(x => x.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase) || x.EdtName.StartsWith("Recip", StringComparison.InvariantCultureIgnoreCase))
+                .Where(x => x.EdtName.StartsWith("Recip", StringComparison.InvariantCultureIgnoreCase) || x.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
 
@@ -57,8 +57,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
             _tagsValidator = new AunWorkbookTagsValidator();
             _locationValidator = new LocationValidator();
             _nonMigratedEmsFolderValidator = new NonMigratedEmsFolderValidator();
-            _subjectIssuesTagsValidator = new SubjectIssuesTagsValidator();
-            
+            _subjectIssuesTagsValidator = new SubjectIssuesTagsValidator();            
 
         }
 
@@ -157,7 +156,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                                                        try
                                                        {
 
-                                                           string actual =
+                                                            string actual =
                                                                edtValuesForMapping[document.DocumentId]?[edtDbLookUpName] ?? string.Empty;
 
                                                            actual = actual.Replace("; ", ";").Replace("\n\n", "\n").Trim();

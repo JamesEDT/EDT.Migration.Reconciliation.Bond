@@ -1,16 +1,14 @@
 ﻿using AventStack.ExtentReports.MarkupUtils;
 using Edt.Bond.Migration.Reconciliation.Framework;
-using Edt.Bond.Migration.Reconciliation.Framework.Logging;
+using Edt.Bond.Migration.Reconciliation.Framework.Extensions;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
 using Edt.Bond.Migration.Reconciliation.Framework.Services;
+using MoreLinq;
 using NUnit.Framework;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Edt.Bond.Migration.Reconciliation.Framework.Extensions;
-using System.Security.Cryptography.X509Certificates;
-using System.Collections.Concurrent;
-using MoreLinq;
 
 namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 {
@@ -239,7 +237,9 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
 			//filter empty to give idx only ids
 			var missingIdxTexts = _idxDocumentIds.Except(edtDocsWithBody);
 
-			var missingIdxWithSize = missingIdxTexts.Where(x => emsZipTextFiles.ContainsKey(x) && new FileInfo(Path.Combine(Settings.ExtractLocation,emsZipTextFiles[x]))?.Length > 3).ToList();
+			var missingIdxWithSize = missingIdxTexts.Where(x => emsZipTextFiles.ContainsKey(x) 
+				&& File.Exists(Path.Combine(Settings.ExtractLocation, emsZipTextFiles[x]))
+				&& new FileInfo(Path.Combine(Settings.ExtractLocation,emsZipTextFiles[x]))?.Length > 3).ToList();
 
 
 			//output counts

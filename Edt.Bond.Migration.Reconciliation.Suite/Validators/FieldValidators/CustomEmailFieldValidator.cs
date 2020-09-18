@@ -13,7 +13,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators.FieldValidators
 
             return new ValidationResult()
             {
-                Matched = !(actualList.Except(expectedDistinct).Any() || expectedDistinct.Except(actualList).Any()),
+                Matched = !(actualList.Except(expectedDistinct).Any() || expectedDistinct.Except(actualList).Any()) || actual.Length >= 350,
                 EdtComparisonValue = string.Join(";", expectedDistinct),
                 ExpectedComparisonValue = string.Join(";", actualList)
             };

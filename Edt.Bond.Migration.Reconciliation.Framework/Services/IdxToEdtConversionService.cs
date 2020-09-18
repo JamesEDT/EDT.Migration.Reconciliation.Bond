@@ -179,6 +179,9 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                 {
                     return GetNumberString(value);
                 }
+
+                if (_standardMapping.IsPartyField() || _standardMapping.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase))
+                    value = value.Replace("|", ";");
             }
             catch (Exception e)
             {
