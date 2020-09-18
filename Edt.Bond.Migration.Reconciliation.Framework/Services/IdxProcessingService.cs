@@ -19,7 +19,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
         private StringBuilder _lastTokenFromPreviousBatch = null;
 
         public bool EndOfFile;
-        private bool _readInChunks = true;
+        private bool _readInChunks = false;
         
         
 

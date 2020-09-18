@@ -44,7 +44,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Extensions
 
         public static string ReplaceTagChars(this string input)
         {
-            return input?.Replace('/', '~').Replace('.', '~').Replace('-','~');
+            return input?.Replace('/', '~').Replace('.', '~').Replace('-','~').Replace(":", "~");
         }
 
 

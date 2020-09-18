@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edt.Bond.Migration.FolderSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DirectRecordUpdater", "DirectRecordUpdater\DirectRecordUpdater.csproj", "{570C0FDE-B6FC-4035-A344-42C15C3BD8CB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edt.Bond.Migration.BatchRecordUpdater", "Edt.Bond.Migration.BatchRecordUpdater\Edt.Bond.Migration.BatchRecordUpdater.csproj", "{59F277C1-45AE-4F6E-AC02-52427DF0D5D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +60,10 @@ Global
 		{570C0FDE-B6FC-4035-A344-42C15C3BD8CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{570C0FDE-B6FC-4035-A344-42C15C3BD8CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{570C0FDE-B6FC-4035-A344-42C15C3BD8CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59F277C1-45AE-4F6E-AC02-52427DF0D5D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59F277C1-45AE-4F6E-AC02-52427DF0D5D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59F277C1-45AE-4F6E-AC02-52427DF0D5D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59F277C1-45AE-4F6E-AC02-52427DF0D5D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +72,7 @@ Global
 		{338A778B-ACE1-4FD3-9D96-4471B9A36425} = {F1EEDABF-FAA7-41DD-8ECA-3E7F6B307250}
 		{6649C498-6CED-443D-BD3A-FB44D3412D49} = {F1EEDABF-FAA7-41DD-8ECA-3E7F6B307250}
 		{570C0FDE-B6FC-4035-A344-42C15C3BD8CB} = {F1EEDABF-FAA7-41DD-8ECA-3E7F6B307250}
+		{59F277C1-45AE-4F6E-AC02-52427DF0D5D8} = {F1EEDABF-FAA7-41DD-8ECA-3E7F6B307250}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6C92D3DD-64D9-40FD-A328-2FFAD07AA559}

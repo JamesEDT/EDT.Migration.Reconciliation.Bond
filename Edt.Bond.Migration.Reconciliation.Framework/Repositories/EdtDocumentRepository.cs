@@ -301,6 +301,26 @@ where TABLE_NAME = 'Document'");
             return SqlExecutor.QueryFirstOrDefault<int>(sql);
         }
 
+        public static void UpdateDocumentImportedParentId(string documentId, string importedParentNumber)
+        {
+            var sql =
+                $@"Update {GetDatabaseName()}.[Document] 
+				  Set ImportedParentNumber = @importedParentNumber
+						WHERE DocNumber = @documentId";
+
+            SqlExecutor.ExecuteScalar(sql, new { documentId, importedParentNumber });
+        }
+
+        public static void UpdateDocumentField(string documentId, string field, string newValue)
+        {
+            var sql =
+                $@"Update {GetDatabaseName()}.[Document] 
+				  Set {field} = @newValue
+						WHERE DocNumber = @documentId";
+
+            SqlExecutor.ExecuteScalar(sql, new { documentId, newValue });
+        }
+
 
         public static IEnumerable<dynamic> GetMultiValueFieldValues(List<string> documentIds, string fieldName)
         {
