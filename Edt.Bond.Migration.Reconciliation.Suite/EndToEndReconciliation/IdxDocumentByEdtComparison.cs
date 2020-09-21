@@ -1,4 +1,4 @@
-﻿using Edt.Bond.Migration.Reconciliation.Framework;
+using Edt.Bond.Migration.Reconciliation.Framework;
 using Edt.Bond.Migration.Reconciliation.Framework.Logging;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
@@ -44,7 +44,7 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.EndToEndReconciliation
                 .Where(x => !string.IsNullOrEmpty(x.EdtName) &&
                             !x.EdtName.Equals("UNMAPPED", StringComparison.InvariantCultureIgnoreCase) &&
                             x.IdxNames.Any())
-                .Where(x => x.EdtName.StartsWith("Recip", StringComparison.InvariantCultureIgnoreCase) || x.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase))
+                //.Where(x => x.EdtName.StartsWith("Recip", StringComparison.InvariantCultureIgnoreCase) || x.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
 

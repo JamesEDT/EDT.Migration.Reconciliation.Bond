@@ -27,13 +27,13 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
             documents.ForEach(idxRecord =>
             {
                 //get subject or issue t
-                var subjects = idxRecord.GetValuesForIdolFields(_subjectFields);
-                var issues = idxRecord.GetValuesForIdolFields(_issueFields);
+                var subjects = idxRecord.GetValuesForIdolFields(_subjectFields).SelectMany(x => x.Split(",".ToCharArray()));
+                var issues = idxRecord.GetValuesForIdolFields(_issueFields).SelectMany(x => x.Split(",".ToCharArray()));
 
                 var expectedTags = subjects.Select(x => $"Subjects:{x}")
                 .Union(issues.Select(x => $"Issues:{x}"));
 
-                var foundEdtValue = allEdtTags.TryGetValue(idxRecord.DocumentId, out var relatedEdTags);
+               var foundEdtValue = allEdtTags.TryGetValue(idxRecord.DocumentId, out var relatedEdTags);
 
                 var mvTags = foundEdtValue ? relatedEdTags?.Where(x => x.StartsWith("Issues:") || x.StartsWith("Subjects:")).ToList() : new List<string>();
 
