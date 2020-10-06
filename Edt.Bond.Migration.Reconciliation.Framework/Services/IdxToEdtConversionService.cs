@@ -4,6 +4,7 @@ using Edt.Bond.Migration.Reconciliation.Framework.Models.Conversion;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.EdtDatabase;
 using Edt.Bond.Migration.Reconciliation.Framework.Models.Exceptions;
 using Edt.Bond.Migration.Reconciliation.Framework.Repositories;
+using MoreLinq.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -134,7 +135,7 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
             try
             {
                 if (_edtColumnDetails?.DataType == ColumnType.Date || (!string.IsNullOrWhiteSpace(_standardMapping.EdtType) && _standardMapping.EdtType.Equals("Date", StringComparison.InvariantCultureIgnoreCase))
-                    || _standardMapping.EdtName.ToLower().Contains("date"))
+                    || (_standardMapping.EdtName.ToLower().Contains("date") && _edtColumnDetails?.DataType == ColumnType.Text))
                 {
                     try
                     {
@@ -175,13 +176,16 @@ namespace Edt.Bond.Migration.Reconciliation.Framework.Services
                     return value.Replace(",", ";");
                 }
 
+                if (_edtColumnDetails?.DataType == ColumnType.List)
+                    value = value.Replace("(", string.Empty).Replace(")", string.Empty);
+
                 if(_edtColumnDetails?.DataType == ColumnType.Number || _edtColumnDetails?.DataType == ColumnType.Float)
                 {
                     return GetNumberString(value);
                 }
 
-                if (_standardMapping.IsPartyField() || _standardMapping.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase))
-                    value = value.Replace("|", ";");
+               // if (_standardMapping.IsPartyField() || _standardMapping.EdtName.Equals("Author", StringComparison.InvariantCultureIgnoreCase))
+                //    value = value.Replace("|", ";");
             }
             catch (Exception e)
             {

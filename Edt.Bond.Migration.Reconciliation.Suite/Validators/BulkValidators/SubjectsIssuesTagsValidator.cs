@@ -30,8 +30,8 @@ namespace Edt.Bond.Migration.Reconciliation.Suite.Validators
                 var subjects = idxRecord.GetValuesForIdolFields(_subjectFields).SelectMany(x => x.Split(",".ToCharArray()));
                 var issues = idxRecord.GetValuesForIdolFields(_issueFields).SelectMany(x => x.Split(",".ToCharArray()));
 
-                var expectedTags = subjects.Select(x => $"Subjects:{x}")
-                .Union(issues.Select(x => $"Issues:{x}"));
+                var expectedTags = subjects.Select(x => $"Subjects:{x.Trim()}")
+                .Union(issues.Select(x => $"Issues:{x.Trim()}"));
 
                var foundEdtValue = allEdtTags.TryGetValue(idxRecord.DocumentId, out var relatedEdTags);
 
